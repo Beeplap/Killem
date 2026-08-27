@@ -85,13 +85,12 @@ export class Player {
     if (weaponType === 'shotgun') barrelLength = this.radius + 15;
     if (weaponType === 'rifle') barrelLength = this.radius + 18;
 
-    const gunLateralOffset = 5;
     const cos = Math.cos(this.angle);
     const sin = Math.sin(this.angle);
 
     return {
-      x: this.x + cos * barrelLength - sin * gunLateralOffset,
-      y: this.y + sin * barrelLength + cos * gunLateralOffset,
+      x: this.x + cos * barrelLength,
+      y: this.y + sin * barrelLength,
     };
   }
 
@@ -120,7 +119,8 @@ export class Player {
 
     ctx.save();
     ctx.translate(this.x, this.y);
-    ctx.rotate(this.angle);
+    // Rotate so sprite (drawn pointing UP) faces mouse aim vector directly upright
+    ctx.rotate(this.angle + Math.PI / 2);
 
     // Flash when invulnerable
     if (this.invulnerableTimer > 0 && Math.floor(this.invulnerableTimer * 20) % 2 === 0) {
@@ -133,7 +133,7 @@ export class Player {
 
     if (sprite) {
       ctx.imageSmoothingEnabled = false;
-      ctx.drawImage(sprite, -18, -18, 36, 36);
+      ctx.drawImage(sprite, -19, -19, 38, 38);
     }
 
     ctx.restore();

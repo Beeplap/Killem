@@ -47,79 +47,85 @@ class SpriteSheetManager {
   // PLAYER PIXEL SPRITE
   // ==========================================
   private generatePlayerSprite(weapon: WeaponType, frame: number): HTMLCanvasElement {
-    const { canvas, ctx } = this.createPixelCanvas(36, 36);
+    const { canvas, ctx } = this.createPixelCanvas(38, 38);
 
     ctx.save();
-    ctx.translate(18, 18);
+    ctx.translate(19, 19);
 
-    // Pixel shadow
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
-    ctx.fillRect(-10, -8, 20, 16);
+    // Ground shadow beneath soldier
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.45)';
+    ctx.beginPath();
+    ctx.ellipse(0, 4, 11, 7, 0, 0, Math.PI * 2);
+    ctx.fill();
 
-    // Tactical Boots / Legs (animated walk)
-    const legOffset = frame === 1 ? 4 : -4;
-    ctx.fillStyle = '#0f172a'; // Black boots
-    ctx.fillRect(-12, -7 + legOffset, 7, 5);
-    ctx.fillRect(-12, 2 - legOffset, 7, 5);
+    // 1. Tactical Boots & Legs (extending down, animated walk cycle)
+    const legStep = frame === 1 ? 3 : -3;
+    ctx.fillStyle = '#0f172a'; // Black combat boots
+    ctx.fillRect(-8 + legStep, 7, 5, 7); // Left boot
+    ctx.fillRect(3 - legStep, 7, 5, 7);  // Right boot
 
-    // Commando Torso (Navy tactical vest)
-    ctx.fillStyle = '#1e293b';
-    ctx.fillRect(-9, -8, 14, 16);
-    ctx.fillStyle = '#334155'; // Armor plate
-    ctx.fillRect(-7, -6, 10, 12);
+    // 2. Commando Torso & Tactical Armor Plate
+    ctx.fillStyle = '#1e293b'; // Navy SWAT vest
+    ctx.fillRect(-8, -2, 16, 11);
+    ctx.fillStyle = '#334155'; // Ballistic plate
+    ctx.fillRect(-6, -1, 12, 8);
 
     // Utility belt pouches
-    ctx.fillStyle = '#64748b';
-    ctx.fillRect(-9, -7, 2, 4);
-    ctx.fillRect(-9, 3, 2, 4);
+    ctx.fillStyle = '#475569';
+    ctx.fillRect(-7, 6, 4, 2);
+    ctx.fillRect(3, 6, 4, 2);
 
-    // Shoulders
+    // 3. Horizontal Shoulders (standing upright facing forward)
     ctx.fillStyle = '#1e293b';
-    ctx.fillRect(-6, -10, 8, 4);
-    ctx.fillRect(-6, 6, 8, 4);
+    ctx.fillRect(-11, -2, 5, 7); // Left shoulder
+    ctx.fillRect(6, -2, 5, 7);   // Right shoulder
 
-    // Hands
-    ctx.fillStyle = '#fed7aa'; // Skin tone
-    ctx.fillRect(2, -7, 4, 4);
-    ctx.fillRect(8, 2, 4, 4);
+    // 4. Arms & Hands holding weapon forward (pointing UP)
+    ctx.fillStyle = '#1e293b';
+    ctx.fillRect(-9, -7, 4, 6);  // Left forearm
+    ctx.fillRect(5, -7, 4, 6);   // Right forearm
 
-    // Weapon
+    ctx.fillStyle = '#fed7aa'; // Skin tone hands
+    ctx.fillRect(-6, -8, 3, 3);
+    ctx.fillRect(3, -8, 3, 3);
+
+    // 5. Weapon held pointing UP (forward in front of chest)
     if (weapon === 'shotgun') {
-      // 12-Gauge Shotgun (long wooden stock + dual metal barrel)
+      // 12-Gauge Shotgun (long double steel barrel pointing UP)
       ctx.fillStyle = '#78350f'; // Wood stock
-      ctx.fillRect(2, 2, 5, 4);
+      ctx.fillRect(-2, -7, 4, 6);
       ctx.fillStyle = '#0f172a'; // Receiver
-      ctx.fillRect(7, 1, 6, 5);
+      ctx.fillRect(-2, -11, 4, 5);
       ctx.fillStyle = '#64748b'; // Dual barrel
-      ctx.fillRect(13, 1, 9, 4);
-      ctx.fillStyle = '#94a3b8'; // Muzzle tip
-      ctx.fillRect(22, 2, 2, 3);
+      ctx.fillRect(-3, -17, 6, 7);
+      ctx.fillStyle = '#94a3b8'; // Muzzle
+      ctx.fillRect(-2, -18, 4, 2);
     } else if (weapon === 'rifle') {
-      // Assault Rifle (long receiver, magazine, suppressor)
-      ctx.fillStyle = '#0f172a';
-      ctx.fillRect(3, 2, 16, 4);
-      ctx.fillStyle = '#334155'; // Mag
-      ctx.fillRect(8, 5, 4, 5);
-      ctx.fillStyle = '#475569'; // Handguard
-      ctx.fillRect(10, 1, 7, 5);
+      // Assault Rifle (long receiver, banana magazine, suppressor pointing UP)
+      ctx.fillStyle = '#0f172a'; // Receiver
+      ctx.fillRect(-2, -11, 4, 10);
+      ctx.fillStyle = '#475569'; // Curved mag
+      ctx.fillRect(2, -6, 4, 3);
+      ctx.fillStyle = '#334155'; // Barrel & handguard
+      ctx.fillRect(-2, -17, 4, 7);
       ctx.fillStyle = '#0284c7'; // Suppressor
-      ctx.fillRect(19, 3, 5, 2);
+      ctx.fillRect(-2, -20, 4, 4);
     } else {
-      // 9mm Handgun
+      // 9mm Handgun (pointing UP)
       ctx.fillStyle = '#0f172a';
-      ctx.fillRect(4, 2, 10, 4);
-      ctx.fillStyle = '#94a3b8';
-      ctx.fillRect(12, 3, 3, 2);
+      ctx.fillRect(-2, -12, 4, 8);
+      ctx.fillStyle = '#94a3b8'; // Slide tip
+      ctx.fillRect(-2, -14, 4, 3);
     }
 
-    // Tactical Helmet (Swat Kevlar)
+    // 6. Tactical Helmet (facing UP)
     ctx.fillStyle = '#0f172a';
-    ctx.fillRect(-6, -5, 10, 10);
-    // Cyan Visor reflection (signature look from reference)
+    ctx.fillRect(-5, -6, 10, 9);
+    // Cyan Visor reflection (facing UP toward target)
     ctx.fillStyle = '#38bdf8';
-    ctx.fillRect(1, -3, 3, 6);
+    ctx.fillRect(-3, -6, 6, 2);
     ctx.fillStyle = '#ffffff';
-    ctx.fillRect(2, -2, 1, 2);
+    ctx.fillRect(-1, -6, 2, 1);
 
     ctx.restore();
     return canvas;
