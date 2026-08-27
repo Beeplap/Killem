@@ -1,0 +1,22 @@
+[gd_scene load_steps=3 format=3 uid="uid://cheavyzombiescene001"]
+
+[ext_resource type="Script" path="res://scripts/zombie.gd" id="1_zombie"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_1"]
+radius = 24.0
+
+[node name="HeavyZombie" type="CharacterBody2D"]
+collision_layer = 2
+collision_mask = 7
+script = ExtResource("1_zombie")
+zombie_type = 2
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_1")
+
+[node name="NavigationAgent2D" type="NavigationAgent2D" parent="."]
+path_desired_distance = 20.0
+target_desired_distance = 35.0
+avoidance_enabled = true
+radius = 28.0
+max_speed = 90.0

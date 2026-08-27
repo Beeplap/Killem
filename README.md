@@ -1,150 +1,107 @@
-# OUTBREAK // 2D Top-Down Zombie Survival
+# OUTBREAK: Post-Apocalyptic Top-Down Zombie Shooter (Godot 4)
 
-[![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![Vite](https://img.shields.io/badge/Vite-646CFF?style=flat-square&logo=vite&logoColor=white)](https://vitejs.dev/)
-[![HTML5 Canvas](https://img.shields.io/badge/HTML5-Canvas%202D-E34F26?style=flat-square&logo=html5&logoColor=white)](https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API)
-[![Web Audio API](https://img.shields.io/badge/Web_Audio_API-Procedural%20SFX-orange?style=flat-square)](https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](https://opensource.org/licenses/MIT)
+A top-down arcade survival zombie shooter built natively in **Godot 4.x** with the **GL Compatibility / Mobile** rendering method, inspired by classic 2000s top-down arcade games like *Zombie Shooter* and *Alien Shooter* by Sigma Team.
 
-> *"The quarantine protocol has failed. Evacuation is impossible. Scavenge for ammunition, hold your ground, and eliminate the infected horde."*
-
-**OUTBREAK** is a fast-paced retro-arcade 2D top-down zombie shooter built from scratch with **TypeScript**, **HTML5 Canvas**, and **Vite**. It features 100% procedural pixel art, a custom Web Audio API sound synthesizer, sector-based compound exploration, destructible crates, and wave-based survival mechanics.
+Pre-configured for cross-platform desktop and mobile deployment (**Windows PC .exe** and **Android .apk**).
 
 ---
 
-## 🎮 Play Online / Quick Preview
+## 🎮 Gameplay & Core Features
 
-Run the development server locally:
-```bash
-git clone https://github.com/Beeplap/Killem.git
-cd Killem
-npm install
-npm run dev
+### 1. Player & Combat Mechanics
+* **CharacterBody2D Movement**: WASD / Arrow key movement with smooth acceleration, deceleration, and physics sliding.
+* **360° Mouse Aiming**: The player character rotates smoothly to face the mouse cursor or touch target.
+* **Mouse-Wheel Camera Zoom**: Dedicated camera zoom mapped strictly to `MOUSE_BUTTON_WHEEL_UP` and `MOUSE_BUTTON_WHEEL_DOWN`. Weapon switching is strictly isolated to number keys `[1]`, `[2]`, and `[3]`.
+* **Shooting & Node Pooling**: High-performance `BulletPool` node pooling system pre-allocating luminous tracer projectiles (`Area2D`) with zero runtime garbage collection pauses.
+* **Arsenal**:
+  * `[1] 9MM PISTOL`: Reliable sidearm with unlimited ammunition.
+  * `[2] 12G SHOTGUN`: Heavy 6-pellet conical buckshot blast with camera recoil shake.
+  * `[3] ASSAULT RIFLE`: High-cadence automatic rifle fire.
+
+### 2. Infected AI (`NavigationAgent2D`)
+* **Regular Walker**: Relentless shambling infected civilian (80 HP, 130 px/s).
+* **Fast Infected Dog**: Low-profile quadruped predator with high sprint speed (45 HP, 240 px/s) that rushes the player.
+* **Heavy Mutant Brute**: Bloated tank with reinforced plating and high knockback resistance (260 HP, 75 px/s).
+* **Intelligent Pathfinding**: Powered by `NavigationAgent2D` traversing walkable zones around obstacles, walls, and props with fallback direct tracking.
+* **Permanent Blood Decals**: Defeated enemies leave organic blood splats that persist on the ground tiles.
+
+### 3. Open-World Post-Apocalyptic Level
+* **Well-Lit Open Terrain**: Daytime/sodium ambient lighting (no pitch-black fog-of-war) over dirt ground and diagonal dark asphalt roadways.
+* **Broken Railway System**: Dual steel rails, wooden railroad ties, gravel ballast bed, and caution hazard platforms.
+* **Destructible Props**:
+  * **Wooden Crates**: 35 HP, breaks into wooden shrapnel particles.
+  * **Trash Bags**: 20 HP, squishes and bursts into debris particles.
+  * **Explosive Barrels**: 25 HP, detonates causing area-of-effect damage to nearby zombies and player, with chain-reaction capabilities.
+* **Loot Drop Table**:
+  * 40% Health Pack (+35 HP)
+  * 40% Ammo Crate (Shotgun shells + Rifle rounds)
+  * 20% Empty
+
+### 4. Retro Arcade HUD
+* **Vitals Gauge**: Blood-red metallic health bar anchored to the bottom-left with HP readout.
+* **Weapon & Ammo Display**: Stark yellow/white retro arcade terminal anchored to the bottom-right showing active weapon name and current ammunition reserves.
+* **Score & Wave Tracker**: Score, kill counter, and wave banner.
+* **Mobile Touch Controls**: On-screen weapon selection buttons and touch support for Android devices.
+
+---
+
+## 📁 Project Structure
+
 ```
-Open `http://localhost:5173` in any modern web browser to play.
+game/
+├── project.godot                # Godot 4.x project settings (GL Compatibility, 1280x720 canvas_items)
+├── export_presets.cfg           # Pre-configured Windows Desktop (.exe) & Android (.apk) presets
+├── icon.svg                     # Vector biohazard crosshair project icon
+├── scenes/
+│   ├── MainLevel.tscn           # Open-world map with NavigationRegion2D, props, spawner, player
+│   ├── Player.tscn              # Player CharacterBody2D with Camera2D & Muzzle
+│   ├── Zombie.tscn              # Regular walker zombie with NavigationAgent2D
+│   ├── InfectedDog.tscn         # Fast quadruped infected canine
+│   ├── HeavyZombie.tscn         # Heavy mutant brute
+│   ├── Bullet.tscn              # Area2D bullet projectile
+│   ├── DestructibleCrate.tscn   # Wooden crate prop
+│   ├── TrashBag.tscn            # Destructible trash bag prop
+│   ├── OilBarrel.tscn           # Explosive oil barrel prop
+│   ├── Pickup.tscn              # Health and Ammo pick-up items
+│   └── HUD.tscn                 # Retro arcade CanvasLayer interface
+└── scripts/
+    ├── global.gd                # Autoload singleton managing score, wave, audio, and weapon state
+    ├── player.gd                # Movement, mouse aiming, scroll zoom, and shooting logic
+    ├── zombie.gd                # NavigationAgent2D AI, variant behaviors, and loot drops
+    ├── bullet.gd                # Tracer projectile movement and collision logic
+    ├── bullet_pool.gd           # Node pool managing pre-allocated projectiles
+    ├── destructible_prop.gd     # Damage, explosive barrels, and debris burst particles
+    ├── blood_splat.gd           # Procedural persistent floor blood splatters
+    ├── pickup.gd                # Auto-collectible health and ammo items
+    ├── spawner.gd               # Wave progression and horde perimeter spawner
+    ├── main_level.gd            # Procedural terrain, railway tracks, and hazard platforms
+    └── hud.gd                   # HUD signals, health bar, and game-over overlay
+```
 
 ---
 
 ## 🕹️ Controls
 
-### Desktop (Keyboard & Mouse)
-
-| Action | Key / Input |
-| :--- | :--- |
-| **Move** | `W`, `A`, `S`, `D` or Arrow Keys |
-| **Aim** | Mouse cursor position |
-| **Fire Weapon** | Left Mouse Button (Hold for automatic fire) |
-| **Select 9mm Pistol** | `1` |
-| **Select 12-Gauge Shotgun** | `2` |
-| **Select Assault Rifle** | `3` |
-| **Manual Reload** | `R` |
-| **Toggle Audio** | Sound button (Top-right) |
-
-### Mobile & Touch Devices
-- **Left Virtual Joystick**: Move soldier in 360 degrees.
-- **Right Virtual Joystick / Tap**: Aim direction and automatic continuous firing.
-- **Quick-Switch Weapon Bar**: Bottom-right on-screen buttons for switching weapons and monitoring ammo counts.
+| Action | PC Controls | Mobile / Touch |
+| :--- | :--- | :--- |
+| **Move** | `W`, `A`, `S`, `D` or Arrow Keys | Left Screen Drag / Touch |
+| **Aim** | Mouse Cursor | Touch Direction |
+| **Fire** | Left Mouse Button | Right Screen Tap / Fire |
+| **Camera Zoom** | Mouse Scroll Wheel (Up/Down) | Pinch Gesture |
+| **Pistol (9MM)** | Key `[1]` | On-screen `[1] 9MM` button |
+| **Shotgun (12G)** | Key `[2]` | On-screen `[2] SHG` button |
+| **Assault Rifle** | Key `[3]` | On-screen `[3] RIFLE` button |
+| **Restart (Game Over)**| Key `[R]` | Tap Screen |
 
 ---
 
-## ⚡ Key Features
+## 🚀 Running & Exporting
 
-### 1. 100% Procedural Pixel Art & Graphics
-- **Zero external image dependencies**: Soldier, zombie breeds, guns, blood splatters, and environment tiles are rendered dynamically via canvas pixel buffers.
-- **Tactical Soldier**: Detailed pixel SWAT commando with directional aiming, walking leg animations, tactical vest, and helmet visor glint.
-- **Atmospheric Lighting**: Dark indoor research sectors contrasted with a rainy outdoor courtyard complete with droplet splashes and ambient fog.
+### Running in Godot 4
+1. Open Godot 4.x.
+2. Click **Import** and select the `project.godot` file in this directory.
+3. Click **Run Project** (`F5`) to play `scenes/MainLevel.tscn`.
 
-### 2. Procedural Web Audio API Sound System
-- **Real-Time Sound Synthesis**: Pure Web Audio oscillators, pink/white noise generators, and biquad filters synthesize:
-  - Gunshot punch, mechanical receiver clicks, and brass shell-casing bounces.
-  - Zombie throat groans, lunges, and blood squelches.
-  - Wooden crate splintering and item pickup cues.
-  - Deep ominous ambient compound drone.
-
-### 3. Sector Exploration & Tactical CRT Radar
-- **Compound Map Generation**: Explore connected rooms including Laboratories, Armory, Medical Bay, Generator Rooms, and an outdoor Yard.
-- **Sector Entry Banners**: Visual industrial warning banner announces sector changes as you navigate the facility.
-- **Circular CRT Radar Minimap**: Features rotating radar sweep line, room layout discovery, player GPS blip, crate drops, and enemy red pings.
-
-### 4. Destructibles & Scavenger Loot System
-- Break wooden crates, hazardous barrels, and debris throughout the compound.
-- Dropped loot includes:
-  - **Medkits**: Restore soldier health (+25 HP).
-  - **Ammo Packs**: Replenish reserve magazines for Shotgun and Assault Rifle.
-
-### 5. Multi-Threat Zombie Horde
-- **Regular Walkers**: Shambling infected civilians that relentlessly swarm in groups.
-- **Infected Canines / Runners**: Fast low-profile rush predators that dart around obstacles to flank the player.
-- **Heavy Brutes**: Giant bullet-sponge mutants dealing massive crushing damage.
-
-### 6. Lethal Weapon Arsenal
-- **9mm Service Pistol**: Reliable sidearm with unlimited reserve ammunition.
-- **12-Gauge Pump Shotgun**: High-spread buckshot lethal at point-blank range.
-- **Tactical Assault Rifle**: Rapid-fire, pinpoint accuracy for thinning massive swarms.
-
-### 7. Engine Performance & Optimization
-- High-frequency **Object Pooling** for bullets, blood splatters, smoke, and zombies prevents garbage collection spikes and guarantees silky smooth 60+ FPS gameplay.
-
----
-
-## 🛠️ Project Structure
-
-```
-game/
-├── index.html              # HTML5 canvas container and retro arcade HUD
-├── package.json            # Scripts and dependencies (TypeScript, Vite)
-├── tsconfig.json           # Strict TypeScript configuration
-├── public/                 # Favicons and web assets
-└── src/
-    ├── audio.ts            # Procedural Web Audio API synthesizer
-    ├── bullet.ts           # Projectile trajectories and impact detection
-    ├── destructibles.ts    # Crates, barrels, and loot drop management
-    ├── game.ts             # Main loop, rendering pipeline, camera & HUD
-    ├── joystick.ts         # Dual virtual analog joysticks for mobile
-    ├── main.ts             # Application bootstrapping and DOM listeners
-    ├── map.ts              # Procedural compound generation & rooms
-    ├── math.ts             # Vector math, collisions (AABB, circle-rect)
-    ├── particles.ts        # Particle emitter (blood, sparks, casings, rain)
-    ├── pickups.ts          # Medkits, ammo crates, and item collection
-    ├── player.ts           # Soldier entity, movement, aim, and stats
-    ├── pool.ts             # Generic object pooling engine
-    ├── spawner.ts          # Wave scaling and zombie distribution
-    ├── sprites.ts          # Procedural pixel-art canvas sprite generator
-    ├── style.css           # Arcade CRT HUD styling and responsive layout
-    ├── types.ts            # Game data interfaces and type definitions
-    └── weapons.ts          # Arsenal configurations and ballistics stats
-```
-
----
-
-## 🚀 Development & Build
-
-### Prerequisites
-- [Node.js](https://nodejs.org/) (version 18 or higher recommended)
-- [npm](https://www.npmjs.com/) or [pnpm](https://pnpm.io/)
-
-### Install Dependencies
-```bash
-npm install
-```
-
-### Start Development Server
-```bash
-npm run dev
-```
-
-### Build for Production
-```bash
-npm run build
-```
-The compiled, type-checked production bundle will be output into the `dist/` directory.
-
-### Preview Production Build
-```bash
-npm run preview
-```
-
----
-
-## 📄 License
-This project is open-source under the [MIT License](LICENSE).
+### Exporting
+* **Windows Desktop**: Project -> Export -> Select `Windows Desktop` -> Export Project (`Builds/Windows/Outbreak.exe`).
+* **Android**: Project -> Export -> Select `Android` -> Export Project (`Builds/Android/Outbreak.apk`).

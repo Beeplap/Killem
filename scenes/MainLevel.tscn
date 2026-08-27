@@ -1,0 +1,136 @@
+[gd_scene load_steps=12 format=3 uid="uid://cmainlevelscene001"]
+
+[ext_resource type="Script" path="res://scripts/main_level.gd" id="1_level"]
+[ext_resource type="Script" path="res://scripts/bullet_pool.gd" id="2_pool"]
+[ext_resource type="PackedScene" path="res://scenes/Player.tscn" id="3_player"]
+[ext_resource type="Script" path="res://scripts/spawner.gd" id="4_spawner"]
+[ext_resource type="PackedScene" path="res://scenes/HUD.tscn" id="5_hud"]
+[ext_resource type="PackedScene" path="res://scenes/DestructibleCrate.tscn" id="6_crate"]
+[ext_resource type="PackedScene" path="res://scenes/TrashBag.tscn" id="7_trash"]
+[ext_resource type="PackedScene" path="res://scenes/OilBarrel.tscn" id="8_barrel"]
+
+[sub_resource type="NavigationPolygon" id="NavigationPolygon_1"]
+vertices = PackedVector2Array(-1380, -1380, 1380, -1380, 1380, 1380, -1380, 1380)
+polygons = Array[PackedInt32Array]([PackedInt32Array(0, 1, 2, 3)])
+outlines = Array[PackedVector2Array]([PackedVector2Array(-1380, -1380, 1380, -1380, 1380, 1380, -1380, 1380)])
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_wall_h"]
+size = Vector2(240, 24)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_wall_v"]
+size = Vector2(24, 200)
+
+[node name="MainLevel" type="Node2D"]
+script = ExtResource("1_level")
+
+[node name="DaylightLighting" type="CanvasModulate" parent="."]
+color = Color(0.98, 0.96, 0.92, 1)
+
+[node name="NavigationRegion2D" type="NavigationRegion2D" parent="."]
+navigation_polygon = SubResource("NavigationPolygon_1")
+
+[node name="BulletPool" type="Node2D" parent="." groups=["bullet_pool"]]
+script = ExtResource("2_pool")
+
+[node name="EnvironmentWalls" type="Node2D" parent="."]
+
+[node name="BunkerWallTop" type="StaticBody2D" parent="EnvironmentWalls" groups=["obstacles"]]
+position = Vector2(-380, 220)
+collision_layer = 4
+collision_mask = 7
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="EnvironmentWalls/BunkerWallTop"]
+shape = SubResource("RectangleShape2D_wall_h")
+
+[node name="BunkerWallLeft" type="StaticBody2D" parent="EnvironmentWalls" groups=["obstacles"]]
+position = Vector2(-490, 310)
+collision_layer = 4
+collision_mask = 7
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="EnvironmentWalls/BunkerWallLeft"]
+shape = SubResource("RectangleShape2D_wall_v")
+
+[node name="BunkerWallRight" type="StaticBody2D" parent="EnvironmentWalls" groups=["obstacles"]]
+position = Vector2(-270, 310)
+collision_layer = 4
+collision_mask = 7
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="EnvironmentWalls/BunkerWallRight"]
+shape = SubResource("RectangleShape2D_wall_v")
+
+[node name="IndustrialFence1" type="StaticBody2D" parent="EnvironmentWalls" groups=["obstacles"]]
+position = Vector2(350, -280)
+collision_layer = 4
+collision_mask = 7
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="EnvironmentWalls/IndustrialFence1"]
+shape = SubResource("RectangleShape2D_wall_h")
+
+[node name="IndustrialFence2" type="StaticBody2D" parent="EnvironmentWalls" groups=["obstacles"]]
+position = Vector2(460, -180)
+collision_layer = 4
+collision_mask = 7
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="EnvironmentWalls/IndustrialFence2"]
+shape = SubResource("RectangleShape2D_wall_v")
+
+[node name="DestructibleProps" type="Node2D" parent="."]
+
+[node name="Crate1" parent="DestructibleProps" instance=ExtResource("6_crate")]
+position = Vector2(-120, -80)
+
+[node name="Crate2" parent="DestructibleProps" instance=ExtResource("6_crate")]
+position = Vector2(-155, -80)
+
+[node name="Crate3" parent="DestructibleProps" instance=ExtResource("6_crate")]
+position = Vector2(-138, -115)
+
+[node name="Crate4" parent="DestructibleProps" instance=ExtResource("6_crate")]
+position = Vector2(240, 180)
+
+[node name="Crate5" parent="DestructibleProps" instance=ExtResource("6_crate")]
+position = Vector2(275, 180)
+
+[node name="Crate6" parent="DestructibleProps" instance=ExtResource("6_crate")]
+position = Vector2(-360, 160)
+
+[node name="Crate7" parent="DestructibleProps" instance=ExtResource("6_crate")]
+position = Vector2(-400, 160)
+
+[node name="Crate8" parent="DestructibleProps" instance=ExtResource("6_crate")]
+position = Vector2(420, -320)
+
+[node name="TrashBag1" parent="DestructibleProps" instance=ExtResource("7_trash")]
+position = Vector2(-190, 80)
+
+[node name="TrashBag2" parent="DestructibleProps" instance=ExtResource("7_trash")]
+position = Vector2(-215, 95)
+
+[node name="TrashBag3" parent="DestructibleProps" instance=ExtResource("7_trash")]
+position = Vector2(180, -140)
+
+[node name="TrashBag4" parent="DestructibleProps" instance=ExtResource("7_trash")]
+position = Vector2(205, -125)
+
+[node name="TrashBag5" parent="DestructibleProps" instance=ExtResource("7_trash")]
+position = Vector2(-320, 360)
+
+[node name="OilBarrel1" parent="DestructibleProps" instance=ExtResource("8_barrel")]
+position = Vector2(-138, 140)
+
+[node name="OilBarrel2" parent="DestructibleProps" instance=ExtResource("8_barrel")]
+position = Vector2(310, 180)
+
+[node name="OilBarrel3" parent="DestructibleProps" instance=ExtResource("8_barrel")]
+position = Vector2(280, -280)
+
+[node name="OilBarrel4" parent="DestructibleProps" instance=ExtResource("8_barrel")]
+position = Vector2(-450, 160)
+
+[node name="Player" parent="." instance=ExtResource("3_player")]
+position = Vector2(0, 0)
+
+[node name="ZombieSpawner" type="Node2D" parent="."]
+script = ExtResource("4_spawner")
+
+[node name="HUD" parent="." instance=ExtResource("5_hud")]

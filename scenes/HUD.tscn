@@ -1,0 +1,222 @@
+[gd_scene load_steps=5 format=3 uid="uid://chudscene001"]
+
+[ext_resource type="Script" path="res://scripts/hud.gd" id="1_hud"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_health_bg"]
+bg_color = Color(0.08, 0.09, 0.11, 0.92)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.4, 0.15, 0.15, 1)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_health_fill"]
+bg_color = Color(0.85, 0.15, 0.15, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(1, 0.4, 0.4, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel"]
+bg_color = Color(0.08, 0.1, 0.12, 0.88)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.3, 0.35, 0.42, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[node name="HUD" type="CanvasLayer"]
+script = ExtResource("1_hud")
+
+[node name="ScoreContainer" type="PanelContainer" parent="."]
+offset_left = 24.0
+offset_top = 20.0
+offset_right = 220.0
+offset_bottom = 84.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
+
+[node name="VBox" type="VBoxContainer" parent="ScoreContainer"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="ScoreLabel" type="Label" parent="ScoreContainer/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.98, 0.82, 0.15, 1)
+theme_override_font_sizes/font_size = 18
+text = "SCORE: 000000"
+
+[node name="KillsLabel" type="Label" parent="ScoreContainer/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.95, 0.3, 0.3, 1)
+theme_override_font_sizes/font_size = 14
+text = "KILLS: 0"
+
+[node name="WaveContainer" type="PanelContainer" parent="."]
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -190.0
+offset_top = 20.0
+offset_right = -24.0
+offset_bottom = 74.0
+grow_horizontal = 0
+theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
+
+[node name="WaveLabel" type="Label" parent="WaveContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.98, 0.82, 0.15, 1)
+theme_override_font_sizes/font_size = 20
+text = "WAVE 01"
+horizontal_alignment = 1
+
+[node name="VitalsContainer" type="PanelContainer" parent="."]
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 24.0
+offset_top = -88.0
+offset_right = 320.0
+offset_bottom = -24.0
+grow_vertical = 0
+theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
+
+[node name="VBox" type="VBoxContainer" parent="VitalsContainer"]
+layout_mode = 2
+
+[node name="HealthLabel" type="Label" parent="VitalsContainer/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.95, 0.25, 0.25, 1)
+theme_override_font_sizes/font_size = 14
+text = "VITALS: 100 / 100"
+
+[node name="HealthBar" type="ProgressBar" parent="VitalsContainer/VBox"]
+custom_minimum_size = Vector2(0, 20)
+layout_mode = 2
+theme_override_styles/background = SubResource("StyleBoxFlat_health_bg")
+theme_override_styles/fill = SubResource("StyleBoxFlat_health_fill")
+value = 100.0
+show_percentage = false
+
+[node name="WeaponContainer" type="PanelContainer" parent="."]
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -300.0
+offset_top = -88.0
+offset_right = -24.0
+offset_bottom = -24.0
+grow_horizontal = 0
+grow_vertical = 0
+theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
+
+[node name="VBox" type="VBoxContainer" parent="WeaponContainer"]
+layout_mode = 2
+alignment = 1
+
+[node name="WeaponLabel" type="Label" parent="WeaponContainer/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.98, 0.82, 0.15, 1)
+theme_override_font_sizes/font_size = 18
+text = "9MM PISTOL"
+horizontal_alignment = 2
+
+[node name="AmmoLabel" type="Label" parent="WeaponContainer/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.9, 0.95, 1)
+theme_override_font_sizes/font_size = 15
+text = "AMMO: ∞"
+horizontal_alignment = 2
+
+[node name="MobileWeaponButtons" type="HBoxContainer" parent="."]
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -110.0
+offset_top = -70.0
+offset_right = 110.0
+offset_bottom = -22.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_constants/separation = 12
+
+[node name="Btn1" type="Button" parent="MobileWeaponButtons"]
+custom_minimum_size = Vector2(60, 44)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.98, 0.82, 0.15, 1)
+theme_override_font_sizes/font_size = 14
+text = "[1] 9MM"
+
+[node name="Btn2" type="Button" parent="MobileWeaponButtons"]
+custom_minimum_size = Vector2(60, 44)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.98, 0.82, 0.15, 1)
+theme_override_font_sizes/font_size = 14
+text = "[2] SHG"
+
+[node name="Btn3" type="Button" parent="MobileWeaponButtons"]
+custom_minimum_size = Vector2(60, 44)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.98, 0.82, 0.15, 1)
+theme_override_font_sizes/font_size = 14
+text = "[3] RIFLE"
+
+[node name="GameOverPanel" type="Panel" parent="."]
+visible = false
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Center" type="VBoxContainer" parent="GameOverPanel"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -200.0
+offset_top = -80.0
+offset_right = 200.0
+offset_bottom = 80.0
+grow_horizontal = 2
+grow_vertical = 2
+alignment = 1
+
+[node name="Title" type="Label" parent="GameOverPanel/Center"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.95, 0.15, 0.15, 1)
+theme_override_font_sizes/font_size = 42
+text = "SIGNAL LOST"
+horizontal_alignment = 1
+
+[node name="Subtitle" type="Label" parent="GameOverPanel/Center"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.8, 0.2, 1)
+theme_override_font_sizes/font_size = 20
+text = "THE HORDE CONSUMED THE SECTOR"
+horizontal_alignment = 1
+
+[node name="Prompt" type="Label" parent="GameOverPanel/Center"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.75, 0.8, 1)
+theme_override_font_sizes/font_size = 16
+text = "PRESS [R] OR TAP SCREEN TO RESTART"
+horizontal_alignment = 1
+
+[connection signal="pressed" from="MobileWeaponButtons/Btn1" to="." method="_on_weapon_btn_1_pressed"]
+[connection signal="pressed" from="MobileWeaponButtons/Btn2" to="." method="_on_weapon_btn_2_pressed"]
+[connection signal="pressed" from="MobileWeaponButtons/Btn3" to="." method="_on_weapon_btn_3_pressed"]
