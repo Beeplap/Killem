@@ -49,7 +49,7 @@ export class Spawner {
         type = 'regular';
       }
 
-      // Spawn outside the player's immediate view, but within the world map
+      // Spawn outside player viewport, emerging from connected rooms
       const spawnPos = this.getSpawnPositionNearPlayer(playerPos, rooms, mapWidth, mapHeight);
       this.zombieManager.spawnZombie(type, spawnPos.x, spawnPos.y, this.wave);
     }
@@ -74,7 +74,18 @@ export class Spawner {
     mapWidth: number,
     mapHeight: number
   ): Vector2 {
-    // Pick an angle and distance (between 500px and 750px from player)
+    // 50% chance to spawn in another connected sector and navigate towards player
+    if (rooms.length > 0 && Math.random() < 0.5) {
+      const otherRooms = rooms.filter((r) => Math.hypot(r.x + r.w / 2 - playerPos.x, r.y + r.h / 2 - playerPos.y) > 450);
+      if (otherRooms.length > 0) {
+        const r = otherRooms[Math.floor(Math.random() * otherRooms.length)];
+        return {
+          x: clamp(r.x + 50 + Math.random() * (r.w - 100), 50, mapWidth - 50),
+          y: clamp(r.y + 50 + Math.random() * (r.h - 100), 50, mapHeight - 50),
+        };
+      }
+    }
+
     const angle = Math.random() * Math.PI * 2;
     const dist = 520 + Math.random() * 250;
 

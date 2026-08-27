@@ -495,6 +495,9 @@ class SoundManager {
     osc.connect(gain);
     gain.connect(this.ctx.destination);
     osc.start(t);
+    osc.stop(t + 0.85);
+  }
+
   /**
    * Crate Break: splintering wood crack and thud
    */

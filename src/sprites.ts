@@ -1,4 +1,4 @@
-import type { DestructibleType, WeaponType, ZombieType } from './types';
+import type { WeaponType } from './types';
 
 /**
  * Procedural Pixel Art Sprite Generator.
