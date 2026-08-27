@@ -314,229 +314,260 @@ html, body {
 }
 
 /* ==========================================================================
-   IN-GAME HUD (Top Corners)
+   CLASSIC 2000s ZOMBIE SHOOTER ARCADE HUD
    ========================================================================== */
 .hud-container {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  padding: 16px 20px;
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  z-index: 10;
+  inset: 0;
+  z-index: 20;
   pointer-events: none;
-  font-family: 'Rajdhani', sans-serif;
+  font-family: 'Courier New', Courier, monospace;
 }
 
 .hud-container.hidden {
   display: none;
 }
 
-.hud-left {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 10px;
-}
-
-.hud-center {
-  display: flex;
-  align-items: center;
-}
-
-.hud-right {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-}
-
-.hud-box {
-  background: rgba(15, 23, 42, 0.82);
-  border: 1px solid rgba(51, 65, 85, 0.85);
-  border-radius: 8px;
-  padding: 8px 14px;
-  backdrop-filter: blur(8px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
-}
-
-.hud-box-right {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  text-align: right;
-  min-width: 140px;
-}
-
-.stat-label {
-  font-family: 'Orbitron', monospace;
-  font-size: 0.65rem;
-  font-weight: 700;
-  letter-spacing: 0.15em;
-  color: #94a3b8;
-  margin-bottom: 4px;
-}
-
-/* Health Bar */
-.health-bar-wrapper {
-  position: relative;
-  width: clamp(160px, 20vw, 220px);
-  height: 20px;
-  background: rgba(15, 23, 42, 0.9);
-  border: 1.5px solid #475569;
-  border-radius: 4px;
-  overflow: hidden;
-}
-
-.health-bar-fill {
-  height: 100%;
-  background: linear-gradient(90deg, #15803d 0%, #22c55e 100%);
-  transition: width 0.15s ease-out;
-  box-shadow: 0 0 10px rgba(34, 197, 94, 0.5);
-}
-
-.health-bar-text {
+/* --- TOP-LEFT: RETRO ARCADE COUNTERS --- */
+.hud-top-left {
   position: absolute;
-  inset: 0;
+  top: 16px;
+  left: 20px;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: 'Orbitron', monospace;
-  font-size: 0.72rem;
-  font-weight: 700;
-  color: #ffffff;
-  text-shadow: 0 1px 3px #000;
+  flex-direction: column;
+  gap: 3px;
+  background: rgba(15, 17, 23, 0.88);
+  border: 2px solid #383c4a;
+  border-radius: 4px;
+  padding: 8px 14px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
-/* Weapon Status Card */
-.weapon-status-card {
-  min-width: 180px;
-}
-
-.weapon-info-row {
+.arcade-counter-row {
   display: flex;
   align-items: center;
   gap: 8px;
-}
-
-.weapon-badge {
-  font-family: 'Orbitron', monospace;
-  font-size: 0.85rem;
+  font-size: 0.88rem;
   font-weight: 900;
-  color: #38bdf8;
-  letter-spacing: 0.08em;
-  text-shadow: 0 0 8px rgba(56, 189, 248, 0.4);
-}
-
-.ammo-badge {
-  font-family: 'Orbitron', monospace;
-  font-size: 0.85rem;
-  font-weight: 700;
-  color: #fbbf24;
-  background: rgba(30, 41, 59, 0.7);
-  padding: 2px 8px;
-  border-radius: 4px;
-  border: 1px solid rgba(251, 191, 36, 0.4);
   letter-spacing: 0.05em;
+  text-shadow: 2px 2px 0px #000, 0 0 6px rgba(0, 0, 0, 0.9);
 }
 
-/* Top Center Wave Badge */
-.wave-badge {
-  background: rgba(15, 23, 42, 0.85);
-  border: 1px solid #ef4444;
-  padding: 6px 16px;
-  border-radius: 20px;
+.arcade-label {
+  color: #94a3b8;
+  min-width: 62px;
+}
+
+.arcade-val-yellow {
+  color: #facc15;
+}
+
+.arcade-val-red {
+  color: #ef4444;
+}
+
+.arcade-val-gray {
+  color: #cbd5e1;
+}
+
+/* --- TOP-RIGHT: WAVE COUNTER & MUTE --- */
+.hud-top-right {
+  position: absolute;
+  top: 16px;
+  right: 145px; /* Sits next to the circular radar minimap */
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.wave-grunge-box {
+  background: linear-gradient(180deg, #242731 0%, #121419 100%);
+  border: 2px solid #4b5062;
+  border-radius: 4px;
+  padding: 6px 14px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  box-shadow: 0 0 15px rgba(239, 68, 68, 0.35);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.15);
 }
 
-.wave-label {
-  font-family: 'Orbitron', monospace;
+.wave-grunge-box .wave-label {
   font-size: 0.62rem;
-  letter-spacing: 0.2em;
-  color: #38bdf8;
-}
-
-.sector-val {
-  font-family: 'Orbitron', monospace;
-  font-size: 0.85rem;
   font-weight: 900;
-  letter-spacing: 0.08em;
-  color: #f8fafc;
-  margin: 1px 0;
-}
-
-.wave-val {
-  font-family: 'Orbitron', monospace;
-  font-size: 0.78rem;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  color: #ef4444;
-}
-
-/* Top Right Kills, Scores & Mute Button */
-.stat-kills {
-  font-family: 'Orbitron', monospace;
-  font-size: 0.95rem;
-  font-weight: 900;
-  color: #ef4444;
-  letter-spacing: 0.08em;
-  text-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
-  margin-bottom: 2px;
-}
-
-.stat-small {
-  font-family: 'Orbitron', monospace;
-  font-size: 0.72rem;
-  font-weight: 700;
+  letter-spacing: 0.18em;
   color: #94a3b8;
-  letter-spacing: 0.08em;
 }
 
-.stat-score {
-  font-family: 'Orbitron', monospace;
+.wave-grunge-box .wave-number {
   font-size: 1.15rem;
   font-weight: 900;
-  color: #fbbf24;
-  letter-spacing: 0.05em;
-  text-shadow: 0 0 10px rgba(251, 191, 36, 0.4);
+  letter-spacing: 0.06em;
+  color: #ef4444;
+  text-shadow: 0 0 8px rgba(239, 68, 68, 0.6), 2px 2px 0px #000;
 }
 
 .sound-toggle-btn {
   pointer-events: auto;
-  background: rgba(15, 23, 42, 0.85);
-  border: 1px solid #475569;
-  color: #e2e8f0;
-  width: 38px;
-  height: 38px;
-  border-radius: 8px;
+  background: linear-gradient(180deg, #242731 0%, #121419 100%);
+  border: 2px solid #4b5062;
+  color: #cbd5e1;
+  width: 36px;
+  height: 36px;
+  border-radius: 4px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.2s ease;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.7);
+  transition: border-color 0.15s ease, color 0.15s ease;
 }
 
 .sound-toggle-btn:hover {
-  background: #1e293b;
-  border-color: #38bdf8;
-  color: #38bdf8;
+  border-color: #facc15;
+  color: #facc15;
 }
 
-/* ==========================================================================
-   WEAPON SWITCHER BAR (On-Screen Mobile & Desktop Buttons)
-   ========================================================================== */
-.weapon-switcher-bar {
-  position: fixed;
-  bottom: 22px;
-  left: 50%;
-  transform: translateX(-50%);
+/* --- BOTTOM-LEFT: RED METALLIC HEALTH GAUGE --- */
+.hud-bottom-left {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
   display: flex;
-  gap: 10px;
-  z-index: 30;
+  align-items: flex-end;
+}
+
+.metallic-health-casing {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: linear-gradient(180deg, #22252e 0%, #101217 100%);
+  border: 3px solid #3c404f;
+  border-radius: 6px;
+  padding: 8px 14px;
+  box-shadow:
+    0 8px 20px rgba(0, 0, 0, 0.8),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15),
+    inset 0 0 10px rgba(0, 0, 0, 0.7);
+}
+
+.health-orb {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #ef4444 0%, #b91c1c 50%, #450a0a 100%);
+  border: 2.5px solid #555a6d;
+  box-shadow:
+    0 0 12px rgba(239, 68, 68, 0.65),
+    inset 0 2px 4px rgba(255, 255, 255, 0.4),
+    inset 0 -3px 6px rgba(0, 0, 0, 0.8);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.health-orb-digits {
+  font-size: 0.95rem;
+  font-weight: 900;
+  color: #ffffff;
+  text-shadow: 1px 1px 2px #000;
+  line-height: 1;
+}
+
+.health-orb-sub {
+  font-size: 0.55rem;
+  font-weight: 900;
+  color: #fca5a5;
+  letter-spacing: 0.08em;
+}
+
+.health-bar-section {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.health-bar-header {
+  font-size: 0.65rem;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+  color: #ef4444;
+  text-shadow: 1px 1px 0px #000;
+}
+
+.health-track-inset {
+  width: clamp(140px, 18vw, 200px);
+  height: 18px;
+  background: #090a0d;
+  border: 2px solid #232733;
+  border-radius: 3px;
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.9);
+  overflow: hidden;
+}
+
+.blood-health-bar {
+  height: 100%;
+  background: linear-gradient(180deg, #f87171 0%, #dc2626 40%, #991b1b 100%);
+  box-shadow: 0 0 10px rgba(220, 38, 38, 0.7);
+  transition: width 0.12s ease-out;
+}
+
+/* --- BOTTOM-RIGHT: STARK WEAPON & AMMO TERMINAL --- */
+.hud-bottom-right {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.classic-weapon-terminal {
+  background: rgba(16, 18, 24, 0.92);
+  border: 2.5px solid #3c404f;
+  border-radius: 4px;
+  padding: 8px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 190px;
+  text-align: right;
+  box-shadow:
+    0 8px 20px rgba(0, 0, 0, 0.8),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+.terminal-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.92rem;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  text-shadow: 2px 2px 0px #000, 0 0 8px rgba(0, 0, 0, 0.8);
+}
+
+.terminal-label {
+  color: #94a3b8;
+  font-size: 0.78rem;
+}
+
+.terminal-val-weapon {
+  color: #facc15; /* Stark Yellow */
+  margin-left: 8px;
+}
+
+.terminal-val-ammo {
+  color: #ef4444; /* Stark Blood Red */
+  margin-left: 8px;
+}
+
+/* --- WEAPON QUICK SWITCHER BUTTONS (BOTTOM-RIGHT DOCKED) --- */
+.weapon-switcher-bar {
+  display: flex;
+  gap: 6px;
   pointer-events: auto;
   touch-action: manipulation;
 }
@@ -546,55 +577,50 @@ html, body {
 }
 
 .weapon-button {
-  background: rgba(15, 23, 42, 0.85);
-  border: 1.5px solid rgba(71, 85, 105, 0.8);
-  border-radius: 8px;
-  padding: 8px 14px;
+  background: linear-gradient(180deg, #242731 0%, #121419 100%);
+  border: 2px solid #3d4252;
+  border-radius: 4px;
+  padding: 5px 10px;
   display: flex;
   flex-direction: column;
   align-items: center;
   cursor: pointer;
   color: #94a3b8;
-  font-family: 'Orbitron', monospace;
-  transition: all 0.15s ease;
-  backdrop-filter: blur(6px);
-  min-width: 82px;
+  font-family: 'Courier New', Courier, monospace;
+  font-weight: 900;
+  transition: all 0.12s ease;
+  min-width: 68px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.6);
 }
 
 .weapon-button:hover {
-  background: rgba(30, 41, 59, 0.95);
-  border-color: #94a3b8;
-  color: #f8fafc;
-  transform: translateY(-2px);
+  background: #2a2e3a;
+  border-color: #facc15;
+  color: #facc15;
 }
 
 .weapon-button.active {
-  background: rgba(15, 23, 42, 0.95);
-  border-color: #38bdf8;
-  color: #38bdf8;
-  box-shadow:
-    0 0 16px rgba(56, 189, 248, 0.5),
-    inset 0 0 12px rgba(56, 189, 248, 0.15);
-  transform: translateY(-3px) scale(1.04);
+  background: linear-gradient(180deg, #371515 0%, #180909 100%);
+  border-color: #ef4444;
+  color: #facc15;
+  box-shadow: 0 0 12px rgba(239, 68, 68, 0.6), inset 0 0 6px rgba(239, 68, 68, 0.3);
+  transform: translateY(-2px);
 }
 
 .weapon-button .w-key {
-  font-size: 0.65rem;
-  font-weight: 700;
-  opacity: 0.85;
+  font-size: 0.62rem;
+  color: #ef4444;
 }
 
 .weapon-button .w-name {
-  font-size: 0.78rem;
-  font-weight: 900;
+  font-size: 0.75rem;
   letter-spacing: 0.05em;
   margin: 1px 0;
 }
 
 .weapon-button .w-ammo {
-  font-size: 0.7rem;
-  font-weight: 700;
-  color: #fbbf24;
+  font-size: 0.68rem;
+  color: #facc15;
 }
 
 /* ==========================================================================

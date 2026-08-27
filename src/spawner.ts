@@ -1,6 +1,7 @@
 import { ZombieManager } from './zombie';
 import type { ZombieType, Vector2, Room } from './types';
 import { clamp } from './math';
+import { sound } from './audio';
 
 export class Spawner {
   private zombieManager: ZombieManager;
@@ -52,6 +53,7 @@ export class Spawner {
       // Spawn outside player viewport, emerging from connected rooms
       const spawnPos = this.getSpawnPositionNearPlayer(playerPos, rooms, mapWidth, mapHeight);
       this.zombieManager.spawnZombie(type, spawnPos.x, spawnPos.y, this.wave);
+      sound.playZombieGroan();
     }
   }
 
@@ -59,6 +61,7 @@ export class Spawner {
    * Spawns an ambush horde when entering a new room
    */
   public triggerRoomAmbush(room: Room, wave: number): void {
+    sound.playZombieGroan();
     const count = 4 + Math.floor(Math.random() * 4) + wave;
     for (let i = 0; i < count; i++) {
       const type: ZombieType = i === 0 && wave >= 2 ? (Math.random() > 0.5 ? 'heavy' : 'dog') : (Math.random() > 0.6 ? 'dog' : 'regular');

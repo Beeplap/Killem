@@ -8,82 +8,94 @@
       content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
     />
     <title>OUTBREAK // 2D Zombie Survival</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Creepster&family=Orbitron:wght@500;700;900&family=Rajdhani:wght@600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/src/style.css" />
   </head>
   <body>
     <!-- Full-screen HTML5 Canvas styled with touch-action: none -->
     <canvas id="game-canvas"></canvas>
 
-    <!-- In-Game HUD -->
+    <!-- Classic 2000s Zombie Shooter Arcade HUD -->
     <div id="hud" class="hud-container hidden">
-      <!-- Top Left Corner: Health Bar, Current Weapon, and Ammo Count -->
-      <div class="hud-left">
-        <div class="hud-box">
-          <div class="stat-label">VITALS</div>
-          <div class="health-bar-wrapper">
-            <div id="health-bar-fill" class="health-bar-fill" style="width: 100%"></div>
-            <span id="health-bar-text" class="health-bar-text">100 / 100</span>
-          </div>
+      <!-- Top-Left Corner: Retro Arcade Score & Kill Counters -->
+      <div class="hud-top-left">
+        <div class="arcade-counter-row">
+          <span class="arcade-label">SCORE:</span>
+          <span id="score-val" class="arcade-val-yellow">0</span>
         </div>
-
-        <div class="hud-box weapon-status-card">
-          <div class="stat-label">CURRENT WEAPON</div>
-          <div class="weapon-info-row">
-            <span id="current-weapon-badge" class="weapon-badge">9MM PISTOL</span>
-            <span id="current-ammo-badge" class="ammo-badge">AMMO: ∞</span>
-          </div>
+        <div class="arcade-counter-row">
+          <span class="arcade-label">KILLS:</span>
+          <span id="kill-count" class="arcade-val-red">0</span>
+        </div>
+        <div class="arcade-counter-row">
+          <span class="arcade-label">BEST:</span>
+          <span id="high-score" class="arcade-val-gray">0</span>
         </div>
       </div>
 
-      <!-- Top Center: Wave / Current Room Sector -->
-      <div class="hud-center">
-        <div class="wave-badge">
-          <span class="wave-label">CURRENT SECTOR</span>
-          <span id="sector-val" class="sector-val">CONTROL AIRLOCK</span>
-          <span id="wave-val" class="wave-val">WAVE 1</span>
-        </div>
-      </div>
-
-      <!-- Top Right Corner: Killed Enemy Count, High Score, Score, and Sound Toggle -->
-      <div class="hud-right">
-        <div class="hud-box hud-box-right">
-          <div class="stat-kills">KILLED: <span id="kill-count">0</span></div>
-          <div class="stat-small">BEST: <span id="high-score">0</span></div>
-          <div class="stat-score">SCORE: <span id="score-val">0</span></div>
+      <!-- Top-Right Corner: Wave Badge & Audio Toggle (Minimap is rendered directly below in canvas) -->
+      <div class="hud-top-right">
+        <div class="wave-grunge-box">
+          <span class="wave-label">WAVE</span>
+          <span id="wave-val" class="wave-number">1</span>
         </div>
         <button id="sound-btn" class="sound-toggle-btn" title="Toggle Sound" aria-label="Toggle Sound">
-          <svg id="sound-icon-on" viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+          <svg id="sound-icon-on" viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
             <path d="M14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77zm-2.5-1.23L6.5 6.5H2v11h4.5l5 4.5V2zm-2 4.41L8.91 8.5H4v7h4.91l3.09 2.09V6.41zM14 8.77v6.46c1.15-.55 2-1.73 2-3.23s-.85-2.68-2-3.23z"/>
           </svg>
-          <svg id="sound-icon-off" class="hidden" viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+          <svg id="sound-icon-off" class="hidden" viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
             <path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/>
           </svg>
         </button>
       </div>
-    </div>
 
-    <!-- On-Screen Mobile & Desktop Weapon Switching Buttons -->
-    <div id="weapon-switcher-bar" class="weapon-switcher-bar hidden">
-      <button id="btn-weapon-pistol" class="weapon-button active" data-weapon="pistol" title="Switch to Pistol [Key 1]">
-        <span class="w-key">[1]</span>
-        <span class="w-name">PISTOL</span>
-        <span class="w-ammo">∞</span>
-      </button>
+      <!-- Bottom-Left Corner: Blood-Red Metallic Health Gauge -->
+      <div class="hud-bottom-left">
+        <div class="metallic-health-casing">
+          <div class="health-orb">
+            <span id="health-bar-text" class="health-orb-digits">100</span>
+            <span class="health-orb-sub">HP</span>
+          </div>
+          <div class="health-bar-section">
+            <div class="health-bar-header">VITAL INTEGRITY</div>
+            <div class="health-track-inset">
+              <div id="health-bar-fill" class="blood-health-bar" style="width: 100%"></div>
+            </div>
+          </div>
+        </div>
+      </div>
 
-      <button id="btn-weapon-shotgun" class="weapon-button" data-weapon="shotgun" title="Switch to Shotgun [Key 2]">
-        <span class="w-key">[2]</span>
-        <span class="w-name">SHOTGUN</span>
-        <span id="btn-ammo-shotgun" class="w-ammo">24</span>
-      </button>
+      <!-- Bottom-Right Corner: Classic Zombie Shooter Weapon & Ammo Display -->
+      <div class="hud-bottom-right">
+        <div class="classic-weapon-terminal">
+          <div class="terminal-row">
+            <span class="terminal-label">WEAPON:</span>
+            <span id="current-weapon-badge" class="terminal-val-weapon">9MM PISTOL</span>
+          </div>
+          <div class="terminal-row">
+            <span class="terminal-label">AMMO:</span>
+            <span id="current-ammo-badge" class="terminal-val-ammo">∞</span>
+          </div>
+        </div>
 
-      <button id="btn-weapon-rifle" class="weapon-button" data-weapon="rifle" title="Switch to Assault Rifle [Key 3]">
-        <span class="w-key">[3]</span>
-        <span class="w-name">RIFLE</span>
-        <span id="btn-ammo-rifle" class="w-ammo">90</span>
-      </button>
+        <!-- Weapon Quick Switcher Buttons -->
+        <div id="weapon-switcher-bar" class="weapon-switcher-bar">
+          <button id="btn-weapon-pistol" class="weapon-button active" data-weapon="pistol" title="[1] 9mm Pistol">
+            <span class="w-key">1</span>
+            <span class="w-name">PISTOL</span>
+            <span class="w-ammo">∞</span>
+          </button>
+          <button id="btn-weapon-shotgun" class="weapon-button" data-weapon="shotgun" title="[2] Shotgun">
+            <span class="w-key">2</span>
+            <span class="w-name">SHOTGUN</span>
+            <span id="btn-ammo-shotgun" class="w-ammo">24</span>
+          </button>
+          <button id="btn-weapon-rifle" class="weapon-button" data-weapon="rifle" title="[3] Assault Rifle">
+            <span class="w-key">3</span>
+            <span class="w-name">RIFLE</span>
+            <span id="btn-ammo-rifle" class="w-ammo">90</span>
+          </button>
+        </div>
+      </div>
     </div>
 
     <!-- Classic Pitch-Black Loading Overlay with Glowing Red Eyes -->
@@ -110,13 +122,13 @@
         <div class="briefing-container">
           <div class="briefing-col">
             <div class="briefing-title">COMPOUND EXPLORATION</div>
-            <div class="intel-item"><strong>Map Layout:</strong> Corridors, Labs, Generators & Rainy Outdoor Yard</div>
-            <div class="intel-item"><strong>Destructibles:</strong> Shoot Wooden Crates, Barrels & Trash Bags for Loot</div>
-            <div class="intel-item"><strong>Loot Drops:</strong> 40% Health Pack, 40% Ammo Drop, 20% Empty</div>
+            <div class="intel-item"><strong>Map:</strong> Corridors, Labs, Generators & Rainy Outdoor Yard</div>
+            <div class="intel-item"><strong>Destructibles:</strong> Shoot Crates, Barrels & Trash Bags for Loot</div>
+            <div class="intel-item"><strong>Loot:</strong> 40% Medkits, 40% Ammo Pickups, 20% Empty</div>
           </div>
           <div class="briefing-col">
             <div class="briefing-title">THREAT INTEL & ARSENAL</div>
-            <div class="intel-item"><span class="intel-dot green"></span> <strong>Regular Zombie:</strong> Medium speed & health</div>
+            <div class="intel-item"><span class="intel-dot green"></span> <strong>Regular Zombie:</strong> Shambling civilian infected</div>
             <div class="intel-item"><span class="intel-dot amber"></span> <strong>Infected Dog:</strong> Fast rush predator</div>
             <div class="intel-item"><span class="intel-dot red"></span> <strong>Heavy Zombie:</strong> Massive, slow & high HP</div>
             <div class="intel-item"><strong>Guns (1, 2, 3):</strong> Pistol (∞) | Shotgun (Spread) | Rifle (Rapid)</div>
@@ -137,7 +149,7 @@
             <span class="key-badge">R</span> Reload
           </div>
           <div class="control-badge">
-            <span class="key-badge">TOUCH JOYSTICKS</span> Mobile Movement & Aim
+            <span class="key-badge">JOYSTICKS</span> Mobile Touch Controls
           </div>
         </div>
 

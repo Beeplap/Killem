@@ -649,22 +649,30 @@ export class Game {
     const alpha = Math.min(1, this.announcementTimer);
     ctx.globalAlpha = alpha;
 
-    const bannerY = 85;
-    ctx.fillStyle = 'rgba(15, 23, 42, 0.85)';
-    ctx.strokeStyle = '#38bdf8';
-    ctx.lineWidth = 1.5;
-
-    const bannerW = 420;
-    const bannerH = 40;
+    const bannerY = 22;
+    const bannerW = 440;
+    const bannerH = 34;
     const bannerX = this.width / 2 - bannerW / 2;
 
+    // Dark steel plate with blood-red hazard border
+    ctx.fillStyle = 'rgba(17, 19, 24, 0.92)';
+    ctx.strokeStyle = '#dc2626';
+    ctx.lineWidth = 2;
+
     ctx.beginPath();
-    ctx.roundRect(bannerX, bannerY, bannerW, bannerH, 6);
+    ctx.rect(bannerX, bannerY, bannerW, bannerH);
     ctx.fill();
     ctx.stroke();
 
-    ctx.font = '900 13px "Orbitron", monospace';
-    ctx.fillStyle = '#38bdf8';
+    // Corner rivets
+    ctx.fillStyle = '#64748b';
+    ctx.fillRect(bannerX + 3, bannerY + 3, 3, 3);
+    ctx.fillRect(bannerX + bannerW - 6, bannerY + 3, 3, 3);
+    ctx.fillRect(bannerX + 3, bannerY + bannerH - 6, 3, 3);
+    ctx.fillRect(bannerX + bannerW - 6, bannerY + bannerH - 6, 3, 3);
+
+    ctx.font = '900 13px "Courier New", Courier, monospace';
+    ctx.fillStyle = '#facc15';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText(`SECTOR: ${this.roomAnnouncement}`, this.width / 2, bannerY + bannerH / 2);
@@ -673,28 +681,63 @@ export class Game {
   }
 
   /**
-   * Compact Exploration Minimap Radar in top-center/right
+   * Classic Circular / Grunge Radar Minimap in Top-Right Corner
    */
   private drawMinimap(ctx: CanvasRenderingContext2D): void {
-    const mw = 140;
-    const mh = 105;
-    const mx = this.width - mw - 20;
-    const my = 85;
+    const cx = this.width - 76;
+    const cy = 76;
+    const rad = 50;
 
     ctx.save();
-    // Background
-    ctx.fillStyle = 'rgba(15, 23, 42, 0.82)';
-    ctx.strokeStyle = '#334155';
-    ctx.lineWidth = 1.5;
+
+    // 1. Heavy metallic outer rim with inset bevel
     ctx.beginPath();
-    ctx.roundRect(mx, my, mw, mh, 6);
+    ctx.arc(cx, cy, rad + 6, 0, Math.PI * 2);
+    ctx.fillStyle = '#1e2129';
     ctx.fill();
+    ctx.strokeStyle = '#3e4250';
+    ctx.lineWidth = 2.5;
     ctx.stroke();
 
+    // 2. Metallic perimeter bolts/rivets
+    ctx.fillStyle = '#64748b';
+    for (let i = 0; i < 8; i++) {
+      const boltAngle = (i / 8) * Math.PI * 2;
+      const bx = cx + Math.cos(boltAngle) * (rad + 3);
+      const by = cy + Math.sin(boltAngle) * (rad + 3);
+      ctx.fillRect(bx - 1.5, by - 1.5, 3, 3);
+    }
+
+    // 3. Dark CRT radar screen (clipped to circle)
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(cx, cy, rad, 0, Math.PI * 2);
+    ctx.clip();
+
+    ctx.fillStyle = '#0b0d12';
+    ctx.fillRect(cx - rad, cy - rad, rad * 2, rad * 2);
+
+    // Range rings & crosshairs
+    ctx.strokeStyle = 'rgba(71, 85, 105, 0.4)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.arc(cx, cy, rad * 0.5, 0, Math.PI * 2);
+    ctx.arc(cx, cy, rad * 0.85, 0, Math.PI * 2);
+    ctx.moveTo(cx - rad, cy);
+    ctx.lineTo(cx + rad, cy);
+    ctx.moveTo(cx, cy - rad);
+    ctx.lineTo(cx, cy + rad);
+    ctx.stroke();
+
+    // Map scaling
+    const mw = rad * 1.7;
+    const mh = rad * 1.7;
+    const mx = cx - mw / 2;
+    const my = cy - mh / 2;
     const scaleX = mw / this.map.width;
     const scaleY = mh / this.map.height;
 
-    // Draw rooms
+    // Draw explored rooms
     for (const r of this.map.rooms) {
       const rx = mx + r.x * scaleX;
       const ry = my + r.y * scaleY;
@@ -702,14 +745,14 @@ export class Game {
       const rh = r.h * scaleY;
 
       if (r.visited) {
-        ctx.fillStyle = r.isOutdoor ? 'rgba(56, 189, 248, 0.22)' : 'rgba(71, 85, 105, 0.4)';
+        ctx.fillStyle = r.isOutdoor ? 'rgba(56, 189, 248, 0.22)' : 'rgba(100, 116, 139, 0.35)';
         ctx.fillRect(rx, ry, rw, rh);
       }
-      ctx.strokeStyle = 'rgba(148, 163, 184, 0.3)';
+      ctx.strokeStyle = 'rgba(148, 163, 184, 0.25)';
       ctx.strokeRect(rx, ry, rw, rh);
     }
 
-    // Destructibles as small yellow dots
+    // Destructible crates as small yellow dots
     ctx.fillStyle = '#eab308';
     for (const d of this.destructibleManager.objects) {
       if (d.active) {
@@ -717,7 +760,7 @@ export class Game {
       }
     }
 
-    // Nearby Zombies as small red dots
+    // Zombie red pings
     ctx.fillStyle = '#ef4444';
     for (const z of this.zombieManager.zombies) {
       if (z.active) {
@@ -725,11 +768,31 @@ export class Game {
       }
     }
 
-    // Player as bright green/cyan dot
+    // Player bright green blip with crosshair
+    const px = mx + this.player.x * scaleX;
+    const py = my + this.player.y * scaleY;
     ctx.fillStyle = '#22c55e';
     ctx.beginPath();
-    ctx.arc(mx + this.player.x * scaleX, my + this.player.y * scaleY, 3, 0, Math.PI * 2);
+    ctx.arc(px, py, 2.5, 0, Math.PI * 2);
     ctx.fill();
+
+    // Subtle sweeping radar line
+    const sweepAngle = (performance.now() * 0.0018) % (Math.PI * 2);
+    ctx.strokeStyle = 'rgba(34, 197, 94, 0.28)';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.lineTo(cx + Math.cos(sweepAngle) * rad, cy + Math.sin(sweepAngle) * rad);
+    ctx.stroke();
+
+    ctx.restore(); // end clip
+
+    // Inner dark rim ring
+    ctx.beginPath();
+    ctx.arc(cx, cy, rad, 0, Math.PI * 2);
+    ctx.strokeStyle = '#2d313d';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
 
     ctx.restore();
   }

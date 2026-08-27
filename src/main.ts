@@ -58,29 +58,17 @@ window.addEventListener('DOMContentLoaded', () => {
 
   // Initialize Game
   const game = new Game(canvas, (state) => {
-    // 1. Top-Left: Player Health Bar
+    // 1. Health Bar & Orb
     const hpPercent = Math.max(0, Math.min(100, (state.health / state.maxHealth) * 100));
     healthBarFill.style.width = `${hpPercent}%`;
-    healthBarText.textContent = `${Math.ceil(state.health)} / ${state.maxHealth}`;
+    healthBarText.textContent = `${Math.ceil(state.health)}`;
 
-    if (hpPercent < 30) {
-      healthBarFill.style.background = 'linear-gradient(90deg, #b91c1c 0%, #ef4444 100%)';
-    } else if (hpPercent < 60) {
-      healthBarFill.style.background = 'linear-gradient(90deg, #d97706 0%, #f59e0b 100%)';
-    } else {
-      healthBarFill.style.background = 'linear-gradient(90deg, #15803d 0%, #22c55e 100%)';
-    }
-
-    // 2. Top-Left: Current Weapon & Ammo Count
+    // 2. Weapon & Ammo in Bottom-Right Terminal
     currentWeaponBadge.textContent = state.currentWeapon.name;
-    currentAmmoBadge.textContent = `AMMO: ${state.ammoDisplay}`;
+    currentAmmoBadge.textContent = state.ammoDisplay;
 
-    // 3. Top-Center: Sector & Wave
-    const sectorVal = document.getElementById('sector-val');
-    if (sectorVal) {
-      sectorVal.textContent = state.roomName;
-    }
-    waveVal.textContent = `WAVE ${state.wave}`;
+    // 3. Top-Right: Wave
+    waveVal.textContent = `${state.wave}`;
 
     // 4. Top-Right: Killed Enemy Count, High Score, Score
     killCount.textContent = state.kills.toLocaleString();
