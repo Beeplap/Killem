@@ -1,9 +1,9 @@
 extends Node3D
 
 @onready var player: CharacterBody3D = $Player3D
-@onready var radio_tower: RadioTower = $RadioTower
-@onready var boss_trigger: BossArenaController = $BossArenaTrigger
-@onready var extraction_zone: ExtractionZone = $ExtractionZone
+@onready var radio_tower: Node3D = $RadioTower
+@onready var boss_trigger: Node3D = $BossArenaTrigger
+@onready var extraction_zone: Node3D = $ExtractionZone
 @onready var enemies_container: Node3D = $Enemies
 
 var siege_started: bool = false

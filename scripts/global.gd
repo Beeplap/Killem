@@ -11,10 +11,14 @@ signal wave_started(wave_num: int)
 signal player_died
 signal player_fired
 signal explosion_occurred
-
-var keycards_collected: Array[String] = []
 signal keycard_collected(color: String)
 signal objective_completed(obj_id: String)
+signal perk_unlocked(perk_name: String, description: String)
+signal roll_cooldown_updated(current: float, max_val: float)
+signal deployables_updated(wires: int, mines: int, turrets: int)
+
+# Core State
+var keycards_collected: Array[String] = []
 var score: int = 0
 var kills: int = 0
 var current_wave: int = 1
@@ -44,10 +48,6 @@ var perk_armor_plating: bool = false
 var deployable_barbed_wire: int = 2
 var deployable_claymores: int = 2
 var deployable_turrets: int = 1
-
-signal perk_unlocked(perk_name: String, description: String)
-signal roll_cooldown_updated(current: float, max_val: float)
-signal deployables_updated(wires: int, mines: int, turrets: int)
 
 var hitstop_active: bool = false
 
@@ -327,4 +327,3 @@ func collect_keycard(color: String) -> void:
 
 func has_keycard(color: String) -> bool:
 	return color in keycards_collected
-

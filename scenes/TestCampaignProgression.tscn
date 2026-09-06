@@ -1,0 +1,133 @@
+[gd_scene load_steps=2 format=3]
+
+[sub_resource type="GDScript" id="GDScript_test_campaign"]
+script/source = "extends Node3D
+
+func _ready() -> void:
+	print('=== RUNNING MULTI-LEVEL CAMPAIGN ARCHITECTURE & SCENE SWITCHER VERIFICATION ===')
+	
+	# 1. Verify CampaignManager Autoload
+	var mgr = get_node_or_null('/root/CampaignManager')
+	assert(mgr != null, 'CampaignManager must be registered as autoload singleton')
+	assert(mgr.LEVELS.size() == 3, 'Must have 3 campaign levels registered')
+	print('✔ Autoload CampaignManager registered and active')
+	
+	# 2. Verify Level Registry & Metadata
+	var lvl1 = mgr.LEVELS[0]
+	assert(lvl1.id == 'level_01', 'Level 1 ID must match')
+	assert(lvl1.name == 'Level 1 - Quarantine Rail Depot', 'Level 1 name must match')
+	assert(lvl1.objectives.size() == 3, 'Level 1 must have 3 objectives')
+	
+	var lvl2 = mgr.LEVELS[1]
+	assert(lvl2.id == 'level_02', 'Level 2 ID must match')
+	assert(lvl2.name == 'Level 2 - Subterranean Research Labs', 'Level 2 name must match')
+	
+	var lvl3 = mgr.LEVELS[2]
+	assert(lvl3.id == 'level_03', 'Level 3 ID must match')
+	assert(lvl3.name == 'Level 3 - Fallen Metropolitan Core', 'Level 3 name must match')
+	print('✔ Level Registry: All 3 campaign levels & objectives definitions verified')
+	
+	# 3. Test Level 1 Objectives Tracking
+	mgr.start_mission(0)
+	assert(mgr.current_level_index == 0, 'Current level index must be 0')
+	assert(mgr.are_all_objectives_complete() == false, 'Objectives must not be complete initially')
+	
+	# Complete battery cells
+	mgr.update_objective('battery_cells', 1)
+	assert(mgr.active_objectives[0].current == 1 and not mgr.active_objectives[0].completed)
+	mgr.update_objective('battery_cells', 1)
+	assert(mgr.active_objectives[0].current == 2 and mgr.active_objectives[0].completed)
+	
+	# Complete rail switch
+	mgr.update_objective('rail_switch', 1)
+	assert(mgr.active_objectives[1].completed == true)
+	
+	# Complete boss elimination
+	mgr.update_objective('defeat_boss', 1)
+	assert(mgr.active_objectives[2].completed == true)
+	assert(mgr.are_all_objectives_complete() == true, 'All Level 1 objectives must be marked complete')
+	print('✔ Objective Progression: Battery cells (2/2), rail switch, and boss defeat verified')
+	
+	# 4. Test Extraction Zone Unlocking
+	var evac_scene = load('res://scenes/mechanics/ExtractionZone.tscn')
+	var evac = evac_scene.instantiate()
+	add_child(evac)
+	evac.check_unlock_condition()
+	assert(evac.is_unlocked == true, 'ExtractionZone must unlock when all objectives are complete')
+	assert(evac.beacon_light.light_color == Color(0.1, 1.0, 0.45), 'Beacon light must turn green')
+	assert(evac.flare_particles.emitting == true, 'Signal flare must ignite')
+	print('✔ Extraction Zone: Green landing beacon, signal flare, and unlock state verified')
+	
+	# 5. Test Mission Summary Statistics
+	mgr.record_shot_fired()
+	mgr.record_shot_fired()
+	mgr.record_shot_hit()
+	mgr.record_kill()
+	mgr.record_kill()
+	var summary = mgr.get_mission_summary()
+	assert(summary.kills == 2, 'Summary kills must match')
+	assert(summary.accuracy == 50.0, 'Accuracy with 1 hit / 2 shots must be 50.0%')
+	assert(summary.time_formatted != '', 'Formatted time must be generated')
+	print('✔ Mission Summary: Kills, time elapsed, 50.0% accuracy calculation verified')
+	
+	# 6. Test Persistent Player Inventory Across Stages
+	Global.shotgun_ammo = 42
+	Global.rifle_ammo = 185
+	Global.flamethrower_fuel = 210
+	Global.minigun_ammo = 450
+	Global.player_health = 85.0
+	Global.perk_full_auto = true
+	Global.perk_extended_mags = true
+	
+	mgr.save_player_state()
+	assert(mgr.saved_shotgun_ammo == 42)
+	assert(mgr.saved_rifle_ammo == 185)
+	assert(mgr.saved_flame_fuel == 210)
+	assert(mgr.saved_minigun_ammo == 450)
+	assert(mgr.saved_player_health == 85.0)
+	assert(mgr.saved_perk_full_auto == true)
+	
+	# Reset Global to defaults
+	Global.shotgun_ammo = 0
+	Global.rifle_ammo = 0
+	Global.player_health = 20.0
+	Global.perk_full_auto = false
+	
+	# Restore state
+	mgr.restore_player_state()
+	assert(Global.shotgun_ammo == 42, 'Shotgun ammo must be restored')
+	assert(Global.rifle_ammo == 185, 'Rifle ammo must be restored')
+	assert(Global.player_health == 85.0, 'Player health must be restored')
+	assert(Global.perk_full_auto == true, 'Perks must be restored')
+	print('✔ Inventory & Weapon Persistence: Ammo, vitals, and perks restored across stages')
+	
+	# 7. Test Level 2 Progression
+	mgr.start_mission(1)
+	assert(mgr.current_level_index == 1)
+	assert(mgr.active_objectives.size() == 3)
+	mgr.update_objective('purge_leaks', 2)
+	mgr.update_objective('master_keycard', 1)
+	mgr.update_objective('defeat_boss', 1)
+	assert(mgr.are_all_objectives_complete() == true)
+	print('✔ Level 2 Progression: Chemical valves (2/2), keycard, and Goliath defeated verified')
+	
+	# 8. Test Level 3 Progression & Final Victory
+	mgr.start_mission(2)
+	assert(mgr.current_level_index == 2)
+	mgr.update_objective('radio_tower', 1)
+	mgr.update_objective('survive_siege', 1)
+	mgr.update_objective('defeat_boss', 1)
+	assert(mgr.are_all_objectives_complete() == true)
+	var final_summary = mgr.get_mission_summary()
+	assert(final_summary.is_final_level == true, 'Level 3 must be flagged as final level')
+	print('✔ Level 3 Progression: Radio SOS, Titan Siege survival, and campaign completion verified')
+	
+	# Cleanup
+	evac.queue_free()
+	
+	print('=== ALL 8 MULTI-LEVEL CAMPAIGN CHECKS PASSED PERFECTLY! ===')
+	get_tree().quit(0)
+"
+
+[node name="TestCampaignProgression" type="Node3D"]
+script = SubResource("GDScript_test_campaign")
