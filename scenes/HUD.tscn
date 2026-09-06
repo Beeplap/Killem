@@ -70,15 +70,6 @@ corner_radius_bottom_left = 6
 [node name="HUD" type="CanvasLayer"]
 script = ExtResource("1_hud")
 
-[node name="PostProcessVignette" type="ColorRect" parent="."]
-material = SubResource("ShaderMaterial_postprocess")
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-
 [node name="ScoreContainer" type="PanelContainer" parent="."]
 offset_left = 24.0
 offset_top = 20.0

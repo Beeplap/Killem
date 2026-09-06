@@ -1,11 +1,11 @@
-﻿shader_type canvas_item;
+shader_type canvas_item;
 
 uniform float ray_speed : hint_range(0.01, 0.5) = 0.06;
 uniform float ray_density : hint_range(5.0, 30.0) = 13.5;
 uniform float ray_angle : hint_range(-1.57, 1.57) = -0.52;
 uniform float fog_speed : hint_range(0.01, 0.3) = 0.035;
 uniform float fog_density : hint_range(0.5, 4.0) = 1.7;
-uniform float overall_opacity : hint_range(0.0, 1.0) = 0.22;
+uniform float overall_opacity : hint_range(0.0, 1.0) = 0.08;
 
 uniform vec4 ray_color : source_color = vec4(0.85, 0.90, 0.98, 0.32);
 uniform vec4 fog_color : source_color = vec4(0.60, 0.65, 0.72, 0.18);

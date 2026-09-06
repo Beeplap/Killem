@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3 uid="uid://supplycrate01"]
+[gd_scene format=3 uid="uid://de278qnq00vyy"]
 
 [ext_resource type="Script" path="res://scripts/supply_crate.gd" id="1_crate"]
 [ext_resource type="Texture2D" path="res://assets/textures/props/supply_crate.png" id="2_cratetex"]

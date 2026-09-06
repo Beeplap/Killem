@@ -1,4 +1,4 @@
-[gd_scene load_steps=4 format=3 uid="uid://screamerzombie01"]
+[gd_scene format=3 uid="uid://bxoirdb73fxce"]
 
 [ext_resource type="Script" path="res://scripts/zombie.gd" id="1_zombie"]
 [ext_resource type="Texture2D" path="res://assets/textures/characters/zombie_screamer_8dir.png" id="2_screamertex"]
