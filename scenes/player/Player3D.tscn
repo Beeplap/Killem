@@ -1,9 +1,9 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene load_steps=10 format=3]
 
 [ext_resource type="Script" path="res://scripts/player_3d.gd" id="1_script"]
-[ext_resource type="PackedScene" path="res://assets/models/weapons/Pistol3D.tscn" id="2_pistol"]
-[ext_resource type="PackedScene" path="res://assets/models/weapons/Shotgun3D.tscn" id="3_shotgun"]
-[ext_resource type="PackedScene" path="res://assets/models/weapons/Rifle3D.tscn" id="4_rifle"]
+[ext_resource type="PackedScene" path="res://scenes/weapons/Pistol3D.tscn" id="2_pistol"]
+[ext_resource type="PackedScene" path="res://scenes/weapons/Shotgun3D.tscn" id="3_shotgun"]
+[ext_resource type="PackedScene" path="res://scenes/weapons/AK3D.tscn" id="4_ak"]
 [ext_resource type="PackedScene" path="res://assets/models/weapons/Flamethrower3D.tscn" id="5_flame"]
 [ext_resource type="PackedScene" path="res://assets/models/weapons/Minigun3D.tscn" id="6_minigun"]
 [ext_resource type="ArrayMesh" uid="uid://oyos2rxdbqyt" path="res://assets/models/weapons/swat_operator.obj" id="7_operator_mesh"]
@@ -75,19 +75,22 @@ transform = Transform3D(0.984808, 0, -0.173648, 0, 1, 0, 0.173648, 0, 0.984808, 
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.04, -0.04, 0.16)
 mesh = SubResource("BoxMesh_arm")
 
-[node name="RightHandAttachment" type="Node3D" parent="BodyMesh/TorsoPivot/RightArm"]
+[node name="RightHandSocket" type="Node3D" parent="BodyMesh/TorsoPivot/RightArm"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.08, -0.04, 0.32)
 
-[node name="Pistol3D" parent="BodyMesh/TorsoPivot/RightArm/RightHandAttachment" instance=ExtResource("2_pistol")]
+[node name="Pistol3D" parent="BodyMesh/TorsoPivot/RightArm/RightHandSocket" instance=ExtResource("2_pistol")]
 
-[node name="Shotgun3D" parent="BodyMesh/TorsoPivot/RightArm/RightHandAttachment" instance=ExtResource("3_shotgun")]
+[node name="Shotgun3D" parent="BodyMesh/TorsoPivot/RightArm/RightHandSocket" instance=ExtResource("3_shotgun")]
 visible = false
 
-[node name="Rifle3D" parent="BodyMesh/TorsoPivot/RightArm/RightHandAttachment" instance=ExtResource("4_rifle")]
+[node name="AK3D" parent="BodyMesh/TorsoPivot/RightArm/RightHandSocket" instance=ExtResource("4_ak")]
 visible = false
 
-[node name="Flamethrower3D" parent="BodyMesh/TorsoPivot/RightArm/RightHandAttachment" instance=ExtResource("5_flame")]
+[node name="Flamethrower3D" parent="BodyMesh/TorsoPivot/RightArm/RightHandSocket" instance=ExtResource("5_flame")]
 visible = false
 
-[node name="Minigun3D" parent="BodyMesh/TorsoPivot/RightArm/RightHandAttachment" instance=ExtResource("6_minigun")]
+[node name="Minigun3D" parent="BodyMesh/TorsoPivot/RightArm/RightHandSocket" instance=ExtResource("6_minigun")]
 visible = false
+
+[node name="RightHandAttachment" type="Marker3D" parent="BodyMesh/TorsoPivot/RightArm"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.08, -0.04, 0.32)

@@ -1,0 +1,257 @@
+[gd_scene load_steps=22 format=3]
+
+[ext_resource type="Script" path="res://scripts/weapons/shotgun_3d.gd" id="1_script"]
+[ext_resource type="Material" path="res://assets/materials/weapons/GunmetalSteel.tres" id="2_gunmetal"]
+[ext_resource type="Material" path="res://assets/materials/weapons/TacticalPolymer.tres" id="3_polymer"]
+[ext_resource type="Material" path="res://assets/materials/weapons/BrassShells.tres" id="4_brass"]
+[ext_resource type="Material" path="res://assets/materials/weapons/ShotgunShellRed.tres" id="5_redshell"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_receiver"]
+material = ExtResource("2_gunmetal")
+size = Vector3(0.04, 0.056, 0.2)
+
+[sub_resource type="BoxMesh" id="BoxMesh_rec_rib"]
+material = ExtResource("2_gunmetal")
+size = Vector3(0.014, 0.008, 0.2)
+
+[sub_resource type="BoxMesh" id="BoxMesh_guard"]
+material = ExtResource("3_polymer")
+size = Vector3(0.016, 0.024, 0.05)
+
+[sub_resource type="BoxMesh" id="BoxMesh_trigger"]
+material = ExtResource("2_gunmetal")
+size = Vector3(0.006, 0.018, 0.008)
+
+[sub_resource type="BoxMesh" id="BoxMesh_wrist"]
+material = ExtResource("3_polymer")
+size = Vector3(0.034, 0.08, 0.065)
+
+[sub_resource type="BoxMesh" id="BoxMesh_stock"]
+material = ExtResource("3_polymer")
+size = Vector3(0.036, 0.09, 0.24)
+
+[sub_resource type="BoxMesh" id="BoxMesh_buttpad"]
+material = ExtResource("3_polymer")
+size = Vector3(0.04, 0.1, 0.02)
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_barrel"]
+material = ExtResource("2_gunmetal")
+top_radius = 0.013
+bottom_radius = 0.013
+height = 0.56
+
+[sub_resource type="BoxMesh" id="BoxMesh_vent_rib"]
+material = ExtResource("2_gunmetal")
+size = Vector3(0.01, 0.008, 0.54)
+
+[sub_resource type="SphereMesh" id="SphereMesh_bead"]
+material = ExtResource("4_brass")
+radius = 0.004
+height = 0.008
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_mag_tube"]
+material = ExtResource("2_gunmetal")
+top_radius = 0.011
+bottom_radius = 0.011
+height = 0.44
+
+[sub_resource type="BoxMesh" id="BoxMesh_clamp"]
+material = ExtResource("2_gunmetal")
+size = Vector3(0.032, 0.04, 0.016)
+
+[sub_resource type="BoxMesh" id="BoxMesh_saddle_plate"]
+material = ExtResource("3_polymer")
+size = Vector3(0.005, 0.038, 0.12)
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_shell_hull"]
+material = ExtResource("5_redshell")
+top_radius = 0.009
+bottom_radius = 0.009
+height = 0.042
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_shell_base"]
+material = ExtResource("4_brass")
+top_radius = 0.0095
+bottom_radius = 0.0095
+height = 0.01
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_pump_sleeve"]
+material = ExtResource("3_polymer")
+top_radius = 0.018
+bottom_radius = 0.018
+height = 0.16
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_pump_rib"]
+material = ExtResource("3_polymer")
+top_radius = 0.0195
+bottom_radius = 0.0195
+height = 0.012
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_shotgun"]
+direction = Vector3(0, 0, 1)
+spread = 35.0
+initial_velocity_min = 8.0
+initial_velocity_max = 18.0
+gravity = Vector3(0, -5, 0)
+
+[sub_resource type="BoxMesh" id="BoxMesh_spark"]
+material = ExtResource("4_brass")
+size = Vector3(0.01, 0.01, 0.01)
+
+[node name="Shotgun3D" type="Node3D"]
+script = ExtResource("1_script")
+
+[node name="Receiver" type="Node3D" parent="."]
+
+[node name="ReceiverMesh" type="MeshInstance3D" parent="Receiver"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.015, -0.02)
+mesh = SubResource("BoxMesh_receiver")
+
+[node name="TopRib" type="MeshInstance3D" parent="Receiver"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.047, -0.02)
+mesh = SubResource("BoxMesh_rec_rib")
+
+[node name="TriggerGuard" type="MeshInstance3D" parent="Receiver"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.025, -0.04)
+mesh = SubResource("BoxMesh_guard")
+
+[node name="Trigger" type="MeshInstance3D" parent="Receiver"]
+transform = Transform3D(1, 0, 0, 0, 0.980067, 0.198669, 0, -0.198669, 0.980067, 0, -0.02, -0.04)
+mesh = SubResource("BoxMesh_trigger")
+
+[node name="Stock" type="Node3D" parent="."]
+
+[node name="GripWrist" type="MeshInstance3D" parent="Stock"]
+transform = Transform3D(1, 0, 0, 0, 0.965926, 0.258819, 0, -0.258819, 0.965926, 0, -0.04, -0.1)
+mesh = SubResource("BoxMesh_wrist")
+
+[node name="ShoulderStock" type="MeshInstance3D" parent="Stock"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.035, -0.24)
+mesh = SubResource("BoxMesh_stock")
+
+[node name="RubberButtpad" type="MeshInstance3D" parent="Stock"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.035, -0.365)
+mesh = SubResource("BoxMesh_buttpad")
+
+[node name="BarrelAssembly" type="Node3D" parent="."]
+
+[node name="MainBarrel" type="MeshInstance3D" parent="BarrelAssembly"]
+transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 0, 0.032, 0.28)
+mesh = SubResource("CylinderMesh_barrel")
+
+[node name="VentedTopRib" type="MeshInstance3D" parent="BarrelAssembly"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.049, 0.28)
+mesh = SubResource("BoxMesh_vent_rib")
+
+[node name="BeadSight" type="MeshInstance3D" parent="BarrelAssembly"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.055, 0.54)
+mesh = SubResource("SphereMesh_bead")
+
+[node name="MagTube" type="MeshInstance3D" parent="BarrelAssembly"]
+transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 0, 0.008, 0.22)
+mesh = SubResource("CylinderMesh_mag_tube")
+
+[node name="ClampRing" type="MeshInstance3D" parent="BarrelAssembly"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.02, 0.43)
+mesh = SubResource("BoxMesh_clamp")
+
+[node name="SideSaddle" type="Node3D" parent="."]
+
+[node name="Plate" type="MeshInstance3D" parent="SideSaddle"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.023, 0.016, -0.02)
+mesh = SubResource("BoxMesh_saddle_plate")
+
+[node name="Shell1" type="Node3D" parent="SideSaddle"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.032, 0.016, -0.065)
+
+[node name="Hull" type="MeshInstance3D" parent="SideSaddle/Shell1"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.005, 0)
+mesh = SubResource("CylinderMesh_shell_hull")
+
+[node name="Base" type="MeshInstance3D" parent="SideSaddle/Shell1"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.02, 0)
+mesh = SubResource("CylinderMesh_shell_base")
+
+[node name="Shell2" type="Node3D" parent="SideSaddle"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.032, 0.016, -0.035)
+
+[node name="Hull" type="MeshInstance3D" parent="SideSaddle/Shell2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.005, 0)
+mesh = SubResource("CylinderMesh_shell_hull")
+
+[node name="Base" type="MeshInstance3D" parent="SideSaddle/Shell2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.02, 0)
+mesh = SubResource("CylinderMesh_shell_base")
+
+[node name="Shell3" type="Node3D" parent="SideSaddle"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.032, 0.016, -0.005)
+
+[node name="Hull" type="MeshInstance3D" parent="SideSaddle/Shell3"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.005, 0)
+mesh = SubResource("CylinderMesh_shell_hull")
+
+[node name="Base" type="MeshInstance3D" parent="SideSaddle/Shell3"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.02, 0)
+mesh = SubResource("CylinderMesh_shell_base")
+
+[node name="Shell4" type="Node3D" parent="SideSaddle"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.032, 0.016, 0.025)
+
+[node name="Hull" type="MeshInstance3D" parent="SideSaddle/Shell4"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.005, 0)
+mesh = SubResource("CylinderMesh_shell_hull")
+
+[node name="Base" type="MeshInstance3D" parent="SideSaddle/Shell4"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.02, 0)
+mesh = SubResource("CylinderMesh_shell_base")
+
+[node name="Pump" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.008, 0.26)
+
+[node name="PumpSleeve" type="MeshInstance3D" parent="Pump"]
+transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 0, 0, 0)
+mesh = SubResource("CylinderMesh_pump_sleeve")
+
+[node name="PumpRib1" type="MeshInstance3D" parent="Pump"]
+transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 0, 0, -0.05)
+mesh = SubResource("CylinderMesh_pump_rib")
+
+[node name="PumpRib2" type="MeshInstance3D" parent="Pump"]
+transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 0, 0, -0.025)
+mesh = SubResource("CylinderMesh_pump_rib")
+
+[node name="PumpRib3" type="MeshInstance3D" parent="Pump"]
+transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 0, 0, 0)
+mesh = SubResource("CylinderMesh_pump_rib")
+
+[node name="PumpRib4" type="MeshInstance3D" parent="Pump"]
+transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 0, 0, 0.025)
+mesh = SubResource("CylinderMesh_pump_rib")
+
+[node name="PumpRib5" type="MeshInstance3D" parent="Pump"]
+transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 0, 0, 0.05)
+mesh = SubResource("CylinderMesh_pump_rib")
+
+[node name="Muzzle" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.032, 0.56)
+
+[node name="MuzzleFlash" type="OmniLight3D" parent="Muzzle"]
+visible = false
+light_color = Color(1, 0.75, 0.3, 1)
+light_energy = 4.0
+omni_range = 5.0
+
+[node name="MuzzleParticles" type="GPUParticles3D" parent="Muzzle"]
+emitting = false
+amount = 24
+lifetime = 0.08
+one_shot = true
+explosiveness = 1.0
+process_material = SubResource("ParticleProcessMaterial_shotgun")
+draw_pass_1 = SubResource("BoxMesh_spark")
+
+[node name="MuzzleMarker" type="Marker3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.032, 0.56)
+
+[node name="EjectionPort" type="Marker3D" parent="."]
+transform = Transform3D(0.866025, 0, 0.5, 0, 1, 0, -0.5, 0, 0.866025, 0.025, 0.022, 0.02)

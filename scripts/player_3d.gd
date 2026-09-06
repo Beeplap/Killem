@@ -42,21 +42,36 @@ var trauma: float = 0.0
 @onready var camera: Camera3D = get_node_or_null("CameraMount/Camera3D")
 @onready var torso_pivot: Node3D = get_node_or_null("BodyMesh/TorsoPivot")
 @onready var head_pivot: Node3D = get_node_or_null("BodyMesh/TorsoPivot/HeadPivot")
-@onready var right_hand_attachment: Node3D = get_node_or_null("BodyMesh/TorsoPivot/RightArm/RightHandAttachment")
+@onready var right_hand_socket: Node3D = get_node_or_null("BodyMesh/TorsoPivot/RightArm/RightHandSocket")
+@onready var right_hand_attachment: Node3D = right_hand_socket if right_hand_socket else get_node_or_null("BodyMesh/TorsoPivot/RightArm/RightHandAttachment")
 @onready var flashlight: SpotLight3D = get_node_or_null("BodyMesh/TorsoPivot/Flashlight")
 @onready var step_ray_low: RayCast3D = get_node_or_null("StepRayLow")
 @onready var step_ray_high: RayCast3D = get_node_or_null("StepRayHigh")
 
 # Weapons Nodes
-@onready var weapon_pistol: Node3D = get_node_or_null("BodyMesh/TorsoPivot/RightArm/RightHandAttachment/Pistol3D")
-@onready var weapon_shotgun: Node3D = get_node_or_null("BodyMesh/TorsoPivot/RightArm/RightHandAttachment/Shotgun3D")
-@onready var weapon_rifle: Node3D = get_node_or_null("BodyMesh/TorsoPivot/RightArm/RightHandAttachment/Rifle3D")
-@onready var weapon_flame: Node3D = get_node_or_null("BodyMesh/TorsoPivot/RightArm/RightHandAttachment/Flamethrower3D")
-@onready var weapon_minigun: Node3D = get_node_or_null("BodyMesh/TorsoPivot/RightArm/RightHandAttachment/Minigun3D")
+@onready var weapon_pistol: Node3D = _find_weapon_node("Pistol3D")
+@onready var weapon_shotgun: Node3D = _find_weapon_node("Shotgun3D")
+@onready var weapon_ak: Node3D = _find_weapon_node("AK3D")
+@onready var weapon_rifle: Node3D = weapon_ak if weapon_ak else _find_weapon_node("Rifle3D")
+@onready var weapon_flame: Node3D = _find_weapon_node("Flamethrower3D")
+@onready var weapon_minigun: Node3D = _find_weapon_node("Minigun3D")
 
 var default_hand_pos: Vector3 = Vector3.ZERO
+var default_hand_rot: Vector3 = Vector3.ZERO
+var current_recoil_offset_z: float = 0.0
+var current_recoil_pitch_x: float = 0.0
+var _equip_tween: Tween
 var _footstep_dist: float = 0.0
 const PROJECTILE_SCENE = preload("res://scenes/entities/Projectile3D.tscn")
+
+func _find_weapon_node(w_name: String) -> Node3D:
+	if right_hand_socket:
+		var n = right_hand_socket.get_node_or_null(w_name)
+		if n: return n
+	if right_hand_attachment:
+		var n = right_hand_attachment.get_node_or_null(w_name)
+		if n: return n
+	return null
 
 func _ready() -> void:
 	add_to_group("player")
@@ -65,8 +80,10 @@ func _ready() -> void:
 	floor_snap_length = step_height
 	floor_max_angle = deg_to_rad(45.0)
 	
-	if right_hand_attachment:
-		default_hand_pos = right_hand_attachment.position
+	var hand_node = right_hand_socket if right_hand_socket else right_hand_attachment
+	if hand_node:
+		default_hand_pos = hand_node.position
+		default_hand_rot = hand_node.rotation
 	
 	switch_weapon(WeaponType3D.PISTOL)
 
@@ -256,23 +273,56 @@ func handle_shooting(delta: float) -> void:
 	if can_fire:
 		fire_current_weapon()
 
+func get_active_muzzle_socket() -> Node3D:
+	var active_w = get_active_weapon_node()
+	if not active_w:
+		return null
+	var muzzle = active_w.get_node_or_null("Muzzle")
+	if muzzle:
+		return muzzle
+	var legacy_marker = active_w.get_node_or_null("MuzzleMarker")
+	if legacy_marker:
+		return legacy_marker
+	return null
+
+func get_active_muzzle_position() -> Vector3:
+	var active_w = get_active_weapon_node()
+	if not active_w:
+		return global_position + aim_direction * 0.8 + Vector3(0, 1.1, 0)
+	if active_w.has_method("get_muzzle_position"):
+		return active_w.get_muzzle_position()
+	var muzzle = get_active_muzzle_socket()
+	if muzzle:
+		return muzzle.global_position
+	return global_position + aim_direction * 0.8 + Vector3(0, 1.1, 0)
+
+func apply_hand_recoil(kick_z: float, pitch_x: float) -> void:
+	current_recoil_offset_z += kick_z
+	current_recoil_pitch_x += pitch_x
+	current_recoil_offset_z = clampf(current_recoil_offset_z, -0.16, 0.0)
+	current_recoil_pitch_x = clampf(current_recoil_pitch_x, -0.28, 0.0)
+
 func fire_current_weapon() -> void:
 	var active_w = get_active_weapon_node()
 	if active_w == null:
 		return
 	
-	var muzzle: Marker3D = active_w.get_node_or_null("MuzzleMarker")
-	var spawn_pos: Vector3 = muzzle.global_position if muzzle else global_position + aim_direction * 0.8 + Vector3(0, 1.1, 0)
+	var spawn_pos: Vector3 = get_active_muzzle_position()
 	
 	# Flash light for 0.05s
 	set_active_muzzle_flash(true)
 	muzzle_flash_timer = 0.05
+	
+	# Trigger procedural moving parts on weapon model (slide blowback, pump cycle, bolt cycle)
+	if active_w.has_method("fire"):
+		active_w.fire()
 	
 	match current_weapon:
 		WeaponType3D.PISTOL:
 			spawn_projectile(spawn_pos, aim_direction, 38.0, 48.0, 1.8, 0)
 			fire_cooldown = 0.22
 			recoil_kick = 0.055
+			apply_hand_recoil(-0.045, -0.09)
 			add_trauma(0.12)
 			PlayerShooting.play_weapon_fire_audio("pistol", spawn_pos)
 		
@@ -286,6 +336,7 @@ func fire_current_weapon() -> void:
 				spawn_projectile(spawn_pos, pellet_dir, 22.0, 40.0, 0.85, 1)
 			fire_cooldown = 0.72
 			recoil_kick = 0.13
+			apply_hand_recoil(-0.095, -0.16)
 			add_trauma(0.42)
 			PlayerShooting.play_weapon_fire_audio("shotgun", spawn_pos)
 		
@@ -295,6 +346,7 @@ func fire_current_weapon() -> void:
 			spawn_projectile(spawn_pos, spread_dir, 32.0, 56.0, 1.8, 0)
 			fire_cooldown = 0.092
 			recoil_kick = 0.045
+			apply_hand_recoil(-0.038, -0.065)
 			# Screen shake removed completely for Assault Rifle / AK
 			PlayerShooting.play_weapon_fire_audio("rifle", spawn_pos)
 		
@@ -305,6 +357,7 @@ func fire_current_weapon() -> void:
 			spawn_projectile(spawn_pos, flame_dir, 18.0, 22.0, 0.75, 2)
 			fire_cooldown = 0.055
 			recoil_kick = 0.02
+			apply_hand_recoil(-0.015, -0.02)
 			add_trauma(0.08)
 			PlayerShooting.play_weapon_fire_audio("flame", spawn_pos)
 		
@@ -314,6 +367,7 @@ func fire_current_weapon() -> void:
 			spawn_projectile(spawn_pos, minigun_dir, 28.0, 62.0, 1.8, 3)
 			fire_cooldown = 0.052
 			recoil_kick = 0.038
+			apply_hand_recoil(-0.028, -0.04)
 			add_trauma(0.19)
 			PlayerShooting.play_weapon_fire_audio("minigun_fire", spawn_pos)
 
@@ -329,24 +383,34 @@ func spawn_projectile(pos: Vector3, dir: Vector3, dmg: float, spd: float, life: 
 func set_active_muzzle_flash(enabled: bool) -> void:
 	var active_w = get_active_weapon_node()
 	if active_w:
-		var flash: OmniLight3D = active_w.get_node_or_null("MuzzleFlash")
+		var flash: OmniLight3D = active_w.get_node_or_null("Muzzle/MuzzleFlash")
+		if not flash:
+			flash = active_w.get_node_or_null("MuzzleFlash")
 		if flash:
 			flash.visible = enabled
 
 func update_weapon_recoil(delta: float) -> void:
-	if recoil_kick > 0.0 and right_hand_attachment:
-		recoil_kick = move_toward(recoil_kick, 0.0, delta * 1.8)
-		right_hand_attachment.position.z = default_hand_pos.z + recoil_kick
-		right_hand_attachment.rotation.x = -recoil_kick * 1.4
-	elif right_hand_attachment:
-		right_hand_attachment.position = default_hand_pos
-		right_hand_attachment.rotation.x = 0.0
+	var hand_node = right_hand_socket if right_hand_socket else right_hand_attachment
+	if not hand_node:
+		return
+	
+	# Smooth damp / lerp calculation back to rest position
+	current_recoil_offset_z = lerpf(current_recoil_offset_z, 0.0, delta * 16.0)
+	current_recoil_pitch_x = lerpf(current_recoil_pitch_x, 0.0, delta * 18.0)
+	recoil_kick = move_toward(recoil_kick, 0.0, delta * 1.8)
+	
+	if _equip_tween and _equip_tween.is_valid():
+		return
+	
+	hand_node.position = default_hand_pos + Vector3(0, 0, current_recoil_offset_z)
+	hand_node.rotation.x = default_hand_rot.x + current_recoil_pitch_x
 
 func switch_weapon(weapon_type: WeaponType3D) -> void:
 	current_weapon = weapon_type
 	if weapon_pistol: weapon_pistol.visible = (weapon_type == WeaponType3D.PISTOL)
 	if weapon_shotgun: weapon_shotgun.visible = (weapon_type == WeaponType3D.SHOTGUN)
-	if weapon_rifle: weapon_rifle.visible = (weapon_type == WeaponType3D.ASSAULT_RIFLE)
+	if weapon_ak: weapon_ak.visible = (weapon_type == WeaponType3D.ASSAULT_RIFLE)
+	elif weapon_rifle: weapon_rifle.visible = (weapon_type == WeaponType3D.ASSAULT_RIFLE)
 	if weapon_flame: weapon_flame.visible = (weapon_type == WeaponType3D.FLAMETHROWER)
 	if weapon_minigun: weapon_minigun.visible = (weapon_type == WeaponType3D.MINIGUN)
 	
@@ -354,12 +418,22 @@ func switch_weapon(weapon_type: WeaponType3D) -> void:
 		WeaponType3D.PISTOL: Global.set_weapon(Global.WeaponType.PISTOL)
 		WeaponType3D.SHOTGUN: Global.set_weapon(Global.WeaponType.SHOTGUN)
 		WeaponType3D.ASSAULT_RIFLE: Global.set_weapon(Global.WeaponType.ASSAULT_RIFLE)
+	
+	# Equip transition: slight weapon draw dip and return via Tween
+	var hand_node = right_hand_socket if right_hand_socket else right_hand_attachment
+	if hand_node and is_inside_tree():
+		if _equip_tween and _equip_tween.is_valid():
+			_equip_tween.kill()
+		_equip_tween = create_tween()
+		var dip_pos = default_hand_pos + Vector3(0, -0.07, -0.04)
+		_equip_tween.tween_property(hand_node, "position", dip_pos, 0.08).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+		_equip_tween.tween_property(hand_node, "position", default_hand_pos, 0.12).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
 
 func get_active_weapon_node() -> Node3D:
 	match current_weapon:
 		WeaponType3D.PISTOL: return weapon_pistol
 		WeaponType3D.SHOTGUN: return weapon_shotgun
-		WeaponType3D.ASSAULT_RIFLE: return weapon_rifle
+		WeaponType3D.ASSAULT_RIFLE: return weapon_ak if weapon_ak else weapon_rifle
 		WeaponType3D.FLAMETHROWER: return weapon_flame
 		WeaponType3D.MINIGUN: return weapon_minigun
 	return weapon_pistol
