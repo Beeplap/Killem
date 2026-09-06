@@ -247,6 +247,7 @@ func play_sound(sound_name: String, pos = null, bus_override: String = "") -> No
 		# 3D Positional Audio
 		var player3d = _pool_3d[_idx_3d]
 		_idx_3d = (_idx_3d + 1) % POOL_SIZE_3D
+		player3d.volume_db = 0.0
 		player3d.bus = bus
 		player3d.stream = stream
 		player3d.global_position = pos
@@ -256,6 +257,7 @@ func play_sound(sound_name: String, pos = null, bus_override: String = "") -> No
 		# 2D Positional Audio
 		var player2d = _pool_2d[_idx_2d]
 		_idx_2d = (_idx_2d + 1) % POOL_SIZE_2D
+		player2d.volume_db = 0.0
 		player2d.bus = bus
 		player2d.stream = stream
 		player2d.global_position = pos
@@ -265,6 +267,7 @@ func play_sound(sound_name: String, pos = null, bus_override: String = "") -> No
 		# Non-positional UI / HUD Audio
 		var player_ui = _pool_ui[_idx_ui]
 		_idx_ui = (_idx_ui + 1) % POOL_SIZE_UI
+		player_ui.volume_db = 0.0
 		player_ui.bus = bus
 		player_ui.stream = stream
 		player_ui.play()
@@ -320,13 +323,15 @@ func play_weapon_foley(cue_name: String, pos = null) -> void:
 func play_footstep(surface_type: String, pos = null) -> void:
 	var sound_name = "footstep_concrete"
 	match surface_type.to_lower():
-		"gravel", "ballast", "dirt":
+		"gravel", "ballast", "dirt", "grass":
 			sound_name = "footstep_gravel"
 		"metal", "tracks", "railway":
 			sound_name = "footstep_metal"
 		_:
 			sound_name = "footstep_concrete"
-	play_sound(sound_name, pos, BUS_FOLEY)
+	var p = play_sound(sound_name, pos, BUS_FOLEY)
+	if p:
+		p.volume_db = -8.0
 
 func stop_all() -> void:
 	for p in _pool_3d:

@@ -171,7 +171,7 @@ func handle_movement(delta: float) -> void:
 	
 	if is_on_floor() and Vector2(velocity.x, velocity.z).length_squared() > 0.5:
 		_footstep_dist += Vector2(velocity.x, velocity.z).length() * delta
-		if _footstep_dist >= 1.65:
+		if _footstep_dist >= 2.4:
 			_footstep_dist = 0.0
 			_play_surface_footstep_3d()
 
@@ -295,7 +295,7 @@ func fire_current_weapon() -> void:
 			spawn_projectile(spawn_pos, spread_dir, 32.0, 56.0, 1.8, 0)
 			fire_cooldown = 0.092
 			recoil_kick = 0.045
-			add_trauma(0.16)
+			# Screen shake removed completely for Assault Rifle / AK
 			PlayerShooting.play_weapon_fire_audio("rifle", spawn_pos)
 		
 		WeaponType3D.FLAMETHROWER:

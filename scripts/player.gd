@@ -107,7 +107,7 @@ func _unhandled_input(event: InputEvent) -> void:
 			cycle_deployable()
 
 var footstep_distance_traveled: float = 0.0
-const FOOTSTEP_STRIDE_LENGTH: float = 52.0
+const FOOTSTEP_STRIDE_LENGTH: float = 110.0
 
 func cycle_deployable() -> void:
 	active_deployable_type = (active_deployable_type + 1) % 3
@@ -397,7 +397,7 @@ func fire_weapon() -> void:
 			if bullet_pool:
 				bullet_pool.spawn_bullet(spawn_pos, base_dir.rotated(spread), 32.0, 1050.0, 1.8)
 			fire_cooldown = 0.095
-			add_trauma(0.18)
+			# Screen shake removed completely for Assault Rifle / AK
 			if tactical_crosshair:
 				tactical_crosshair.add_bloom(9.5)
 			PlayerShooting.play_weapon_fire_audio("rifle", global_position)
