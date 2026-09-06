@@ -55,6 +55,7 @@ var trauma: float = 0.0
 @onready var weapon_minigun: Node3D = get_node_or_null("BodyMesh/TorsoPivot/RightArm/RightHandAttachment/Minigun3D")
 
 var default_hand_pos: Vector3 = Vector3.ZERO
+var _footstep_dist: float = 0.0
 const PROJECTILE_SCENE = preload("res://scenes/entities/Projectile3D.tscn")
 
 func _ready() -> void:
@@ -80,6 +81,8 @@ func _unhandled_input(event: InputEvent) -> void:
 		elif event.keycode == KEY_3: switch_weapon(WeaponType3D.ASSAULT_RIFLE)
 		elif event.keycode == KEY_4: switch_weapon(WeaponType3D.FLAMETHROWER)
 		elif event.keycode == KEY_5: switch_weapon(WeaponType3D.MINIGUN)
+		elif event.keycode == KEY_R:
+			PlayerShooting.play_reload_sequence(get_tree(), global_position)
 	
 	# Combat Dodge Dash (Space)
 	if event.is_action_pressed("dodge_roll") or (event is InputEventKey and event.pressed and event.keycode == KEY_SPACE):
@@ -162,10 +165,26 @@ func handle_movement(delta: float) -> void:
 	if not is_on_floor():
 		velocity.y -= 18.0 * delta
 	else:
-		if velocity.y < 0.0:
-			velocity.y = -0.5
+		velocity.y = -0.5
 	
 	move_and_slide()
+	
+	if is_on_floor() and Vector2(velocity.x, velocity.z).length_squared() > 0.5:
+		_footstep_dist += Vector2(velocity.x, velocity.z).length() * delta
+		if _footstep_dist >= 1.65:
+			_footstep_dist = 0.0
+			_play_surface_footstep_3d()
+
+func _play_surface_footstep_3d() -> void:
+	var surface = "concrete"
+	if abs(global_position.z) > 12.0 or abs(global_position.x) > 14.0:
+		surface = "gravel"
+	elif global_position.x > 8.0 and global_position.z < -4.0:
+		surface = "metal"
+	
+	var audio_mgr = get_node_or_null("/root/AudioManager")
+	if audio_mgr and audio_mgr.has_method("play_footstep"):
+		audio_mgr.play_footstep(surface, global_position)
 
 func update_raycast_aiming(delta: float) -> void:
 	var cam: Camera3D = get_viewport().get_camera_3d()
@@ -255,7 +274,7 @@ func fire_current_weapon() -> void:
 			fire_cooldown = 0.22
 			recoil_kick = 0.055
 			add_trauma(0.12)
-			Global.play_sound("pistol")
+			PlayerShooting.play_weapon_fire_audio("pistol", spawn_pos)
 		
 		WeaponType3D.SHOTGUN:
 			# 7 Conical spread pellets
@@ -268,7 +287,7 @@ func fire_current_weapon() -> void:
 			fire_cooldown = 0.72
 			recoil_kick = 0.13
 			add_trauma(0.42)
-			Global.play_sound("shotgun")
+			PlayerShooting.play_weapon_fire_audio("shotgun", spawn_pos)
 		
 		WeaponType3D.ASSAULT_RIFLE:
 			var spread_yaw: float = randf_range(-0.035, 0.035)
@@ -277,7 +296,7 @@ func fire_current_weapon() -> void:
 			fire_cooldown = 0.092
 			recoil_kick = 0.045
 			add_trauma(0.16)
-			Global.play_sound("rifle")
+			PlayerShooting.play_weapon_fire_audio("rifle", spawn_pos)
 		
 		WeaponType3D.FLAMETHROWER:
 			# Expanding flame stream
@@ -287,7 +306,7 @@ func fire_current_weapon() -> void:
 			fire_cooldown = 0.055
 			recoil_kick = 0.02
 			add_trauma(0.08)
-			Global.play_sound("explode")
+			PlayerShooting.play_weapon_fire_audio("flame", spawn_pos)
 		
 		WeaponType3D.MINIGUN:
 			var minigun_yaw: float = randf_range(-0.045, 0.045)
@@ -296,7 +315,7 @@ func fire_current_weapon() -> void:
 			fire_cooldown = 0.052
 			recoil_kick = 0.038
 			add_trauma(0.19)
-			Global.play_sound("rifle")
+			PlayerShooting.play_weapon_fire_audio("minigun_fire", spawn_pos)
 
 func spawn_projectile(pos: Vector3, dir: Vector3, dmg: float, spd: float, life: float, type_idx: int) -> void:
 	var level = get_tree().current_scene

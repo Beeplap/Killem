@@ -1,0 +1,228 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/pause_menu.gd" id="1_script"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel"]
+bg_color = Color(0.06, 0.08, 0.11, 0.96)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.18, 0.75, 0.9, 0.9)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+content_margin_left = 24.0
+content_margin_top = 20.0
+content_margin_right = 24.0
+content_margin_bottom = 20.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn_resume"]
+bg_color = Color(0.12, 0.6, 0.3, 0.9)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.3, 0.9, 0.5, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+content_margin_top = 8.0
+content_margin_bottom = 8.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn_normal"]
+bg_color = Color(0.15, 0.2, 0.26, 0.85)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.3, 0.45, 0.6, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+content_margin_top = 8.0
+content_margin_bottom = 8.0
+
+[node name="PauseMenu" type="CanvasLayer"]
+process_mode = 3
+layer = 100
+script = ExtResource("1_script")
+
+[node name="MenuRoot" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="DimOverlay" type="ColorRect" parent="MenuRoot"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.02, 0.04, 0.06, 0.85)
+
+[node name="Panel" type="PanelContainer" parent="MenuRoot"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -260.0
+offset_top = -250.0
+offset_right = 260.0
+offset_bottom = 250.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
+
+[node name="VBox" type="VBoxContainer" parent="MenuRoot/Panel"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="Title" type="Label" parent="MenuRoot/Panel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.2, 0.85, 1, 1)
+theme_override_font_sizes/font_size = 20
+text = "TACTICAL PAUSE & SETTINGS"
+horizontal_alignment = 1
+
+[node name="Sep1" type="HSeparator" parent="MenuRoot/Panel/VBox"]
+layout_mode = 2
+
+[node name="AudioHeader" type="Label" parent="MenuRoot/Panel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.8, 0.2, 1)
+theme_override_font_sizes/font_size = 14
+text = "AUDIO MIX CONTROLS"
+
+[node name="AudioGrid" type="GridContainer" parent="MenuRoot/Panel/VBox"]
+layout_mode = 2
+theme_override_constants/h_separation = 16
+theme_override_constants/v_separation = 6
+columns = 2
+
+[node name="MasterLabel" type="Label" parent="MenuRoot/Panel/VBox/AudioGrid"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Master Volume"
+
+[node name="MasterSlider" type="HSlider" parent="MenuRoot/Panel/VBox/AudioGrid"]
+custom_minimum_size = Vector2(160, 0)
+layout_mode = 2
+size_flags_vertical = 4
+value = 100.0
+
+[node name="MusicLabel" type="Label" parent="MenuRoot/Panel/VBox/AudioGrid"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Music Volume"
+
+[node name="MusicSlider" type="HSlider" parent="MenuRoot/Panel/VBox/AudioGrid"]
+custom_minimum_size = Vector2(160, 0)
+layout_mode = 2
+size_flags_vertical = 4
+value = 70.0
+
+[node name="WeaponsLabel" type="Label" parent="MenuRoot/Panel/VBox/AudioGrid"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Weapons Volume"
+
+[node name="WeaponsSlider" type="HSlider" parent="MenuRoot/Panel/VBox/AudioGrid"]
+custom_minimum_size = Vector2(160, 0)
+layout_mode = 2
+size_flags_vertical = 4
+value = 100.0
+
+[node name="ZombiesLabel" type="Label" parent="MenuRoot/Panel/VBox/AudioGrid"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Zombies SFX Volume"
+
+[node name="ZombiesSlider" type="HSlider" parent="MenuRoot/Panel/VBox/AudioGrid"]
+custom_minimum_size = Vector2(160, 0)
+layout_mode = 2
+size_flags_vertical = 4
+value = 100.0
+
+[node name="Sep2" type="HSeparator" parent="MenuRoot/Panel/VBox"]
+layout_mode = 2
+
+[node name="GraphicsHeader" type="Label" parent="MenuRoot/Panel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.8, 0.2, 1)
+theme_override_font_sizes/font_size = 14
+text = "VIDEO & EFFECTS"
+
+[node name="GraphicsGrid" type="GridContainer" parent="MenuRoot/Panel/VBox"]
+layout_mode = 2
+theme_override_constants/h_separation = 16
+theme_override_constants/v_separation = 6
+columns = 2
+
+[node name="VsyncLabel" type="Label" parent="MenuRoot/Panel/VBox/GraphicsGrid"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Vertical Sync (V-Sync)"
+
+[node name="VsyncCheck" type="CheckButton" parent="MenuRoot/Panel/VBox/GraphicsGrid"]
+layout_mode = 2
+button_pressed = true
+
+[node name="FullscreenLabel" type="Label" parent="MenuRoot/Panel/VBox/GraphicsGrid"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Exclusive Fullscreen"
+
+[node name="FullscreenCheck" type="CheckButton" parent="MenuRoot/Panel/VBox/GraphicsGrid"]
+layout_mode = 2
+
+[node name="ShakeLabel" type="Label" parent="MenuRoot/Panel/VBox/GraphicsGrid"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Screen Shake Intensity"
+
+[node name="ShakeBox" type="HBoxContainer" parent="MenuRoot/Panel/VBox/GraphicsGrid"]
+layout_mode = 2
+
+[node name="ShakeSlider" type="HSlider" parent="MenuRoot/Panel/VBox/GraphicsGrid/ShakeBox"]
+custom_minimum_size = Vector2(110, 0)
+layout_mode = 2
+size_flags_vertical = 4
+value = 100.0
+
+[node name="ShakeVal" type="Label" parent="MenuRoot/Panel/VBox/GraphicsGrid/ShakeBox"]
+custom_minimum_size = Vector2(42, 0)
+layout_mode = 2
+text = "100%"
+horizontal_alignment = 2
+
+[node name="Sep3" type="HSeparator" parent="MenuRoot/Panel/VBox"]
+layout_mode = 2
+
+[node name="Buttons" type="VBoxContainer" parent="MenuRoot/Panel/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="ResumeButton" type="Button" parent="MenuRoot/Panel/VBox/Buttons"]
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn_resume")
+text = "RESUME OPERATION [ESC]"
+
+[node name="RestartButton" type="Button" parent="MenuRoot/Panel/VBox/Buttons"]
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn_normal")
+text = "RESTART MISSION"
+
+[node name="QuitButton" type="Button" parent="MenuRoot/Panel/VBox/Buttons"]
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn_normal")
+text = "QUIT TO DESKTOP"

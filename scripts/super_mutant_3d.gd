@@ -89,7 +89,7 @@ func trigger_footstep_impact() -> void:
 			var trauma_amount = (1.0 - (d / 18.0)) * 0.12
 			target_player.add_trauma(trauma_amount)
 	if Engine.has_singleton("Global") or "Global" in get_tree().root:
-		Global.play_sound("hit")
+		Global.play_sound("mutant_step", global_position)
 
 func enter_stomp_windup() -> void:
 	current_boss_state = BossState.STOMP_WINDUP
@@ -102,6 +102,8 @@ func enter_stomp_windup() -> void:
 		right_fist.rotation.x = deg_to_rad(-140.0)
 	
 	# Telegraph roar / screenshake
+	if Engine.has_singleton("Global") or "Global" in get_tree().root:
+		Global.play_sound("mutant_roar", global_position)
 	trigger_footstep_impact()
 
 func handle_stomp_windup(delta: float) -> void:
@@ -146,6 +148,9 @@ func execute_ground_stomp() -> void:
 	if target_player and is_instance_valid(target_player) and "add_trauma" in target_player:
 		target_player.add_trauma(0.55)
 	
+	if Engine.has_singleton("Global") or "Global" in get_tree().root:
+		Global.play_sound("stomp_crash", global_position)
+	
 	stomp_cooldown_timer = stomp_cooldown_time
 
 func handle_stomping(delta: float) -> void:
@@ -171,6 +176,8 @@ func enter_rush_prep() -> void:
 	# Lower horns/head forward
 	if mutant_visuals:
 		mutant_visuals.rotation.x = deg_to_rad(15.0)
+	if Engine.has_singleton("Global") or "Global" in get_tree().root:
+		Global.play_sound("mutant_roar", global_position)
 
 func handle_rush_prep(delta: float) -> void:
 	state_timer -= delta
@@ -186,7 +193,7 @@ func enter_rush() -> void:
 	rush_cooldown_timer = rush_cooldown_time
 	
 	if Engine.has_singleton("Global") or "Global" in get_tree().root:
-		Global.play_sound("explode")
+		Global.play_sound("mutant_roar", global_position)
 
 func handle_rushing(delta: float) -> void:
 	state_timer -= delta
@@ -234,6 +241,8 @@ func enter_rush_stun() -> void:
 	find_player()
 	if target_player and is_instance_valid(target_player) and "add_trauma" in target_player:
 		target_player.add_trauma(0.4)
+	if Engine.has_singleton("Global") or "Global" in get_tree().root:
+		Global.play_sound("stomp_crash", global_position)
 
 func handle_rush_stun(delta: float) -> void:
 	state_timer -= delta

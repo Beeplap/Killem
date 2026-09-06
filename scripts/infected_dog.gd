@@ -54,6 +54,24 @@ func _physics_process(delta: float) -> void:
 	var target_pos = player.global_position
 	var dist_to_player = global_position.distance_to(target_pos)
 	
+	# Distance-Based Hibernation (Off-Screen Culling)
+	if dist_to_player > HIBERNATION_DISTANCE:
+		if not is_hibernating:
+			is_hibernating = true
+			if collision_shape:
+				collision_shape.disabled = true
+			if sprite:
+				sprite.visible = false
+		velocity = (target_pos - global_position).normalized() * (speed * 0.75)
+		global_position += velocity * delta
+		return
+	elif is_hibernating:
+		is_hibernating = false
+		if collision_shape:
+			collision_shape.disabled = false
+		if sprite:
+			sprite.visible = true
+	
 	match dog_state:
 		DogState.CHASE:
 			_process_chase(delta, target_pos, dist_to_player)
@@ -80,10 +98,16 @@ func _process_chase(delta: float, target_pos: Vector2, dist_to_player: float) ->
 	var face_dir = (target_pos - global_position).normalized()
 	update_facing(face_dir)
 	
+	# Staggered navigation updates
+	nav_refresh_timer -= delta
+	if nav_refresh_timer <= 0.0:
+		nav_refresh_timer = 0.2 + randf_range(-0.05, 0.05)
+		if nav_agent and is_instance_valid(player):
+			nav_agent.target_position = target_pos
+	
 	# Pathfinding using NavigationAgent2D with direct fallback
 	var move_dir: Vector2 = Vector2.ZERO
 	if nav_agent and not nav_agent.is_navigation_finished():
-		nav_agent.target_position = target_pos
 		var next_path_pos = nav_agent.get_next_path_position()
 		move_dir = (next_path_pos - global_position).normalized()
 	

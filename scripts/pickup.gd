@@ -27,8 +27,11 @@ func _on_body_entered(body: Node2D) -> void:
 	if body.is_in_group("player"):
 		if pickup_type == PickupType.HEALTH:
 			Global.heal_player(health_amount)
+			Global.play_sound("pickup_health", global_position)
 		elif pickup_type == PickupType.AMMO:
 			Global.add_ammo_crate()
+			Global.play_sound("pickup_ammo", global_position)
+		else:
+			Global.play_sound("pickup", global_position)
 		
-		Global.play_sound("pickup")
 		queue_free()

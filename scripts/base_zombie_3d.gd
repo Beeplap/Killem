@@ -188,8 +188,7 @@ func perform_melee_attack() -> void:
 		var dir = (target_player.global_position - global_position).normalized()
 		if target_player.has_method("take_damage"):
 			target_player.take_damage(attack_damage, dir)
-		if Engine.has_singleton("Global") or "Global" in get_tree().root:
-			Global.play_sound("hit")
+		Global.play_sound("zombie_aggro", global_position)
 
 func trigger_hit_flash() -> void:
 	flash_timer = 0.12
@@ -202,6 +201,7 @@ func take_damage(amount: float, knockback_dir: Vector3 = Vector3.ZERO) -> void:
 	
 	current_hp -= amount
 	trigger_hit_flash()
+	Global.play_sound("zombie_hurt", global_position)
 	
 	# Apply knockback scaled by resistance
 	if knockback_dir != Vector3.ZERO and knockback_resistance < 1.0:
@@ -222,11 +222,11 @@ func die(death_dir: Vector3 = Vector3.ZERO) -> void:
 	if collision_shape:
 		collision_shape.set_deferred("disabled", true)
 	
-	# Register kill and score
+	# Register kill, score, and visceral death rattle audio
 	var global_singleton = get_node_or_null("/root/Global")
 	if global_singleton and global_singleton.has_method("add_kill"):
 		global_singleton.add_kill(score_value)
-		global_singleton.play_sound("hit")
+	Global.play_sound("zombie_death", global_position)
 	
 	# Spawn floor blood decal
 	spawn_blood_decal()

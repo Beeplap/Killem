@@ -93,7 +93,7 @@ func start_defense() -> void:
 	_last_wave_time = defense_duration
 	defense_started.emit()
 	generator_defense_wave.emit(1)
-	Global.play_sound("wave_start")
+	Global.play_sound("wave_start", global_position)
 	if _marker:
 		_marker.set("marker_text", "DEFEND GENERATOR")
 		_marker.set("marker_color", Color(1.0, 0.2, 0.2))
@@ -112,7 +112,7 @@ func _process(delta: float) -> void:
 			_last_wave_time = time_remaining
 			_wave_counter += 1
 			generator_defense_wave.emit(_wave_counter)
-			Global.play_sound("zombie_groan")
+			Global.play_sound("zombie_groan", global_position)
 		
 		if time_remaining <= 0.0:
 			complete_defense()
@@ -134,7 +134,7 @@ func complete_defense() -> void:
 	_light.light_energy = 2.5
 	defense_completed.emit()
 	objective_completed.emit()
-	Global.play_sound("wave_clear")
+	Global.play_sound("wave_clear", global_position)
 	
 	if _marker:
 		_marker.queue_free()

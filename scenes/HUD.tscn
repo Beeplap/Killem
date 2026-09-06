@@ -1,8 +1,10 @@
-[gd_scene load_steps=10 format=3 uid="uid://chudscene001"]
+[gd_scene load_steps=12 format=3 uid="uid://chudscene001"]
 
 [ext_resource type="Script" path="res://scripts/hud.gd" id="1_hud"]
 [ext_resource type="Shader" path="res://shaders/post_process.gdshader" id="2_postprocess"]
 [ext_resource type="Script" path="res://scripts/tactical_crosshair.gd" id="3_crosshair"]
+[ext_resource type="PackedScene" path="res://scenes/ui/Minimap.tscn" id="4_minimap"]
+[ext_resource type="PackedScene" path="res://scenes/ui/PauseMenu.tscn" id="5_pause"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_postprocess"]
 shader = ExtResource("2_postprocess")
@@ -331,6 +333,19 @@ theme_override_colors/font_color = Color(0.7, 0.75, 0.8, 1)
 theme_override_font_sizes/font_size = 16
 text = "PRESS [R] OR TAP SCREEN TO RESTART"
 horizontal_alignment = 1
+
+[node name="Minimap" parent="." instance=ExtResource("4_minimap")]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -180.0
+offset_top = 82.0
+offset_right = -20.0
+offset_bottom = 242.0
+grow_horizontal = 0
+
+[node name="PauseMenu" parent="." instance=ExtResource("5_pause")]
 
 [node name="TacticalCrosshair" type="Control" parent="." groups=["crosshair"]]
 layout_mode = 3

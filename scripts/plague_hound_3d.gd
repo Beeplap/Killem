@@ -92,8 +92,7 @@ func enter_prepare_leap() -> void:
 	if eye_light:
 		eye_light.light_energy = 4.0
 	
-	if Engine.has_singleton("Global") or "Global" in get_tree().root:
-		Global.play_sound("hit")
+	Global.play_sound("dog_bark", global_position)
 
 func handle_prepare_leap_state(delta: float) -> void:
 	leap_timer -= delta
@@ -111,6 +110,7 @@ func enter_leaping() -> void:
 	current_state = HoundState.LEAPING
 	leap_timer = leap_duration
 	has_hit_player_in_leap = false
+	Global.play_sound("dog_whoosh", global_position)
 	
 	# Lock leap trajectory
 	if target_player and is_instance_valid(target_player):

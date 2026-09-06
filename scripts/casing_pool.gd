@@ -24,6 +24,10 @@ func _ready() -> void:
 		_casings.append(c)
 
 func spawn_casing(spawn_pos: Vector2, shoot_dir: Vector2) -> void:
+	if Engine.has_singleton("DecalManager") or get_node_or_null("/root/DecalManager"):
+		get_node("/root/DecalManager").spawn_bullet_casing(spawn_pos, shoot_dir)
+		return
+	
 	if _casings.is_empty():
 		return
 	

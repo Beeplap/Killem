@@ -99,7 +99,7 @@ func _on_interaction_progress(progress: float) -> void:
 			current_state = State.HACKING
 			hack_started.emit()
 			room_breach_triggered.emit()
-			Global.play_sound("boss_alarm")
+			Global.play_sound("boss_alarm", global_position)
 			if _marker:
 				_marker.set("marker_text", "HACKING IN PROGRESS")
 				_marker.set("marker_color", Color(1.0, 0.4, 0.1))
@@ -114,7 +114,7 @@ func complete_hack() -> void:
 	current_state = State.COMPLETED
 	hack_progress.emit(1.0)
 	terminal_hacked.emit()
-	Global.play_sound("perk")
+	Global.play_sound("perk", global_position)
 	
 	if _screen and _screen.material_override:
 		var mat = _screen.material_override as StandardMaterial3D

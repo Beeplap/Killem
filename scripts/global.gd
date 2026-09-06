@@ -50,6 +50,7 @@ var deployable_claymores: int = 2
 var deployable_turrets: int = 1
 
 var hitstop_active: bool = false
+var screenshake_multiplier: float = 1.0
 
 func _ready() -> void:
 	reset_state()
@@ -202,8 +203,13 @@ func set_weapon(type: WeaponType) -> void:
 	current_weapon = type
 	emit_current_ammo()
 
-func play_sound(sound_name: String) -> void:
-	# Simple audio effects synthesizer using procedural audio or audio bus
+func play_sound(sound_name: String, pos = null) -> void:
+	var audio_mgr = get_node_or_null("/root/AudioManager")
+	if audio_mgr and audio_mgr.has_method("play_sound"):
+		audio_mgr.play_sound(sound_name, pos)
+		return
+	
+	# Fallback audio effects synthesizer
 	var player = AudioStreamPlayer.new()
 	add_child(player)
 	player.bus = &"Master"
@@ -235,12 +241,24 @@ func play_sound(sound_name: String) -> void:
 		"hit":
 			duration = 0.08
 			freq = 120.0
-		"pickup":
+		"pickup", "pickup_ammo", "pickup_health":
 			duration = 0.15
 			freq = 660.0
+		"keycard_chirp":
+			duration = 0.22
+			freq = 1400.0
 		"explode":
 			duration = 0.35
 			freq = 80.0
+		"mutant_step":
+			duration = 0.25
+			freq = 55.0
+		"mutant_roar":
+			duration = 0.75
+			freq = 75.0
+		"stomp_crash":
+			duration = 0.55
+			freq = 50.0
 		"zombie_groan":
 			duration = 0.30
 			freq = 110.0
@@ -323,7 +341,7 @@ func collect_keycard(color: String) -> void:
 	if not color in keycards_collected:
 		keycards_collected.append(color)
 	keycard_collected.emit(color)
-	play_sound("pickup")
+	play_sound("keycard_chirp")
 
 func has_keycard(color: String) -> bool:
 	return color in keycards_collected

@@ -60,7 +60,7 @@ func _ready() -> void:
 	if weak_point_light: weak_point_light.visible = false
 	
 	# Initial roar
-	Global.play_sound("boss_roar")
+	Global.play_sound("boss_roar", global_position)
 
 func _physics_process(delta: float) -> void:
 	if current_state == State.DEAD or Global.is_game_over:
@@ -169,7 +169,7 @@ func start_cleave_attack() -> void:
 	if cleave_indicator:
 		cleave_indicator.visible = true
 	
-	Global.play_sound("boss_cleave")
+	Global.play_sound("boss_cleave", global_position)
 
 func handle_cleave_windup(delta: float) -> void:
 	state_timer -= delta
@@ -190,7 +190,7 @@ func execute_cleave_sweep() -> void:
 	if cleave_indicator:
 		cleave_indicator.visible = false
 	
-	Global.play_sound("boss_slam")
+	Global.play_sound("boss_slam", global_position)
 	
 	# Check 180-degree frontal cone within 5.8m
 	if target_player and is_instance_valid(target_player):
@@ -226,7 +226,7 @@ func start_boulder_hurl() -> void:
 	if held_boulder:
 		held_boulder.visible = true
 	
-	Global.play_sound("rock_impact")
+	Global.play_sound("rock_impact", global_position)
 
 func handle_boulder_windup(delta: float) -> void:
 	state_timer -= delta
@@ -255,7 +255,7 @@ func throw_boulder() -> void:
 			var lead_pos = target_player.global_position + (target_player.velocity * 0.45)
 			boulder.setup(spawn_origin, lead_pos, 22.0, 38.0)
 	
-	Global.play_sound("boss_slam")
+	Global.play_sound("boss_slam", global_position)
 
 func handle_boulder_throw(delta: float) -> void:
 	state_timer -= delta
@@ -270,7 +270,7 @@ func start_leap_slam() -> void:
 	leap_cooldown = 9.5
 	leap_start_y = global_position.y
 	
-	Global.play_sound("boss_roar")
+	Global.play_sound("boss_roar", global_position)
 
 func handle_leap_windup(delta: float) -> void:
 	state_timer -= delta
@@ -329,7 +329,7 @@ func crash_land() -> void:
 	if leap_indicator:
 		leap_indicator.visible = false
 	
-	Global.play_sound("boss_slam")
+	Global.play_sound("boss_slam", global_position)
 	
 	# AoE Damage & Shockwave
 	var scene = get_tree().current_scene
@@ -375,7 +375,7 @@ func handle_leap_land(delta: float) -> void:
 # --- PHASE 2 MINION SUMMONING ---
 func spawn_plague_hounds() -> void:
 	hound_spawn_cooldown = 14.0
-	Global.play_sound("screamer")
+	Global.play_sound("screamer", global_position)
 	
 	var scene = get_tree().current_scene
 	if not scene:
@@ -398,7 +398,7 @@ func handle_radiation_field(delta: float) -> void:
 			var dist = global_position.distance_to(target_player.global_position)
 			if dist <= 5.5:
 				target_player.take_damage(5.0, Vector3.ZERO) # 12.5 DPS
-				Global.play_sound("radiation_tick")
+				Global.play_sound("radiation_tick", global_position)
 
 # --- DAMAGE & PHASE TRANSITIONS ---
 func take_damage(dmg: float, hit_direction: Vector3 = Vector3.ZERO) -> void:
@@ -418,7 +418,7 @@ func take_damage(dmg: float, hit_direction: Vector3 = Vector3.ZERO) -> void:
 	if current_phase == Phase.PHASE_3 and is_back_hit:
 		# +200% Critical Damage on Exposed Weak Point
 		final_dmg = dmg * 3.0
-		Global.play_sound("hit")
+		Global.play_sound("hit", global_position)
 		spawn_crit_sparks()
 	
 	current_health = max(0.0, current_health - final_dmg)
@@ -446,7 +446,7 @@ func transition_to_phase(new_phase: Phase) -> void:
 		current_speed = base_speed * 1.35
 		if vent_smoke:
 			vent_smoke.emitting = true
-		Global.play_sound("boss_roar")
+		Global.play_sound("boss_roar", global_position)
 		spawn_plague_hounds()
 		
 	elif new_phase == Phase.PHASE_3:
@@ -455,7 +455,7 @@ func transition_to_phase(new_phase: Phase) -> void:
 			radiation_particles.emitting = true
 		if weak_point_light:
 			weak_point_light.visible = true
-		Global.play_sound("boss_alarm")
+		Global.play_sound("boss_alarm", global_position)
 
 func flash_damage_tint(is_crit: bool) -> void:
 	if not mesh_root:
@@ -497,7 +497,7 @@ func die() -> void:
 	current_state = State.DEAD
 	velocity = Vector3.ZERO
 	boss_defeated_signal.emit()
-	Global.play_sound("boss_roar")
+	Global.play_sound("boss_roar", global_position)
 	Global.add_kill(5000)
 	
 	# Death collapse tween
@@ -506,6 +506,6 @@ func die() -> void:
 	tween.parallel().tween_property(mesh_root, "rotation:x", deg_to_rad(85.0), 1.2)
 	tween.tween_callback(func():
 		# Spawn massive death explosion
-		Global.play_sound("explode")
+		Global.play_sound("explode", global_position)
 		queue_free()
 	)

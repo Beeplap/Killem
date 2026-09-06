@@ -97,12 +97,17 @@ func _unhandled_input(event: InputEvent) -> void:
 			Global.set_weapon(Global.WeaponType.FLAMETHROWER)
 		elif event.keycode == KEY_5:
 			Global.set_weapon(Global.WeaponType.MINIGUN)
+		elif event.keycode == KEY_R:
+			PlayerShooting.play_reload_sequence(get_tree(), global_position)
 		elif event.keycode == KEY_SPACE:
 			start_dodge_roll()
 		elif event.keycode == KEY_E:
 			deploy_current_item()
 		elif event.keycode == KEY_Q:
 			cycle_deployable()
+
+var footstep_distance_traveled: float = 0.0
+const FOOTSTEP_STRIDE_LENGTH: float = 52.0
 
 func cycle_deployable() -> void:
 	active_deployable_type = (active_deployable_type + 1) % 3
@@ -259,10 +264,24 @@ func handle_movement(delta: float) -> void:
 	
 	if input_dir != Vector2.ZERO:
 		velocity = velocity.move_toward(input_dir * effective_speed, acceleration * delta)
-	else:
-		velocity = velocity.move_toward(Vector2.ZERO, friction * delta)
-	
 	move_and_slide()
+	
+	if velocity.length_squared() > 100.0:
+		footstep_distance_traveled += velocity.length() * delta
+		if footstep_distance_traveled >= FOOTSTEP_STRIDE_LENGTH:
+			footstep_distance_traveled = 0.0
+			_play_surface_footstep()
+
+func _play_surface_footstep() -> void:
+	var surface = "gravel"
+	if global_position.y > 60.0 and global_position.y < 380.0:
+		surface = "asphalt"
+	elif global_position.x < -400.0:
+		surface = "metal"
+	
+	var audio_mgr = get_node_or_null("/root/AudioManager")
+	if audio_mgr and audio_mgr.has_method("play_footstep"):
+		audio_mgr.play_footstep(surface, global_position)
 
 func handle_aiming() -> void:
 	var mouse_pos = get_global_mouse_position()
@@ -283,6 +302,7 @@ func handle_aiming() -> void:
 	
 	if muzzle:
 		muzzle.position = aim_dir * 26.0 + Vector2(0, -4)
+		muzzle.rotation = angle
 	
 	if muzzle_flash:
 		muzzle_flash.position = muzzle.position if muzzle else aim_dir * 26.0
@@ -316,7 +336,7 @@ func handle_shooting(delta: float) -> void:
 	
 	if wants_to_shoot and fire_cooldown <= 0.0:
 		if not Global.has_ammo(Global.current_weapon):
-			Global.play_sound("hit")
+			PlayerShooting.play_empty_click(global_position)
 			fire_cooldown = 0.25
 			return
 		
@@ -339,6 +359,10 @@ func fire_weapon() -> void:
 	
 	Global.player_fired.emit()
 	
+	var laser = muzzle.get_node_or_null("LaserSight") if muzzle else null
+	if laser and laser.has_method("add_recoil_scatter"):
+		laser.add_recoil_scatter(0.04)
+	
 	match Global.current_weapon:
 		Global.WeaponType.PISTOL:
 			Global.consume_ammo(Global.WeaponType.PISTOL)
@@ -348,7 +372,7 @@ func fire_weapon() -> void:
 			add_trauma(0.14)
 			if tactical_crosshair:
 				tactical_crosshair.add_bloom(6.5)
-			Global.play_sound("pistol")
+			PlayerShooting.play_weapon_fire_audio("pistol", global_position)
 		
 		Global.WeaponType.SHOTGUN:
 			Global.consume_ammo(Global.WeaponType.SHOTGUN)
@@ -363,7 +387,7 @@ func fire_weapon() -> void:
 			add_trauma(0.44)
 			if tactical_crosshair:
 				tactical_crosshair.add_bloom(19.0)
-			Global.play_sound("shotgun")
+			PlayerShooting.play_weapon_fire_audio("shotgun", global_position)
 		
 		Global.WeaponType.ASSAULT_RIFLE:
 			Global.consume_ammo(Global.WeaponType.ASSAULT_RIFLE)
@@ -374,7 +398,7 @@ func fire_weapon() -> void:
 			add_trauma(0.18)
 			if tactical_crosshair:
 				tactical_crosshair.add_bloom(9.5)
-			Global.play_sound("rifle")
+			PlayerShooting.play_weapon_fire_audio("rifle", global_position)
 		
 		Global.WeaponType.FLAMETHROWER:
 			Global.consume_ammo(Global.WeaponType.FLAMETHROWER)
@@ -383,7 +407,7 @@ func fire_weapon() -> void:
 			add_trauma(0.06)
 			if tactical_crosshair:
 				tactical_crosshair.add_bloom(12.0)
-			Global.play_sound("flame")
+			PlayerShooting.play_weapon_fire_audio("flame", global_position)
 		
 		Global.WeaponType.MINIGUN:
 			Global.consume_ammo(Global.WeaponType.MINIGUN)
@@ -394,7 +418,7 @@ func fire_weapon() -> void:
 			add_trauma(0.12)
 			if tactical_crosshair:
 				tactical_crosshair.add_bloom(14.0)
-			Global.play_sound("minigun_fire")
+			PlayerShooting.play_weapon_fire_audio("minigun_fire", global_position)
 
 func process_flame_cone(base_dir: Vector2, spawn_pos: Vector2) -> void:
 	var level = get_tree().current_scene

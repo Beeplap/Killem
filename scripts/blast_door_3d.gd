@@ -44,7 +44,7 @@ func open_door() -> void:
 	if is_open:
 		return
 	is_open = true
-	Global.play_sound("gate_slam")
+	Global.play_sound("gate_slam", global_position)
 	
 	if collision_shape:
 		collision_shape.set_deferred("disabled", true)

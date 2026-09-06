@@ -20,10 +20,16 @@ run/main_scene="res://scenes/MainLevel.tscn"
 config/features=PackedStringArray("4.7", "GL Compatibility")
 config/icon="res://icon.svg"
 
+[audio]
+
+busses/default_bus_layout="res://default_bus_layout.tres"
+
 [autoload]
 
+AudioManager="*res://scripts/audio_manager.gd"
 Global="*res://scripts/global.gd"
 CampaignManager="*res://scripts/campaign_manager.gd"
+DecalManager="*res://scripts/decal_manager.gd"
 
 [display]
 

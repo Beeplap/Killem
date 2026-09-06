@@ -30,6 +30,10 @@ var enrage_timer: float = 0.0
 var stagger_timer: float = 0.0
 var screamer_cooldown_timer: float = 4.0
 
+var nav_refresh_timer: float = 0.0
+var is_hibernating: bool = false
+const HIBERNATION_DISTANCE: float = 1400.0
+
 var player: Node2D = null
 
 @onready var nav_agent: NavigationAgent2D = $NavigationAgent2D
@@ -40,6 +44,7 @@ func _ready() -> void:
 	add_to_group("enemies")
 	configure_type()
 	current_health = max_health
+	nav_refresh_timer = randf_range(0.0, 0.2)
 	
 	# Hit-Flash shader material
 	if sprite:
@@ -231,6 +236,25 @@ func _physics_process(delta: float) -> void:
 	var target_pos = player.global_position
 	var dist_to_player = global_position.distance_to(target_pos)
 	
+	# Distance-Based Hibernation (Off-Screen Culling)
+	if dist_to_player > HIBERNATION_DISTANCE:
+		if not is_hibernating:
+			is_hibernating = true
+			if collision_shape:
+				collision_shape.disabled = true
+			if sprite:
+				sprite.visible = false
+		# Lightweight linear vector update, skipping expensive nav/animation
+		velocity = (target_pos - global_position).normalized() * (speed * 0.75)
+		global_position += velocity * delta
+		return
+	elif is_hibernating:
+		is_hibernating = false
+		if collision_shape:
+			collision_shape.disabled = false
+		if sprite:
+			sprite.visible = true
+	
 	# 8-Directional 2.5D Isometric orientation
 	var face_dir = (target_pos - global_position).normalized()
 	update_facing(face_dir)
@@ -241,6 +265,13 @@ func _physics_process(delta: float) -> void:
 		if screamer_cooldown_timer <= 0.0:
 			screamer_cooldown_timer = 8.0
 			screech_and_buff()
+	
+	# Staggered navigation path updates (every ~0.2s instead of every frame)
+	nav_refresh_timer -= delta
+	if nav_refresh_timer <= 0.0:
+		nav_refresh_timer = 0.2 + randf_range(-0.05, 0.05)
+		if nav_agent and is_instance_valid(player):
+			nav_agent.target_position = target_pos
 	
 	var move_dir: Vector2 = Vector2.ZERO
 	if zombie_type == ZombieType.SCREAMER:
@@ -255,7 +286,6 @@ func _physics_process(delta: float) -> void:
 	else:
 		# Pathfinding using NavigationAgent2D with direct fallback
 		if nav_agent and not nav_agent.is_navigation_finished():
-			nav_agent.target_position = target_pos
 			var next_path_pos = nav_agent.get_next_path_position()
 			move_dir = (next_path_pos - global_position).normalized()
 		

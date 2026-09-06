@@ -13,6 +13,10 @@ static var _pool_parent: Node2D = null
 const MAX_DECALS: int = 80
 
 static func spawn_splat(tree_root: Node, pos: Vector2, hit_dir: Vector2) -> void:
+	if Engine.has_singleton("DecalManager") or tree_root.get_node_or_null("/root/DecalManager"):
+		tree_root.get_node("/root/DecalManager").spawn_blood_splat(pos, hit_dir)
+		return
+	
 	if not is_instance_valid(_pool_parent) or _pool_parent.get_parent() == null:
 		_pool.clear()
 		_pool_index = 0

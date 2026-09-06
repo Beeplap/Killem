@@ -67,6 +67,6 @@ func _on_body_entered(body: Node3D) -> void:
 			Global.collect_keycard(keycard_color)
 		elif Global and "keycards_collected" in Global:
 			Global.keycards_collected.append(keycard_color)
-			Global.play_sound("pickup")
+			Global.play_sound("keycard_chirp", global_position)
 		
 		queue_free()

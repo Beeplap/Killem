@@ -1,9 +1,10 @@
-[gd_scene load_steps=6 format=3 uid="uid://cplayerscene001"]
+[gd_scene load_steps=7 format=3 uid="uid://cplayerscene001"]
 
 [ext_resource type="Script" path="res://scripts/player.gd" id="1_player"]
 [ext_resource type="Texture2D" path="res://assets/textures/characters/soldier_8dir.png" id="2_soldier"]
 [ext_resource type="Texture2D" path="res://assets/textures/lighting/flashlight_cookie.png" id="3_flashlight"]
 [ext_resource type="Texture2D" path="res://assets/textures/lighting/point_light_cookie.png" id="4_pointlight"]
+[ext_resource type="PackedScene" path="res://scenes/weapons/LaserSight.tscn" id="5_laser"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_1"]
 radius = 12.0
@@ -57,6 +58,8 @@ process_material = SubResource("ParticleProcessMaterial_dust")
 
 [node name="Muzzle" type="Marker2D" parent="."]
 position = Vector2(28, -4)
+
+[node name="LaserSight" parent="Muzzle" instance=ExtResource("5_laser")]
 
 [node name="Flashlight" type="PointLight2D" parent="."]
 position = Vector2(16, -4)
