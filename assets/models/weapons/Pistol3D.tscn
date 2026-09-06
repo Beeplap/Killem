@@ -1,0 +1,21 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="ArrayMesh" uid="uid://cv4vhutnkrk4k" path="res://assets/models/weapons/pistol_3d.obj" id="1_mesh"]
+
+[node name="Pistol3D" type="Node3D"]
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+mesh = ExtResource("1_mesh")
+
+[node name="MuzzleMarker" type="Marker3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.02, 0.26)
+
+[node name="MuzzleFlash" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.02, 0.28)
+visible = false
+light_color = Color(1, 0.85, 0.4, 1)
+light_energy = 2.5
+omni_range = 3.5
+
+[node name="EjectionPort" type="Marker3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.022, 0.02, 0.02)

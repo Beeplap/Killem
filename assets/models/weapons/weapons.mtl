@@ -1,0 +1,109 @@
+# Weapons and Operator Materials
+newmtl Gunmetal
+Kd 0.22 0.24 0.26
+Ks 0.6 0.65 0.7
+Ns 45.0
+
+newmtl GunmetalMatte
+Kd 0.18 0.20 0.22
+Ks 0.3 0.35 0.4
+Ns 20.0
+
+newmtl PolymerBlack
+Kd 0.12 0.13 0.15
+Ks 0.2 0.2 0.25
+Ns 15.0
+
+newmtl RubberBlack
+Kd 0.08 0.08 0.09
+Ks 0.1 0.1 0.1
+Ns 5.0
+
+newmtl Steel
+Kd 0.55 0.58 0.62
+Ks 0.8 0.85 0.9
+Ns 80.0
+
+newmtl SteelDark
+Kd 0.32 0.34 0.38
+Ks 0.7 0.75 0.8
+Ns 60.0
+
+newmtl Brass
+Kd 0.88 0.72 0.24
+Ks 0.9 0.8 0.3
+Ns 70.0
+
+newmtl ShotgunRed
+Kd 0.82 0.15 0.12
+Ks 0.4 0.4 0.4
+Ns 25.0
+
+newmtl LaserRed
+Kd 0.95 0.1 0.1
+Ke 1.0 0.1 0.1
+Ks 0.2 0.2 0.2
+Ns 10.0
+
+newmtl SightGlass
+Kd 0.2 0.8 0.9
+d 0.5
+Ks 0.9 0.9 0.9
+Ns 100.0
+
+newmtl HazardYellow
+Kd 0.92 0.78 0.12
+Ks 0.5 0.5 0.5
+Ns 30.0
+
+newmtl FlamePilot
+Kd 1.0 0.5 0.1
+Ke 1.0 0.55 0.15
+Ks 0.2 0.2 0.2
+Ns 10.0
+
+newmtl CamoNavy
+Kd 0.14 0.17 0.22
+Ks 0.15 0.15 0.2
+Ns 10.0
+
+newmtl VestBlack
+Kd 0.10 0.11 0.13
+Ks 0.25 0.25 0.3
+Ns 20.0
+
+newmtl KneePads
+Kd 0.07 0.08 0.09
+Ks 0.3 0.3 0.35
+Ns 25.0
+
+newmtl BootsBlack
+Kd 0.06 0.06 0.07
+Ks 0.4 0.4 0.4
+Ns 35.0
+
+newmtl Balaclava
+Kd 0.11 0.12 0.14
+Ks 0.1 0.1 0.1
+Ns 8.0
+
+newmtl HelmetBlack
+Kd 0.13 0.14 0.16
+Ks 0.4 0.4 0.45
+Ns 35.0
+
+newmtl NVGMount
+Kd 0.2 0.22 0.24
+Ks 0.5 0.5 0.5
+Ns 40.0
+
+newmtl NVGGoggles
+Kd 0.08 0.55 0.25
+Ke 0.05 0.4 0.15
+Ks 0.7 0.9 0.7
+Ns 70.0
+
+newmtl PouchCamo
+Kd 0.18 0.21 0.18
+Ks 0.15 0.15 0.15
+Ns 10.0

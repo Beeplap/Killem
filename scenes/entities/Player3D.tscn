@@ -1,0 +1,93 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/player_3d.gd" id="1_script"]
+[ext_resource type="PackedScene" path="res://assets/models/weapons/Pistol3D.tscn" id="2_pistol"]
+[ext_resource type="PackedScene" path="res://assets/models/weapons/Shotgun3D.tscn" id="3_shotgun"]
+[ext_resource type="PackedScene" path="res://assets/models/weapons/Rifle3D.tscn" id="4_rifle"]
+[ext_resource type="PackedScene" path="res://assets/models/weapons/Flamethrower3D.tscn" id="5_flame"]
+[ext_resource type="PackedScene" path="res://assets/models/weapons/Minigun3D.tscn" id="6_minigun"]
+[ext_resource type="ArrayMesh" uid="uid://oyos2rxdbqyt" path="res://assets/models/weapons/swat_operator.obj" id="7_operator_mesh"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_player"]
+radius = 0.35
+height = 1.8
+
+[sub_resource type="BoxMesh" id="BoxMesh_arm"]
+size = Vector3(0.09, 0.09, 0.35)
+
+[node name="Player3D" type="CharacterBody3D"]
+collision_layer = 1
+collision_mask = 6
+floor_constant_speed = true
+floor_snap_length = 0.35
+script = ExtResource("1_script")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+shape = SubResource("CapsuleShape3D_player")
+
+[node name="StepRayLow" type="RayCast3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.15, 0)
+target_position = Vector3(0, 0, -0.5)
+
+[node name="StepRayHigh" type="RayCast3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.45, 0)
+target_position = Vector3(0, 0, -0.5)
+
+[node name="CameraMount" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+
+[node name="Camera3D" type="Camera3D" parent="CameraMount"]
+transform = Transform3D(1, 0, 0, 0, 0.615661, 0.788011, 0, -0.788011, 0.615661, 0, 10.5, 8.5)
+fov = 48.0
+
+[node name="BodyMesh" type="Node3D" parent="."]
+
+[node name="OperatorMesh" type="MeshInstance3D" parent="BodyMesh"]
+mesh = ExtResource("7_operator_mesh")
+
+[node name="TorsoPivot" type="Node3D" parent="BodyMesh"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.15, 0)
+
+[node name="HeadPivot" type="Node3D" parent="BodyMesh/TorsoPivot"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.42, 0)
+
+[node name="Flashlight" type="SpotLight3D" parent="BodyMesh/TorsoPivot"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.22, 0.05, 0.1)
+light_color = Color(1, 0.96, 0.88, 1)
+light_energy = 2.2
+shadow_enabled = true
+spot_range = 28.0
+spot_attenuation = 0.8
+spot_angle = 32.0
+
+[node name="LeftArm" type="Node3D" parent="BodyMesh/TorsoPivot"]
+transform = Transform3D(0.965926, 0, 0.258819, 0, 1, 0, -0.258819, 0, 0.965926, -0.24, 0.02, 0.06)
+
+[node name="ArmMesh" type="MeshInstance3D" parent="BodyMesh/TorsoPivot/LeftArm"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.06, -0.04, 0.16)
+mesh = SubResource("BoxMesh_arm")
+
+[node name="RightArm" type="Node3D" parent="BodyMesh/TorsoPivot"]
+transform = Transform3D(0.984808, 0, -0.173648, 0, 1, 0, 0.173648, 0, 0.984808, 0.24, 0.02, 0.06)
+
+[node name="ArmMesh" type="MeshInstance3D" parent="BodyMesh/TorsoPivot/RightArm"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.04, -0.04, 0.16)
+mesh = SubResource("BoxMesh_arm")
+
+[node name="RightHandAttachment" type="Node3D" parent="BodyMesh/TorsoPivot/RightArm"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.08, -0.04, 0.32)
+
+[node name="Pistol3D" parent="BodyMesh/TorsoPivot/RightArm/RightHandAttachment" instance=ExtResource("2_pistol")]
+
+[node name="Shotgun3D" parent="BodyMesh/TorsoPivot/RightArm/RightHandAttachment" instance=ExtResource("3_shotgun")]
+visible = false
+
+[node name="Rifle3D" parent="BodyMesh/TorsoPivot/RightArm/RightHandAttachment" instance=ExtResource("4_rifle")]
+visible = false
+
+[node name="Flamethrower3D" parent="BodyMesh/TorsoPivot/RightArm/RightHandAttachment" instance=ExtResource("5_flame")]
+visible = false
+
+[node name="Minigun3D" parent="BodyMesh/TorsoPivot/RightArm/RightHandAttachment" instance=ExtResource("6_minigun")]
+visible = false

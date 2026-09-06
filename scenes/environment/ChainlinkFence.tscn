@@ -1,0 +1,28 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="ArrayMesh" path="res://assets/models/environment/chainlink_fence.obj" id="1_mesh"]
+[ext_resource type="Texture2D" path="res://assets/textures/environment/chainlink_wire.png" id="2_tex"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_wire"]
+transparency = 2
+alpha_scissor_threshold = 0.5
+cull_mode = 0
+albedo_texture = ExtResource("2_tex")
+roughness = 0.5
+metallic = 0.8
+uv1_scale = Vector3(3, 2, 1)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_fence"]
+size = Vector3(0.3, 2.5, 3.2)
+
+[node name="ChainlinkFence" type="StaticBody3D" groups=["obstacles"]]
+collision_layer = 4
+collision_mask = 7
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+material_override = SubResource("StandardMaterial3D_wire")
+mesh = ExtResource("1_mesh")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.25, 0)
+shape = SubResource("BoxShape3D_fence")

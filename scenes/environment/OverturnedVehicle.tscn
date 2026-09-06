@@ -1,0 +1,48 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="ArrayMesh" path="res://assets/models/environment/armored_vehicle_wreck.obj" id="1_mesh"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_wreck"]
+albedo_color = Color(0.22, 0.24, 0.22, 1)
+metallic = 0.7
+roughness = 0.65
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_wreck"]
+size = Vector3(2.6, 2.0, 5.2)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_smoke"]
+shading_mode = 0
+albedo_color = Color(0.2, 0.2, 0.2, 0.6)
+
+[sub_resource type="SphereMesh" id="SphereMesh_smoke"]
+material = SubResource("StandardMaterial3D_smoke")
+radius = 0.25
+height = 0.5
+
+[node name="OverturnedVehicle" type="StaticBody3D" groups=["obstacles"]]
+collision_layer = 4
+collision_mask = 7
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+material_override = SubResource("StandardMaterial3D_wreck")
+mesh = ExtResource("1_mesh")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.0, 0)
+shape = SubResource("BoxShape3D_wreck")
+
+[node name="SmokeParticles" type="CPUParticles3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.3, 1.2, 0.5)
+amount = 20
+lifetime = 1.8
+speed_scale = 0.8
+mesh = SubResource("SphereMesh_smoke")
+emission_shape = 1
+emission_sphere_radius = 0.3
+direction = Vector3(0, 1, 0)
+spread = 25.0
+initial_velocity_min = 0.6
+initial_velocity_max = 1.4
+gravity = Vector3(0.2, 0.4, 0)
+scale_amount_min = 0.6
+scale_amount_max = 2.2

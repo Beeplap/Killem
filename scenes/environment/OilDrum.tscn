@@ -1,0 +1,28 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="ArrayMesh" path="res://assets/models/environment/oil_drum.obj" id="1_mesh"]
+[ext_resource type="Texture2D" path="res://assets/textures/props/metal_barrel_pbr.png" id="2_tex"]
+[ext_resource type="Texture2D" path="res://assets/textures/props/metal_barrel_pbr_n.png" id="3_norm"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_drum"]
+albedo_texture = ExtResource("2_tex")
+normal_enabled = true
+normal_texture = ExtResource("3_norm")
+roughness = 0.55
+metallic = 0.75
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_drum"]
+height = 1.1
+radius = 0.38
+
+[node name="OilDrum" type="StaticBody3D" groups=["obstacles", "destructibles"]]
+collision_layer = 4
+collision_mask = 7
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+material_override = SubResource("StandardMaterial3D_drum")
+mesh = ExtResource("1_mesh")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.55, 0)
+shape = SubResource("CylinderShape3D_drum")

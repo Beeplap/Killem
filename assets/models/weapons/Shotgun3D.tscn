@@ -1,0 +1,21 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="ArrayMesh" uid="uid://covmvpp30twly" path="res://assets/models/weapons/shotgun_3d.obj" id="1_mesh"]
+
+[node name="Shotgun3D" type="Node3D"]
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+mesh = ExtResource("1_mesh")
+
+[node name="MuzzleMarker" type="Marker3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.028, 0.48)
+
+[node name="MuzzleFlash" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.028, 0.50)
+visible = false
+light_color = Color(1, 0.75, 0.3, 1)
+light_energy = 4.0
+omni_range = 5.0
+
+[node name="EjectionPort" type="Marker3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.025, 0.02, 0.04)
