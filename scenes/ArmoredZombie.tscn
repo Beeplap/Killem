@@ -1,0 +1,29 @@
+[gd_scene format=3 uid="uid://ipujgxdb327e"]
+
+[ext_resource type="Script" path="res://scripts/zombie.gd" id="1_zombie"]
+[ext_resource type="Texture2D" path="res://assets/textures/characters/zombie_armored_8dir.png" id="2_armoredtex"]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_1"]
+radius = 14.0
+height = 32.0
+
+[node name="ArmoredZombie" type="CharacterBody2D"]
+collision_layer = 2
+collision_mask = 7
+script = ExtResource("1_zombie")
+zombie_type = 4
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture = ExtResource("2_armoredtex")
+hframes = 8
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0, 8)
+shape = SubResource("CapsuleShape2D_1")
+
+[node name="NavigationAgent2D" type="NavigationAgent2D" parent="."]
+path_desired_distance = 15.0
+target_desired_distance = 25.0
+avoidance_enabled = true
+radius = 20.0
+max_speed = 120.0

@@ -1,9 +1,13 @@
-[gd_scene load_steps=3 format=3 uid="uid://ccratescene001"]
+[gd_scene load_steps=5 format=3 uid="uid://ccratescene001"]
 
 [ext_resource type="Script" path="res://scripts/destructible_prop.gd" id="1_prop"]
+[ext_resource type="Texture2D" path="res://assets/textures/props/crate_isometric.png" id="2_cratetex"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_1"]
-size = Vector2(32, 32)
+size = Vector2(36, 32)
+
+[sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_1"]
+polygon = PackedVector2Array(-18, -4, 18, -4, 18, 22, -18, 22)
 
 [node name="DestructibleCrate" type="StaticBody2D"]
 collision_layer = 4
@@ -11,5 +15,12 @@ collision_mask = 7
 script = ExtResource("1_prop")
 prop_type = 0
 
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture = ExtResource("2_cratetex")
+
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0, 8)
 shape = SubResource("RectangleShape2D_1")
+
+[node name="LightOccluder2D" type="LightOccluder2D" parent="."]
+occluder = SubResource("OccluderPolygon2D_1")

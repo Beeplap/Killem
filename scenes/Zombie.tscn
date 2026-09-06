@@ -1,17 +1,24 @@
-[gd_scene load_steps=3 format=3 uid="uid://czombiescene001"]
+[gd_scene load_steps=4 format=3 uid="uid://czombiescene001"]
 
 [ext_resource type="Script" path="res://scripts/zombie.gd" id="1_zombie"]
+[ext_resource type="Texture2D" path="res://assets/textures/characters/zombie_regular_8dir.png" id="2_zombietex"]
 
-[sub_resource type="CircleShape2D" id="CircleShape2D_1"]
-radius = 15.0
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_1"]
+radius = 12.0
+height = 28.0
 
 [node name="Zombie" type="CharacterBody2D"]
 collision_layer = 2
 collision_mask = 7
 script = ExtResource("1_zombie")
 
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture = ExtResource("2_zombietex")
+hframes = 8
+
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
-shape = SubResource("CircleShape2D_1")
+position = Vector2(0, 8)
+shape = SubResource("CapsuleShape2D_1")
 
 [node name="NavigationAgent2D" type="NavigationAgent2D" parent="."]
 path_desired_distance = 15.0

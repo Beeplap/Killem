@@ -9,13 +9,24 @@ extends CanvasLayer
 @onready var wave_label: Label = $WaveContainer/WaveLabel
 @onready var game_over_panel: Control = $GameOverPanel
 
+@onready var wave_banner: PanelContainer = $WaveBanner
+@onready var banner_title: Label = $WaveBanner/VBox/TitleLabel
+@onready var banner_subtitle: Label = $WaveBanner/VBox/SubtitleLabel
+
+var banner_hide_timer: SceneTreeTimer = null
+
 func _ready() -> void:
 	Global.health_changed.connect(_on_health_changed)
 	Global.ammo_changed.connect(_on_ammo_changed)
 	Global.score_changed.connect(_on_score_changed)
 	Global.wave_changed.connect(_on_wave_changed)
+	Global.wave_cleared.connect(_on_wave_cleared)
+	Global.wave_countdown.connect(_on_wave_countdown)
+	Global.wave_started.connect(_on_wave_started)
 	Global.player_died.connect(_on_player_died)
 	
+	if wave_banner:
+		wave_banner.visible = false
 	game_over_panel.visible = false
 	_on_health_changed(Global.player_health, Global.player_max_health)
 	Global.emit_current_ammo()
@@ -55,9 +66,38 @@ func _on_wave_changed(wave: int) -> void:
 	if wave_label:
 		wave_label.text = "WAVE %02d" % wave
 
+func _on_wave_cleared(wave_num: int, cooldown: float) -> void:
+	if wave_banner and banner_title and banner_subtitle:
+		banner_title.text = "WAVE %d CLEARED!" % wave_num
+		banner_title.modulate = Color(0.98, 0.85, 0.18, 1.0)
+		banner_subtitle.text = "SUPPLY BREAK: NEXT WAVE IN %ds" % int(ceil(cooldown))
+		banner_subtitle.modulate = Color(0.4, 0.9, 1.0, 1.0)
+		wave_banner.visible = true
+
+func _on_wave_countdown(seconds_left: int) -> void:
+	if wave_banner and banner_subtitle and wave_banner.visible:
+		banner_subtitle.text = "SUPPLY BREAK: NEXT WAVE IN %ds" % seconds_left
+
+func _on_wave_started(wave_num: int) -> void:
+	if wave_banner and banner_title and banner_subtitle:
+		banner_title.text = "WAVE %d INCOMING!" % wave_num
+		banner_title.modulate = Color(1.0, 0.35, 0.25, 1.0)
+		banner_subtitle.text = "HORDE DETECTED • TAKE POSITIONS"
+		banner_subtitle.modulate = Color(0.9, 0.9, 0.95, 1.0)
+		wave_banner.visible = true
+		
+		# Auto-hide banner after 2.4 seconds so player has clear view
+		var t = get_tree().create_timer(2.4)
+		banner_hide_timer = t
+		await t.timeout
+		if banner_hide_timer == t and wave_banner.visible and banner_title.text.begins_with("WAVE %d INCOMING!" % wave_num):
+			wave_banner.visible = false
+
 func _on_player_died() -> void:
 	if game_over_panel:
 		game_over_panel.visible = true
+	if wave_banner:
+		wave_banner.visible = false
 
 func restart_game() -> void:
 	Global.reset_state()

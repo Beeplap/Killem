@@ -1,18 +1,24 @@
-[gd_scene load_steps=3 format=3 uid="uid://cinfecteddogscene001"]
+[gd_scene load_steps=4 format=3 uid="uid://cinfecteddogscene001"]
 
-[ext_resource type="Script" path="res://scripts/zombie.gd" id="1_zombie"]
+[ext_resource type="Script" path="res://scripts/infected_dog.gd" id="1_dog"]
+[ext_resource type="Texture2D" path="res://assets/textures/characters/zombie_dog_8dir.png" id="2_dogtex"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_1"]
 radius = 10.0
-height = 32.0
+height = 28.0
 
 [node name="InfectedDog" type="CharacterBody2D"]
 collision_layer = 2
 collision_mask = 7
-script = ExtResource("1_zombie")
+script = ExtResource("1_dog")
 zombie_type = 1
 
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture = ExtResource("2_dogtex")
+hframes = 8
+
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0, 6)
 rotation = 1.5708
 shape = SubResource("CapsuleShape2D_1")
 

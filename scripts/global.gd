@@ -5,6 +5,9 @@ signal health_changed(current: float, max_val: float)
 signal ammo_changed(weapon_name: String, current: int, max_val: int)
 signal score_changed(score: int, kills: int)
 signal wave_changed(wave: int)
+signal wave_cleared(wave_num: int, cooldown_duration: float)
+signal wave_countdown(seconds_left: int)
+signal wave_started(wave_num: int)
 signal player_died
 
 var score: int = 0
@@ -23,6 +26,8 @@ var shotgun_max_ammo: int = 64
 var rifle_ammo: int = 90
 var rifle_max_ammo: int = 240
 
+var hitstop_active: bool = false
+
 func _ready() -> void:
 	reset_state()
 
@@ -36,6 +41,17 @@ func reset_state() -> void:
 	rifle_ammo = 90
 	current_weapon = WeaponType.PISTOL
 	is_game_over = false
+	Engine.time_scale = 1.0
+	hitstop_active = false
+
+func trigger_hitstop(duration: float = 0.04, scale_factor: float = 0.05) -> void:
+	if is_game_over or hitstop_active:
+		return
+	hitstop_active = true
+	Engine.time_scale = scale_factor
+	await get_tree().create_timer(duration, true, false, true).timeout
+	Engine.time_scale = 1.0
+	hitstop_active = false
 
 func add_kill(points: int = 100) -> void:
 	kills += 1
@@ -135,6 +151,12 @@ func play_sound(sound_name: String) -> void:
 			freq = 80.0
 		"zombie_groan":
 			duration = 0.30
+			freq = 110.0
+		"wave_clear":
+			duration = 0.36
+			freq = 587.33
+		"wave_start":
+			duration = 0.40
 			freq = 110.0
 	
 	var stream = AudioStreamWAV.new()

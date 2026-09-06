@@ -1,47 +1,47 @@
-# OUTBREAK: Post-Apocalyptic Top-Down Zombie Shooter (Godot 4)
+# OUTBREAK: Post-Apocalyptic 2.5D Isometric Zombie Shooter (Godot 4)
 
-A top-down arcade survival zombie shooter built natively in **Godot 4.x** with the **GL Compatibility / Mobile** rendering method, inspired by classic 2000s top-down arcade games like *Zombie Shooter* and *Alien Shooter* by Sigma Team.
+A gritty, realistic 2.5D isometric survival zombie shooter built natively in **Godot 4.x** with the **GL Compatibility / Mobile** rendering method, heavily inspired by the classic arcade aesthetics of *Zombie Shooter 2* and *Alien Shooter* by Sigma Team.
 
 Pre-configured for cross-platform desktop and mobile deployment (**Windows PC .exe** and **Android .apk**).
 
 ---
 
-## 🎮 Gameplay & Core Features
+## 🎮 Gameplay & Visual Architecture
 
-### 1. Player & Combat Mechanics
-* **CharacterBody2D Movement**: WASD / Arrow key movement with smooth acceleration, deceleration, and physics sliding.
-* **360° Mouse Aiming**: The player character rotates smoothly to face the mouse cursor or touch target.
-* **Mouse-Wheel Camera Zoom**: Dedicated camera zoom mapped strictly to `MOUSE_BUTTON_WHEEL_UP` and `MOUSE_BUTTON_WHEEL_DOWN`. Weapon switching is strictly isolated to number keys `[1]`, `[2]`, and `[3]`.
-* **Shooting & Node Pooling**: High-performance `BulletPool` node pooling system pre-allocating luminous tracer projectiles (`Area2D`) with zero runtime garbage collection pauses.
-* **Arsenal**:
-  * `[1] 9MM PISTOL`: Reliable sidearm with unlimited ammunition.
-  * `[2] 12G SHOTGUN`: Heavy 6-pellet conical buckshot blast with camera recoil shake.
-  * `[3] ASSAULT RIFLE`: High-cadence automatic rifle fire.
+### 1. 2.5D Isometric View & Multi-Directional Sprites
+* **Classic 2.5D Slanted Perspective**: Replaced flat bird's-eye circles with multi-directional standing profile sprites. Characters, walls, buildings, and props display realistic vertical height and depth.
+* **Y-Sorting Depth**: Real-time Y-sorting (`y_sort_enabled = true`) across the level, entities, walls, and props ensures correct depth ordering as actors walk behind or in front of obstacles.
+* **8-Directional Pre-Rendered Characters**:
+  * **Soldier**: Full standing profile with combat boots, tactical Kevlar armor, ballistic helmet with night-vision mount, and assault rifle aimed forward in 8 compass directions.
+  * **Infected Walker**: Decayed rotting flesh, tattered clothing, blood-stained chest, and lunging posture (6 DMG).
+  * **Infected Dog / Hound**: Agile quadruped canine carcass with exposed ribcage and snarling jaws (4 DMG).
+  * **Heavy Mutant Brute**: Hulking mutant brute with industrial scrap armor plating and massive fists (14 DMG).
+  * **Spitter Mutant**: Acid-mutated zombie with glowing toxic bile pustules (6 DMG).
+  * **Armored SWAT Zombie**: Infected military operative with riot helmet and bullet-resistant Kevlar (40% damage resistance).
+  * **Colossus Boss**: Enormous behemoth boss with ground-slam fists, volcanic magma fissures, and screen-shaking presence.
+* **Tactical Military Crosshair**: Custom precision reticle that dynamically expands and flashes combat red upon firing.
+* **Dynamic Wave Progression & Size Scaling**: As waves advance, horde sizes increase progressively, spawn intervals quicken, and zombies grow larger and more menacing!
 
-### 2. Infected AI (`NavigationAgent2D`)
-* **Regular Walker**: Relentless shambling infected civilian (80 HP, 130 px/s).
-* **Fast Infected Dog**: Low-profile quadruped predator with high sprint speed (45 HP, 240 px/s) that rushes the player.
-* **Heavy Mutant Brute**: Bloated tank with reinforced plating and high knockback resistance (260 HP, 75 px/s).
-* **Intelligent Pathfinding**: Powered by `NavigationAgent2D` traversing walkable zones around obstacles, walls, and props with fallback direct tracking.
-* **Permanent Blood Decals**: Defeated enemies leave organic blood splats that persist on the ground tiles.
+### 2. High-Detail Realistic Textures (Zero Vector Drawings)
+* **Ground**: Gritty seamless dark muddy soil with pebble noise, cracked cold asphalt road, and withered dry dead grass tufts.
+* **Railway Corridor**: Granite stone ballast, distressed dark wooden ties with iron plates, and dual oxidized rails with polished specular chrome heads.
+* **Structures & Objects**:
+  * **Bunker Building**: Industrial concrete bunker ruin with slanted roof, recessed doorway, shattered windows, and an exterior hanging sodium floodlight.
+  * **Military Vehicle Wrecks**: Overturned olive-drab pickup and abandoned sedans with rusted body panels and deflated tires.
+  * **Reinforced Concrete Walls & Chain-Link Fences**: Modular horizontal and vertical wall blocks with chipped edges and chain-link wire mesh with barbed wire.
+* **Destructibles & Props**:
+  * **Weathered Wooden Crates**: 3D-shaded isometric crates with diagonal wooden braces and iron corner rivets.
+  * **Heavy Polyethylene Trash Bags**: Wrinkled black garbage sacks with glossy reflections.
+  * **Explosive Chemical Barrels**: Rusted industrial drums with biohazard markings.
+* **Decals**: Visceral coagulated crimson blood splat decals randomly generated on enemy deaths.
 
-### 3. Open-World Post-Apocalyptic Level
-* **Well-Lit Open Terrain**: Daytime/sodium ambient lighting (no pitch-black fog-of-war) over dirt ground and diagonal dark asphalt roadways.
-* **Broken Railway System**: Dual steel rails, wooden railroad ties, gravel ballast bed, and caution hazard platforms.
-* **Destructible Props**:
-  * **Wooden Crates**: 35 HP, breaks into wooden shrapnel particles.
-  * **Trash Bags**: 20 HP, squishes and bursts into debris particles.
-  * **Explosive Barrels**: 25 HP, detonates causing area-of-effect damage to nearby zombies and player, with chain-reaction capabilities.
-* **Loot Drop Table**:
-  * 40% Health Pack (+35 HP)
-  * 40% Ammo Crate (Shotgun shells + Rifle rounds)
-  * 20% Empty
-
-### 4. Retro Arcade HUD
-* **Vitals Gauge**: Blood-red metallic health bar anchored to the bottom-left with HP readout.
-* **Weapon & Ammo Display**: Stark yellow/white retro arcade terminal anchored to the bottom-right showing active weapon name and current ammunition reserves.
-* **Score & Wave Tracker**: Score, kill counter, and wave banner.
-* **Mobile Touch Controls**: On-screen weapon selection buttons and touch support for Android devices.
+### 3. Realistic 2D Lighting, Shadows & Particle Effects
+* **Overcast Slate Daylight (`#b0b5bd`)**: The level features visible overcast daylight illumination, ensuring ground, tracks, walls, and zombie silhouettes are visible across the screen at all times.
+* **Tactical Weapon Flashlight**: PointLight2D cone with a realistic volumetric light cookie attached to the player's weapon aim vector, casting dynamic realtime soft shadows via `LightOccluder2D` on walls, fences, vehicles, and crates.
+* **Atmospheric Bunker Sodium Lamp**: Flickering overhead industrial lamp casting warm amber light over the bunker entrance with dynamic shadows.
+* **Impact & Explosion Particles**:
+  * **Bullet Impacts**: Dynamic sparks flying along the ricochet normal, concrete/metal dust, blood spray on enemy hits, and lingering smoke puffs.
+  * **Barrel Detonations**: Blinding light flash, burst of fiery embers, and billowing heavy black smoke.
 
 ---
 
@@ -52,30 +52,41 @@ game/
 ├── project.godot                # Godot 4.x project settings (GL Compatibility, 1280x720 canvas_items)
 ├── export_presets.cfg           # Pre-configured Windows Desktop (.exe) & Android (.apk) presets
 ├── icon.svg                     # Vector biohazard crosshair project icon
+├── assets/
+│   └── textures/
+│       ├── ground/              # dirt_terrain.png, cracked_asphalt.png, dead_grass.png
+│       ├── railway/             # railway_track.png, hazard_platform.png
+│       ├── environment/         # bunker_building.png, military_truck_wreck.png, concrete_wall_h/v.png, chainlink_fence_h.png
+│       ├── props/               # crate_isometric.png, trash_bag.png, oil_barrel.png, pickup_health/ammo.png, bullet_tracer.png
+│       ├── decals/              # blood_splat_1.png, blood_splat_2.png, blood_splat_3.png
+│       ├── lighting/            # flashlight_cookie.png, point_light_cookie.png
+│       └── characters/          # soldier_8dir.png, zombie_regular_8dir.png, zombie_dog_8dir.png, zombie_heavy_8dir.png
 ├── scenes/
-│   ├── MainLevel.tscn           # Open-world map with NavigationRegion2D, props, spawner, player
-│   ├── Player.tscn              # Player CharacterBody2D with Camera2D & Muzzle
-│   ├── Zombie.tscn              # Regular walker zombie with NavigationAgent2D
-│   ├── InfectedDog.tscn         # Fast quadruped infected canine
-│   ├── HeavyZombie.tscn         # Heavy mutant brute
-│   ├── Bullet.tscn              # Area2D bullet projectile
-│   ├── DestructibleCrate.tscn   # Wooden crate prop
-│   ├── TrashBag.tscn            # Destructible trash bag prop
-│   ├── OilBarrel.tscn           # Explosive oil barrel prop
-│   ├── Pickup.tscn              # Health and Ammo pick-up items
+│   ├── MainLevel.tscn           # 2.5D Isometric map with dynamic lighting, shadows, walls, props
+│   ├── Player.tscn              # 2.5D Soldier CharacterBody2D with Camera2D, Flashlight, Muzzle
+│   ├── Zombie.tscn              # 2.5D Walker zombie with NavigationAgent2D
+│   ├── InfectedDog.tscn         # 2.5D Infected dog
+│   ├── HeavyZombie.tscn         # 2.5D Heavy mutant brute
+│   ├── Bullet.tscn              # Area2D bullet projectile with tracer sprite
+│   ├── DestructibleCrate.tscn   # Weathered wooden crate with LightOccluder2D
+│   ├── TrashBag.tscn            # Destructible trash bag
+│   ├── OilBarrel.tscn           # Explosive barrel with LightOccluder2D
+│   ├── Pickup.tscn              # Medkit and ammo pickups
 │   └── HUD.tscn                 # Retro arcade CanvasLayer interface
-└── scripts/
-    ├── global.gd                # Autoload singleton managing score, wave, audio, and weapon state
-    ├── player.gd                # Movement, mouse aiming, scroll zoom, and shooting logic
-    ├── zombie.gd                # NavigationAgent2D AI, variant behaviors, and loot drops
-    ├── bullet.gd                # Tracer projectile movement and collision logic
-    ├── bullet_pool.gd           # Node pool managing pre-allocated projectiles
-    ├── destructible_prop.gd     # Damage, explosive barrels, and debris burst particles
-    ├── blood_splat.gd           # Procedural persistent floor blood splatters
-    ├── pickup.gd                # Auto-collectible health and ammo items
-    ├── spawner.gd               # Wave progression and horde perimeter spawner
-    ├── main_level.gd            # Procedural terrain, railway tracks, and hazard platforms
-    └── hud.gd                   # HUD signals, health bar, and game-over overlay
+├── scripts/
+│   ├── global.gd                # Autoload singleton managing score, wave, audio, and weapon state
+│   ├── player.gd                # 8-directional movement, aiming, scroll zoom, flashlight, and shooting
+│   ├── zombie.gd                # 8-directional NavigationAgent2D AI, variant behaviors, loot drops
+│   ├── bullet.gd                # High-speed projectile with impact spark/smoke particles
+│   ├── bullet_pool.gd           # Node pool managing pre-allocated projectiles
+│   ├── destructible_prop.gd     # Damage, fire/smoke explosion effects, and debris particles
+│   ├── blood_splat.gd           # High-resolution persistent blood decal placement
+│   ├── pickup.gd                # Auto-collectible health and ammo items
+│   ├── spawner.gd               # Wave progression and horde perimeter spawner
+│   ├── main_level.gd            # Atmospheric sodium light flicker and 2.5D depth setup
+│   └── hud.gd                   # HUD signals, health bar, and game-over overlay
+└── tools/
+    └── generate_all_assets.py   # Procedural realistic texture and sprite sheet generator
 ```
 
 ---
@@ -99,7 +110,7 @@ game/
 
 ### Running in Godot 4
 1. Open Godot 4.x.
-2. Click **Import** and select the `project.godot` file in this directory.
+2. Select the `project.godot` file in this directory.
 3. Click **Run Project** (`F5`) to play `scenes/MainLevel.tscn`.
 
 ### Exporting

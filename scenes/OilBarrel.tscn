@@ -1,9 +1,14 @@
-[gd_scene load_steps=3 format=3 uid="uid://coilbarrelscene001"]
+[gd_scene load_steps=5 format=3 uid="uid://coilbarrelscene001"]
 
 [ext_resource type="Script" path="res://scripts/destructible_prop.gd" id="1_prop"]
+[ext_resource type="Texture2D" path="res://assets/textures/props/oil_barrel.png" id="2_barreltex"]
 
-[sub_resource type="CircleShape2D" id="CircleShape2D_1"]
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_1"]
 radius = 16.0
+height = 36.0
+
+[sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_1"]
+polygon = PackedVector2Array(-14, 0, 14, 0, 14, 24, -14, 24)
 
 [node name="OilBarrel" type="StaticBody2D"]
 collision_layer = 4
@@ -11,5 +16,12 @@ collision_mask = 7
 script = ExtResource("1_prop")
 prop_type = 2
 
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture = ExtResource("2_barreltex")
+
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
-shape = SubResource("CircleShape2D_1")
+position = Vector2(0, 10)
+shape = SubResource("CapsuleShape2D_1")
+
+[node name="LightOccluder2D" type="LightOccluder2D" parent="."]
+occluder = SubResource("OccluderPolygon2D_1")
