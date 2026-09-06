@@ -1,8 +1,8 @@
 extends CharacterBody2D
 
 @export var move_speed: float = 240.0
-@export var acceleration: float = 1400.0
-@export var friction: float = 1200.0
+@export var acceleration: float = 2800.0
+@export var friction: float = 3200.0
 
 @onready var camera: Camera2D = $Camera2D
 @onready var muzzle: Marker2D = $Muzzle
@@ -264,6 +264,8 @@ func handle_movement(delta: float) -> void:
 	
 	if input_dir != Vector2.ZERO:
 		velocity = velocity.move_toward(input_dir * effective_speed, acceleration * delta)
+	else:
+		velocity = velocity.move_toward(Vector2.ZERO, friction * delta)
 	move_and_slide()
 	
 	if velocity.length_squared() > 100.0:

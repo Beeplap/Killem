@@ -4,8 +4,8 @@ class_name Player3D
 enum WeaponType3D { PISTOL, SHOTGUN, ASSAULT_RIFLE, FLAMETHROWER, MINIGUN }
 
 @export var move_speed: float = 6.0
-@export var acceleration: float = 40.0
-@export var friction: float = 34.0
+@export var acceleration: float = 85.0
+@export var friction: float = 90.0
 @export var step_height: float = 0.35
 
 # Dodge Dash System

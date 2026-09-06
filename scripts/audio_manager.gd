@@ -176,8 +176,12 @@ func _preload_all_sounds() -> void:
 		"pickup_ammo": "res://assets/audio/pickups/pickup_ammo.wav",
 		"pickup_health": "res://assets/audio/pickups/pickup_health.wav",
 		"keycard_chirp": "res://assets/audio/pickups/keycard_chirp.wav",
+		"hit": "res://assets/audio/pickups/hit.ogg",
+		"perk": "res://assets/audio/pickups/keycard_chirp.wav",
+		"wave_clear": "res://assets/audio/weapons/shotgun_pump.wav",
+		"wave_start": "res://assets/audio/zombies/mutant_roar.wav",
 		"explode": "res://assets/audio/environment/explosion.wav",
-		"gate_slam": "res://assets/audio/environment/explosion.wav"
+		"gate_slam": "res://assets/audio/environment/gate_slam.ogg"
 	}
 	
 	for s_name in sound_file_map.keys():
@@ -185,6 +189,10 @@ func _preload_all_sounds() -> void:
 		var base_stream: AudioStream = null
 		if ResourceLoader.exists(path):
 			base_stream = load(path)
+		else:
+			var alt_path = path.replace(".wav", ".ogg") if path.ends_with(".wav") else path.replace(".ogg", ".wav")
+			if ResourceLoader.exists(alt_path):
+				base_stream = load(alt_path)
 		
 		# Fallback to procedural synthesis if asset not on disk
 		if base_stream == null:
@@ -203,16 +211,17 @@ func _get_or_create_sound(sound_name: String) -> AudioStream:
 	if _sound_cache.has(sound_name):
 		return _sound_cache[sound_name]
 	
-	# Try loading directly
-	var path = "res://assets/audio/%s.wav" % sound_name
-	if ResourceLoader.exists(path):
-		var stream = load(path)
-		var rand = AudioStreamRandomizer.new()
-		rand.random_pitch = 1.08
-		rand.random_volume_offset_db = 1.2
-		rand.add_stream(0, stream)
-		_sound_cache[sound_name] = rand
-		return rand
+	# Try loading directly (.ogg or .wav)
+	for ext in [".ogg", ".wav"]:
+		var path = "res://assets/audio/%s%s" % [sound_name, ext]
+		if ResourceLoader.exists(path):
+			var stream = load(path)
+			var rand = AudioStreamRandomizer.new()
+			rand.random_pitch = 1.08
+			rand.random_volume_offset_db = 1.2
+			rand.add_stream(0, stream)
+			_sound_cache[sound_name] = rand
+			return rand
 	
 	# Procedural fallback
 	var proc_stream = _synthesize_procedural_stream(sound_name)
@@ -292,10 +301,10 @@ func trigger_weapons_ducking(duck_db: float = -2.5, restore_time: float = 0.16) 
 func play_weapon_shot(weapon_name: String, pos = null) -> void:
 	play_sound(weapon_name, pos, BUS_WEAPONS)
 	
-	# Eject shell casing ping after 0.25s
-	if weapon_name in ["pistol", "shotgun", "rifle", "minigun"]:
+	# Subtle shell casing ping (only occasional for single-shot pistol/rifle)
+	if weapon_name in ["pistol", "rifle"] and randf() < 0.35:
 		var casing_variant = "casing_%d" % (randi() % 3 + 1)
-		get_tree().create_timer(0.25).timeout.connect(func():
+		get_tree().create_timer(randf_range(0.28, 0.40)).timeout.connect(func():
 			play_sound(casing_variant, pos, BUS_FOLEY)
 		)
 	
@@ -444,22 +453,26 @@ func _synthesize_procedural_stream(sound_name: String) -> AudioStreamWAV:
 		var val: float = 0.0
 		
 		if sound_name in ["explode", "hit", "stomp_crash", "boss_slam", "gate_slam", "zombie_hurt"]:
-			var sub = sin(t * freq * TAU) * 0.7
-			var noise = (randf() * 2.0 - 1.0) * 0.6
-			val = (sub + noise) * pow(decay, 1.8)
+			var noise = (randf() * 2.0 - 1.0) * pow(decay, 1.6)
+			var shock = (1.0 - t * 35.0) if t < 0.025 else 0.0
+			val = tanh(shock * 1.5 + noise * 1.2) * 0.95
 		elif sound_name in ["pistol", "rifle", "shotgun", "minigun_fire"]:
-			var crack = (randf() * 2.0 - 1.0) * exp(-t * 35.0) * 0.8
-			var body = sin(t * freq * TAU) * exp(-t * 22.0) * 0.7
-			val = crack + body
+			var crack = (randf() * 2.0 - 1.0) * exp(-t * 55.0) * 1.4
+			var thump = (randf() * 2.0 - 1.0) * exp(-t * 28.0) * 0.9
+			val = tanh(crack + thump) * 0.92
 		elif sound_name in ["zombie_idle", "zombie_groan", "mutant_roar", "boss_roar"]:
-			var r1 = sin(t * freq * TAU) * 0.6
-			var r2 = sin(t * freq * 1.8 * TAU) * 0.3
-			var rasp = (randf() * 2.0 - 1.0) * 0.2
-			val = (r1 + r2 + rasp) * sin(float(i) / float(frames) * PI)
-		elif sound_name in ["pickup_ammo", "keycard_chirp", "pickup"]:
-			val = sin(t * freq * TAU) * exp(-t * 20.0) * 0.6
+			var pulse = 1.0 if fmod(t * 26.0, 1.0) < 0.15 else -0.2
+			var rasp = (randf() * 2.0 - 1.0) * 0.5
+			val = tanh((pulse + rasp) * sin(float(i) / float(frames) * PI) * 1.5) * 0.85
+		elif sound_name in ["dog_bark"]:
+			var snap = (randf() * 2.0 - 1.0) * exp(-t * 22.0)
+			val = tanh(snap * 1.3) * 0.85
+		elif sound_name in ["footstep_concrete", "footstep_gravel", "footstep_metal"]:
+			var scuff = (randf() * 2.0 - 1.0) * exp(-t * 65.0) * 0.5
+			val = scuff
 		else:
-			val = sin(t * freq * TAU) * decay * 0.7
+			var noise = (randf() * 2.0 - 1.0) * exp(-t * 40.0) * 0.6
+			val = noise
 		
 		var sample_16 = int(clampf(val, -1.0, 1.0) * 32767.0)
 		data.encode_s16(i * 2, sample_16)

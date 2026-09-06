@@ -317,15 +317,16 @@ func play_sound(sound_name: String, pos = null) -> void:
 		var val: float = 0.0
 		
 		if sound_name in ["explode", "hit", "boss_slam", "rock_impact", "gate_slam"]:
-			# Heavy noise with distortion
-			val = (randf() * 2.0 - 1.0) * decay
-		elif sound_name == "boss_roar":
-			var low_rumble = sin(t * freq * TAU) + sin(t * (freq * 0.5) * TAU) * 0.5
-			val = (low_rumble * 0.7 + (randf() * 0.4)) * decay
+			# Heavy noise with punch
+			var shock = (1.0 - t * 30.0) if t < 0.03 else 0.0
+			val = tanh(shock * 1.5 + (randf() * 2.0 - 1.0) * decay * 1.2)
+		elif sound_name in ["boss_roar", "mutant_roar", "zombie_groan"]:
+			var low_rumble = (randf() * 2.0 - 1.0) * 0.7
+			var pulse = 0.8 if fmod(t * 28.0, 1.0) < 0.2 else -0.2
+			val = tanh((low_rumble + pulse) * decay * 1.4)
 		else:
-			# Square / Sine wave with noise kick
-			var phase = sin(t * freq * TAU)
-			val = (phase * 0.7 + (randf() * 0.3)) * decay
+			# Broadband noise impulse with fast mechanical decay (zero cartoon sine waves)
+			val = (randf() * 2.0 - 1.0) * pow(decay, 2.2) * 0.8
 		
 		# Convert -1.0..1.0 to 8-bit unsigned (0..255)
 		var byte_val = int(clamp((val + 1.0) * 127.5, 0, 255))
