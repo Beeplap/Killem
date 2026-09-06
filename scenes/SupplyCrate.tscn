@@ -1,9 +1,9 @@
 [gd_scene format=3 uid="uid://de278qnq00vyy"]
 
-[ext_resource type="Script" path="res://scripts/supply_crate.gd" id="1_crate"]
-[ext_resource type="Texture2D" path="res://assets/textures/props/supply_crate.png" id="2_cratetex"]
-[ext_resource type="Texture2D" path="res://assets/textures/props/supply_crate_n.png" id="3_crate_n"]
-[ext_resource type="Texture2D" path="res://assets/textures/lighting/point_light_cookie.png" id="4_lighttex"]
+[ext_resource type="Script" uid="uid://bkmayqnbhx6j6" path="res://scripts/supply_crate.gd" id="1_crate"]
+[ext_resource type="Texture2D" uid="uid://rqmysap0uyb0" path="res://assets/textures/props/supply_crate.png" id="2_cratetex"]
+[ext_resource type="Texture2D" uid="uid://d1ssmolah7qd4" path="res://assets/textures/props/supply_crate_n.png" id="3_crate_n"]
+[ext_resource type="Texture2D" uid="uid://brd6rqbmehjnl" path="res://assets/textures/lighting/point_light_cookie.png" id="4_lighttex"]
 
 [sub_resource type="CanvasTexture" id="CanvasTexture_crate"]
 diffuse_texture = ExtResource("2_cratetex")
@@ -18,25 +18,25 @@ radius = 90.0
 offsets = PackedFloat32Array(0, 0.4, 1)
 colors = PackedColorArray(1, 0.25, 0.15, 0.85, 0.9, 0.15, 0.1, 0.6, 0.25, 0.2, 0.2, 0)
 
-[node name="SupplyCrate" type="Area2D"]
+[node name="SupplyCrate" type="Area2D" unique_id=697496172]
 collision_layer = 0
-collision_mask = 1
 script = ExtResource("1_crate")
 
-[node name="Sprite2D" type="Sprite2D" parent="."]
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=2124301665]
 texture = SubResource("CanvasTexture_crate")
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=2041955342]
 shape = SubResource("CircleShape2D_radius")
 
-[node name="FlareLight" type="PointLight2D" parent="."]
+[node name="FlareLight" type="PointLight2D" parent="." unique_id=1377340340]
+position = Vector2(0, -1)
 color = Color(1, 0.3, 0.2, 1)
 energy = 1.8
 texture = ExtResource("4_lighttex")
 texture_scale = 2.2
 
-[node name="SmokeParticles" type="CPUParticles2D" parent="."]
-position = Vector2(0, -10)
+[node name="SmokeParticles" type="CPUParticles2D" parent="." unique_id=1100462744]
+position = Vector2(0, -1)
 amount = 22
 lifetime = 1.4
 gravity = Vector2(0, -60)

@@ -1,27 +1,27 @@
 [gd_scene format=3 uid="uid://cxu5gb54wy3ps"]
 
-[ext_resource type="Script" path="res://scripts/zombie.gd" id="1_zombie"]
-[ext_resource type="Texture2D" path="res://assets/textures/characters/zombie_spitter_8dir.png" id="2_spittertex"]
+[ext_resource type="Script" uid="uid://y4a8y61ce4y2" path="res://scripts/zombie.gd" id="1_zombie"]
+[ext_resource type="Texture2D" uid="uid://ctln66cy3jgxu" path="res://assets/textures/characters/zombie_spitter_8dir.png" id="2_spittertex"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_1"]
-radius = 12.0
-height = 30.0
+radius = 9.0
+height = 52.0
 
-[node name="SpitterZombie" type="CharacterBody2D"]
+[node name="SpitterZombie" type="CharacterBody2D" unique_id=1326130191]
 collision_layer = 2
 collision_mask = 7
 script = ExtResource("1_zombie")
 zombie_type = 3
 
-[node name="Sprite2D" type="Sprite2D" parent="."]
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1449221365]
 texture = ExtResource("2_spittertex")
 hframes = 8
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
-position = Vector2(0, 8)
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1896650962]
+position = Vector2(1, 6)
 shape = SubResource("CapsuleShape2D_1")
 
-[node name="NavigationAgent2D" type="NavigationAgent2D" parent="."]
+[node name="NavigationAgent2D" type="NavigationAgent2D" parent="." unique_id=231135749]
 path_desired_distance = 15.0
 target_desired_distance = 25.0
 avoidance_enabled = true
