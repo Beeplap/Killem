@@ -1,0 +1,150 @@
+[gd_scene load_steps=2 format=3]
+
+[sub_resource type="GDScript" id="GDScript_test_boss"]
+script/source = "extends Node3D
+
+func _ready() -> void:
+	print('=== RUNNING MULTI-PHASE 3D APEX BOSS & ARENA VERIFICATION ===')
+	
+	# 1. Instantiate Player3D
+	var player_scene = load('res://scenes/entities/Player3D.tscn')
+	var player = player_scene.instantiate()
+	add_child(player)
+	player.global_position = Vector3(0, 0, 0)
+	print('✔ Player3D instantiated in test arena')
+	
+	# 2. Test Boss Arena Controller & Lockdown
+	var arena_scene = load('res://scenes/mechanics/BossArenaTrigger.tscn')
+	var arena = arena_scene.instantiate()
+	arena.auto_spawn_boss = false # We test manual coupling first
+	arena.boss_hud_scene = null
+	add_child(arena)
+	arena.global_position = Vector3(0, 0, 5)
+	
+	assert(arena.is_locked_down == false, 'Arena must start unlocked')
+	arena.engage_lockdown()
+	assert(arena.is_locked_down == true, 'Arena must be locked down')
+	assert(arena.blast_gate_barrier.process_mode == Node.PROCESS_MODE_INHERIT, 'Blast gate barrier must be active')
+	assert(arena.flame_wall_particles.emitting == true, 'Flame walls must be burning')
+	assert(arena.emergency_light_1.visible == true, 'Emergency lights must be active')
+	print('✔ Boss Arena Controller: Blast gates slammed shut, flame walls raised, crimson lights active')
+	
+	# 3. Test Dedicated Boss HUD
+	var hud_scene = load('res://scenes/ui/BossHUD.tscn')
+	var hud = hud_scene.instantiate()
+	add_child(hud)
+	hud.activate_boss('GOLIATH - BIO-CONTAINMENT SUBJECT 0', 2500.0, 2500.0)
+	assert(hud.is_active == true, 'Boss HUD must be active')
+	assert(hud.boss_name_label.text == 'GOLIATH - BIO-CONTAINMENT SUBJECT 0', 'Boss name banner must match')
+	assert(hud.health_bar.max_value == 2500.0, 'Health bar max value must match')
+	print('✔ Dedicated Boss HUD: Screen-wide health bar, ghost bar, and stylized banner initialized')
+	
+	# 4. Instantiate Goliath Boss 3D
+	var boss_script = load('res://scripts/goliath_boss_3d.gd')
+	var boss_scene = load('res://scenes/enemies/bosses/GoliathBoss3D.tscn')
+	var boss = boss_scene.instantiate()
+	add_child(boss)
+	boss.global_position = Vector3(0, 0, -6)
+	boss.target_player = player
+	
+	# Connect Boss to HUD
+	boss.boss_health_changed.connect(hud.update_boss_health)
+	boss.boss_phase_changed.connect(hud.set_phase)
+	
+	assert(boss.current_phase == boss_script.Phase.PHASE_1, 'Boss must start in Phase 1')
+	assert(boss.current_health == 2500.0, 'Boss starts with full 2500 HP')
+	print('✔ Goliath Boss 3D: Spawned with 2500 HP in Phase 1 (Dormant Aggression)')
+	
+	# 5. Test Phase 1 Cleave Attack
+	boss.start_cleave_attack()
+	assert(boss.current_state == boss_script.State.CLEAVE_WINDUP, 'Boss must enter CLEAVE_WINDUP')
+	assert(boss.cleave_indicator.visible == true, 'Cleave indicator arc must be visible')
+	boss.execute_cleave_sweep()
+	assert(boss.current_state == boss_script.State.CLEAVE_ATTACK, 'Boss must execute CLEAVE_ATTACK')
+	assert(boss.cleave_indicator.visible == false, 'Cleave indicator must hide after strike')
+	print('✔ Phase 1 Telegraphed Cleave Attack (180° frontal arc) verified')
+	
+	# 6. Test Phase 1 Boulder Hurl
+	boss.start_boulder_hurl()
+	assert(boss.current_state == boss_script.State.BOULDER_WINDUP, 'Boss must enter BOULDER_WINDUP')
+	assert(boss.held_boulder.visible == true, 'Held boulder mesh must be visible')
+	boss.throw_boulder()
+	assert(boss.held_boulder.visible == false, 'Held boulder must be thrown')
+	print('✔ Phase 1 Boulder Hurl (high-velocity 3D rock debris) verified')
+	
+	# 7. Test Phase 2 Transition (Enraged State at 60% HP = 1500 HP)
+	# Deal 1050 damage to drop boss to 1450 HP (< 60%)
+	boss.take_damage(1050.0, Vector3(0, 0, 1))
+	assert(boss.current_phase == boss_script.Phase.PHASE_2, 'Boss must transition to Phase 2 Enraged')
+	assert(boss.current_speed >= boss.base_speed * 1.34, 'Boss movement speed must increase by 35%')
+	assert(boss.vent_smoke.emitting == true, 'Vent smoke/spark particles must emit in Phase 2')
+	assert(hud.current_phase == 2, 'HUD must display Phase 2')
+	print('✔ Phase 2 Enraged State: +35% movement speed, vent smoke particles, and HUD phase sync verified')
+	
+	# 8. Test Phase 2 Minion Spawning & Leap Slam
+	var hounds_before = get_tree().get_nodes_in_group('plague_hounds').size()
+	boss.spawn_plague_hounds()
+	var hounds_after = get_tree().get_nodes_in_group('plague_hounds').size()
+	assert(hounds_after > hounds_before, 'Plague Hounds must be spawned')
+	
+	# Test Leap Slam
+	boss.start_leap_slam()
+	assert(boss.current_state == boss_script.State.LEAP_WINDUP, 'Boss must enter LEAP_WINDUP')
+	boss.launch_into_air()
+	assert(boss.current_state == boss_script.State.LEAP_AIR, 'Boss must enter LEAP_AIR')
+	assert(boss.leap_indicator.visible == true, 'Leap indicator shadow must be visible on ground')
+	boss.crash_land()
+	assert(boss.current_state == boss_script.State.LEAP_LAND, 'Boss must crash land with AoE shockwave')
+	assert(boss.leap_indicator.visible == false, 'Leap indicator must hide after landing')
+	print('✔ Phase 2 Plague Hound spawning and Leap Slam AoE attack verified')
+	
+	# 9. Test Phase 3 Transition (Core Meltdown under 20% HP = 500 HP)
+	# Current health is 1450. Deal 1000 damage to drop to 450 HP (< 20%)
+	boss.take_damage(1000.0, Vector3(0, 0, 1))
+	assert(boss.current_phase == boss_script.Phase.PHASE_3, 'Boss must transition to Phase 3 Meltdown')
+	assert(boss.weak_point_light.visible == true, 'Weak point light must be visible in Phase 3')
+	assert(boss.radiation_particles.emitting == true, 'Radiation field particles must emit')
+	assert(hud.current_phase == 3, 'HUD must display Phase 3')
+	print('✔ Phase 3 Core Meltdown: Glowing back weak point and radiation field verified')
+	
+	# 10. Test +200% Critical Damage on Back Weak Point
+	var hp_before_front = boss.current_health
+	# Hit from front: hit_direction against Goliath facing (forward is -Z, projectile moving +Z hits front)
+	boss.take_damage(50.0, Vector3(0, 0, 1))
+	var front_damage_dealt = hp_before_front - boss.current_health
+	assert(abs(front_damage_dealt - 50.0) < 0.1, 'Front hit must deal standard 50 damage')
+	
+	var hp_before_back = boss.current_health
+	# Hit from behind: projectile moving -Z (same as Goliath facing -Z) hits back
+	boss.take_damage(50.0, Vector3(0, 0, -1))
+	var back_damage_dealt = hp_before_back - boss.current_health
+	assert(abs(back_damage_dealt - 150.0) < 0.1, 'Back weak point hit must deal +200% critical damage (150 dmg)')
+	print('✔ Back Weak Point Critical Damage (+200% / 3x damage multiplier) verified')
+	
+	# 11. Test Boss Defeat & Arena Lockdown Release
+	var cleared_called = false
+	arena.arena_cleared.connect(func(): cleared_called = true)
+	boss.boss_defeated_signal.connect(arena._on_boss_defeated)
+	
+	# Eliminate boss
+	boss.take_damage(boss.current_health, Vector3(0, 0, -1))
+	assert(boss.current_state == boss_script.State.DEAD, 'Boss must enter DEAD state')
+	assert(arena.is_cleared == true, 'Arena must be marked cleared')
+	assert(arena.blast_gate_barrier.process_mode == Node.PROCESS_MODE_DISABLED, 'Blast gates must be opened')
+	assert(arena.flame_wall_particles.emitting == false, 'Flame walls must be extinguished')
+	print('✔ Boss Defeat & Arena Lockdown Release: Gates opened, flame walls extinguished, evacuation unlocked')
+	
+	# Cleanup
+	player.queue_free()
+	boss.queue_free()
+	arena.queue_free()
+	hud.queue_free()
+	for h in get_tree().get_nodes_in_group('plague_hounds'):
+		h.queue_free()
+	
+	print('=== ALL 11 MULTI-PHASE APEX BOSS & ARENA CHECKS PASSED PERFECTLY! ===')
+	get_tree().quit(0)
+"
+
+[node name="TestBossEncounter3D" type="Node3D"]
+script = SubResource("GDScript_test_boss")

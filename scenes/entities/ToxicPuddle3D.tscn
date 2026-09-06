@@ -1,0 +1,51 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://scripts/toxic_puddle_3d.gd" id="1_puddle"]
+[ext_resource type="Texture2D" path="res://assets/textures/decals/toxic_pool.png" id="2_pool_tex"]
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_puddle"]
+height = 0.6
+radius = 1.8
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_bubble"]
+shading_mode = 0
+albedo_color = Color(0.45, 1, 0.25, 0.85)
+
+[sub_resource type="SphereMesh" id="SphereMesh_bubble"]
+material = SubResource("StandardMaterial3D_bubble")
+radius = 0.08
+height = 0.16
+
+[node name="ToxicPuddle3D" type="Node3D"]
+script = ExtResource("1_puddle")
+
+[node name="Decal" type="Decal" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.2, 0)
+size = Vector3(3.6, 0.8, 3.6)
+texture_albedo = ExtResource("2_pool_tex")
+distance_fade_enabled = true
+distance_fade_begin = 40.0
+distance_fade_length = 15.0
+
+[node name="Area3D" type="Area3D" parent="."]
+collision_layer = 0
+collision_mask = 1
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, 0)
+shape = SubResource("CylinderShape3D_puddle")
+
+[node name="CPUParticles3D" type="CPUParticles3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 0)
+amount = 16
+lifetime = 0.8
+mesh = SubResource("SphereMesh_bubble")
+emission_shape = 1
+emission_sphere_radius = 1.4
+direction = Vector3(0, 1, 0)
+spread = 20.0
+initial_velocity_min = 0.8
+initial_velocity_max = 1.8
+gravity = Vector3(0, 0.5, 0)
+scale_amount_min = 0.5
+scale_amount_max = 1.4

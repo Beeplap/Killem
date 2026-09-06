@@ -1,0 +1,69 @@
+# Boss Materials
+newmtl Flesh
+Kd 0.18 0.19 0.21
+Ka 0.1 0.1 0.1
+Ks 0.1 0.1 0.1
+Ns 10
+
+newmtl ChitinArmor
+Kd 0.08 0.09 0.11
+Ka 0.05 0.05 0.05
+Ks 0.35 0.35 0.4
+Ns 45
+
+newmtl MoltenCore
+Kd 1.0 0.28 0.04
+Ka 1.0 0.3 0.05
+Ke 1.0 0.35 0.05
+Ks 0.2 0.2 0.2
+Ns 20
+
+newmtl BoneSpikes
+Kd 0.82 0.78 0.68
+Ka 0.4 0.4 0.35
+Ks 0.2 0.2 0.2
+Ns 15
+
+newmtl WeakPoint
+Kd 0.95 0.08 0.15
+Ka 0.8 0.05 0.1
+Ke 0.9 0.1 0.2
+Ks 0.4 0.1 0.1
+Ns 50
+
+newmtl HoundSkin
+Kd 0.22 0.24 0.20
+Ka 0.1 0.1 0.1
+Ks 0.1 0.1 0.1
+Ns 10
+
+newmtl HoundBones
+Kd 0.75 0.72 0.62
+Ka 0.3 0.3 0.25
+Ks 0.15 0.15 0.15
+Ns 15
+
+newmtl HoundEyes
+Kd 1.0 0.1 0.0
+Ke 1.0 0.2 0.0
+Ka 0.5 0.0 0.0
+Ks 0.5 0.5 0.5
+Ns 30
+
+newmtl RockDebris
+Kd 0.28 0.26 0.24
+Ka 0.15 0.14 0.13
+Ks 0.05 0.05 0.05
+Ns 5
+
+newmtl BlastGateSteel
+Kd 0.18 0.20 0.23
+Ka 0.1 0.1 0.12
+Ks 0.5 0.5 0.55
+Ns 60
+
+newmtl HazardGate
+Kd 0.75 0.55 0.12
+Ka 0.3 0.25 0.05
+Ks 0.3 0.3 0.3
+Ns 30

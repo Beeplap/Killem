@@ -1,0 +1,108 @@
+[gd_scene load_steps=14 format=3]
+
+[ext_resource type="Script" path="res://scripts/toxic_spitter_3d.gd" id="1_spitter"]
+[ext_resource type="Texture2D" path="res://assets/textures/characters/zombie_flesh_pbr.png" id="2_flesh"]
+[ext_resource type="Texture2D" path="res://assets/textures/characters/zombie_flesh_pbr_n.png" id="3_norm"]
+[ext_resource type="Texture2D" path="res://assets/textures/characters/acid_pustule_pbr.png" id="4_pustule"]
+[ext_resource type="Texture2D" path="res://assets/textures/characters/acid_pustule_pbr_n.png" id="5_pustule_n"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_spitter"]
+radius = 0.42
+height = 1.85
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_flesh"]
+albedo_texture = ExtResource("2_flesh")
+normal_enabled = true
+normal_texture = ExtResource("3_norm")
+roughness = 0.82
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_torso"]
+material = SubResource("StandardMaterial3D_flesh")
+radius = 0.38
+height = 1.05
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_pustule"]
+albedo_texture = ExtResource("4_pustule")
+normal_enabled = true
+normal_texture = ExtResource("5_pustule_n")
+emission_enabled = true
+emission = Color(0.4, 0.95, 0.2, 1)
+emission_energy_multiplier = 1.8
+roughness = 0.45
+
+[sub_resource type="SphereMesh" id="SphereMesh_sac1"]
+material = SubResource("StandardMaterial3D_pustule")
+radius = 0.28
+height = 0.56
+
+[sub_resource type="SphereMesh" id="SphereMesh_sac2"]
+material = SubResource("StandardMaterial3D_pustule")
+radius = 0.22
+height = 0.44
+
+[sub_resource type="SphereMesh" id="SphereMesh_head"]
+material = SubResource("StandardMaterial3D_flesh")
+radius = 0.2
+height = 0.38
+
+[sub_resource type="BoxMesh" id="BoxMesh_arm"]
+material = SubResource("StandardMaterial3D_flesh")
+size = Vector3(0.12, 0.12, 0.65)
+
+[node name="ToxicSpitter3D" type="CharacterBody3D"]
+collision_layer = 2
+collision_mask = 7
+script = ExtResource("1_spitter")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.95, 0)
+shape = SubResource("CapsuleShape3D_spitter")
+
+[node name="NavigationAgent3D" type="NavigationAgent3D" parent="."]
+
+[node name="Visuals" type="Node3D" parent="."]
+
+[node name="Torso" type="Node3D" parent="Visuals"]
+transform = Transform3D(1, 0, 0, 0, 0.939693, 0.34202, 0, -0.34202, 0.939693, 0, 1.15, 0)
+
+[node name="TorsoMesh" type="MeshInstance3D" parent="Visuals/Torso"]
+mesh = SubResource("CapsuleMesh_torso")
+
+[node name="PustuleLight" type="OmniLight3D" parent="Visuals/Torso"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, -0.35)
+light_color = Color(0.4, 1, 0.2, 1)
+light_energy = 2.0
+omni_range = 4.0
+
+[node name="PustuleCluster" type="Node3D" parent="Visuals/Torso"]
+
+[node name="Pustule1" type="MeshInstance3D" parent="Visuals/Torso/PustuleCluster"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.15, 0.15, -0.28)
+mesh = SubResource("SphereMesh_sac1")
+
+[node name="Pustule2" type="MeshInstance3D" parent="Visuals/Torso/PustuleCluster"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.18, -0.05, -0.26)
+mesh = SubResource("SphereMesh_sac2")
+
+[node name="Head" type="Node3D" parent="Visuals/Torso"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.55, 0.15)
+
+[node name="HeadMesh" type="MeshInstance3D" parent="Visuals/Torso/Head"]
+mesh = SubResource("SphereMesh_head")
+
+[node name="MouthMarker" type="Marker3D" parent="Visuals/Torso/Head"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.05, 0.25)
+
+[node name="LeftArm" type="Node3D" parent="Visuals/Torso"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.42, 0.15, 0)
+
+[node name="ArmMesh" type="MeshInstance3D" parent="Visuals/Torso/LeftArm"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.28)
+mesh = SubResource("BoxMesh_arm")
+
+[node name="RightArm" type="Node3D" parent="Visuals/Torso"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.42, 0.15, 0)
+
+[node name="ArmMesh" type="MeshInstance3D" parent="Visuals/Torso/RightArm"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.28)
+mesh = SubResource("BoxMesh_arm")

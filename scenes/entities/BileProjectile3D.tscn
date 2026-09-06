@@ -1,0 +1,52 @@
+[gd_scene load_steps=7 format=3]
+
+[ext_resource type="Script" path="res://scripts/bile_projectile_3d.gd" id="1_bile"]
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_bile"]
+radius = 0.28
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_bile"]
+shading_mode = 0
+albedo_color = Color(0.4, 1, 0.15, 1)
+
+[sub_resource type="SphereMesh" id="SphereMesh_bile"]
+material = SubResource("StandardMaterial3D_bile")
+radius = 0.22
+height = 0.44
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_trail"]
+shading_mode = 0
+albedo_color = Color(0.6, 1, 0.3, 0.7)
+
+[sub_resource type="SphereMesh" id="SphereMesh_trail"]
+material = SubResource("StandardMaterial3D_trail")
+radius = 0.06
+height = 0.12
+
+[node name="BileProjectile3D" type="Area3D"]
+collision_layer = 16
+collision_mask = 5
+script = ExtResource("1_bile")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("SphereShape3D_bile")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+mesh = SubResource("SphereMesh_bile")
+
+[node name="OmniLight3D" type="OmniLight3D" parent="."]
+light_color = Color(0.35, 1, 0.2, 1)
+light_energy = 2.5
+omni_range = 4.5
+
+[node name="CPUParticles3D" type="CPUParticles3D" parent="."]
+amount = 12
+lifetime = 0.25
+mesh = SubResource("SphereMesh_trail")
+direction = Vector3(0, 0, 1)
+spread = 30.0
+initial_velocity_min = 0.5
+initial_velocity_max = 1.5
+gravity = Vector3(0, -4, 0)
+scale_amount_min = 0.6
+scale_amount_max = 1.2

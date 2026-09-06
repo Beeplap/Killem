@@ -1,4 +1,4 @@
-[gd_scene load_steps=22 format=3]
+[gd_scene load_steps=23 format=3]
 
 [ext_resource type="Script" path="res://scripts/base_level_3d.gd" id="1_level"]
 [ext_resource type="Script" path="res://scripts/camera_isometric_3d.gd" id="2_camera"]
@@ -16,6 +16,7 @@
 [ext_resource type="Texture2D" path="res://assets/textures/ground/asphalt_road_pbr_n.png" id="14_asphalt_n"]
 [ext_resource type="Texture2D" path="res://assets/textures/decals/oil_slick.png" id="15_slick"]
 [ext_resource type="Texture2D" path="res://assets/textures/decals/blast_scorch.png" id="16_scorch"]
+[ext_resource type="PackedScene" path="res://scenes/mechanics/BossArenaTrigger.tscn" id="17_boss_arena"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_sky"]
 sky_top_color = Color(0.35, 0.4, 0.48, 1)
@@ -227,3 +228,10 @@ texture_albedo = ExtResource("16_scorch")
 transform = Transform3D(0.866025, 0, 0.5, 0, 1, 0, -0.5, 0, 0.866025, -7, 0.1, 14)
 size = Vector3(3.5, 1.0, 3.5)
 texture_albedo = ExtResource("16_scorch")
+
+[node name="BossArenaTrigger" parent="." instance=ExtResource("17_boss_arena")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -20)
+
+
+[node name="Enemies" type="Node3D" parent="."]
+

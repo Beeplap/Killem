@@ -1,0 +1,141 @@
+[gd_scene load_steps=2 format=3]
+
+[sub_resource type="GDScript" id="GDScript_test_enemies"]
+script/source = "extends Node3D
+
+func _ready() -> void:
+	print('=== RUNNING TIERED 3D ZOMBIE HIERARCHY VERIFICATION SUITE ===')
+	
+	# 1. Verify Instantiation of all 4 variants
+	var shambler_scene = load('res://scenes/enemies/ShamblerZombie3D.tscn')
+	var hound_scene = load('res://scenes/enemies/PlagueHound3D.tscn')
+	var spitter_scene = load('res://scenes/enemies/ToxicSpitter3D.tscn')
+	var mutant_scene = load('res://scenes/enemies/SuperMutant3D.tscn')
+	
+	assert(shambler_scene != null, 'Shambler scene must exist')
+	assert(hound_scene != null, 'Plague Hound scene must exist')
+	assert(spitter_scene != null, 'Toxic Spitter scene must exist')
+	assert(mutant_scene != null, 'Super Mutant scene must exist')
+	
+	var shambler = shambler_scene.instantiate()
+	var hound = hound_scene.instantiate()
+	var spitter = spitter_scene.instantiate()
+	var mutant = mutant_scene.instantiate()
+	
+	add_child(shambler)
+	add_child(hound)
+	add_child(spitter)
+	add_child(mutant)
+	
+	shambler.global_position = Vector3(-4, 0, 0)
+	hound.global_position = Vector3(0, 0, -4)
+	spitter.global_position = Vector3(4, 0, 0)
+	mutant.global_position = Vector3(0, 0, 4)
+	
+	print('✔ All 4 Enemy Variants successfully instantiated')
+	
+	# 2. Verify NavigationAgent3D presence & configuration
+	for enemy in [shambler, hound, spitter, mutant]:
+		assert(enemy.nav_agent != null, enemy.name + ' must have NavigationAgent3D')
+		assert(enemy.is_in_group('enemies'), enemy.name + ' must be in enemies group')
+	print('✔ NavigationAgent3D components and groups verified')
+	
+	# 3. Verify Hit-Flash Shader & Knockback Physics
+	var initial_flash = shambler.hit_flash_material.get_shader_parameter('flash_amount')
+	assert(initial_flash == 0.0, 'Hit-flash should start at 0')
+	
+	var initial_hp = shambler.current_hp
+	var kb_dir = Vector3(1, 0, 0)
+	shambler.take_damage(25.0, kb_dir)
+	assert(shambler.current_hp == initial_hp - 25.0, 'HP should decrease by damage')
+	assert(shambler.flash_timer > 0.0, 'Flash timer should be active after damage')
+	assert(shambler.knockback_velocity.length() > 0.0, 'Directional knockback velocity should be applied')
+	print('✔ Hit-flash shader and directional knockback mechanics verified')
+	
+	# 4. Verify Super Mutant Knockback Resistance & Scale
+	var mutant_initial_hp = mutant.current_hp
+	assert(mutant_initial_hp >= 1500.0, 'Super Mutant HP must be at least 1500')
+	mutant.take_damage(50.0, kb_dir)
+	assert(mutant.knockback_velocity.length() < shambler.knockback_velocity.length() * 0.15, 'Super Mutant must resist 95% knockback')
+	print('✔ Super Mutant 1500 HP pool and heavy knockback resistance verified')
+	
+	# 5. Verify Floor Blood Decal Spawn on Elimination
+	var decal_container = Node3D.new()
+	decal_container.name = 'Decals'
+	add_child(decal_container)
+	
+	var dummy_shambler = shambler_scene.instantiate()
+	add_child(dummy_shambler)
+	dummy_shambler.global_position = Vector3(1, 0, 1)
+	dummy_shambler.die(Vector3(0, 0, 1))
+	
+	assert(dummy_shambler.is_dead == true, 'Zombie must be in dead state')
+	assert(dummy_shambler.collision_layer == 0, 'Dead zombie collision must be disabled')
+	
+	# Check Decal spawn
+	var found_decal = false
+	for child in decal_container.get_children():
+		if child is Decal:
+			found_decal = true
+			break
+	if not found_decal:
+		for child in get_children():
+			if child is Decal:
+				found_decal = true
+				break
+	assert(found_decal == true, 'Floor Decal must be spawned on zombie elimination')
+	print('✔ Floor 3D Decal blood splatter generation on elimination verified')
+	
+	# 6. Verify Plague Hound Pounce State Machine
+	assert(hound.current_state == hound.HoundState.CHASE, 'Hound starts in CHASE')
+	hound.enter_prepare_leap()
+	assert(hound.current_state == hound.HoundState.PREPARE_LEAP, 'Hound enters PREPARE_LEAP')
+	assert(hound.visuals.scale.y < 1.0, 'Hound telegraph squash scale verified')
+	hound.enter_leaping()
+	assert(hound.current_state == hound.HoundState.LEAPING, 'Hound enters LEAPING')
+	assert(hound.visuals.scale.y > 1.0, 'Hound leap stretch scale verified')
+	hound.enter_cooldown()
+	assert(hound.current_state == hound.HoundState.COOLDOWN, 'Hound enters COOLDOWN')
+	print('✔ Plague Hound Pounce State Machine (CHASE -> PREPARE -> LEAP -> COOLDOWN) verified')
+	
+	# 7. Verify Toxic Spitter Bile Projectile & Toxic Puddle
+	var bile_scene = load('res://scenes/entities/BileProjectile3D.tscn')
+	assert(bile_scene != null, 'BileProjectile3D must exist')
+	var bile = bile_scene.instantiate()
+	add_child(bile)
+	bile.setup(Vector3(0, 2, 0), Vector3(5, 0, 5))
+	assert(bile.velocity.length() > 0.0, 'Bile projectile must have ballistic velocity')
+	
+	var puddle_scene = load('res://scenes/entities/ToxicPuddle3D.tscn')
+	assert(puddle_scene != null, 'ToxicPuddle3D must exist')
+	var puddle = puddle_scene.instantiate()
+	add_child(puddle)
+	assert(puddle.get_node('Area3D') != null, 'Puddle must have damage Area3D')
+	assert(puddle.get_node('Decal') != null, 'Puddle must have toxic decal')
+	print('✔ Toxic Spitter Bile Projectile & ground Toxic Puddle verified')
+	
+	# 8. Verify Super Mutant Ground Stomp & Bull Rush
+	var shockwave_scene = load('res://scenes/entities/Shockwave3D.tscn')
+	assert(shockwave_scene != null, 'Shockwave3D scene must exist')
+	var wave = shockwave_scene.instantiate()
+	add_child(wave)
+	assert(wave.get_node('RingMesh') != null, 'Shockwave must have expanding RingMesh')
+	assert(wave.get_node('Area3D') != null, 'Shockwave must have Area3D')
+	
+	mutant.enter_stomp_windup()
+	assert(mutant.current_boss_state == mutant.BossState.STOMP_WINDUP, 'Mutant enters STOMP_WINDUP')
+	mutant.execute_ground_stomp()
+	assert(mutant.current_boss_state == mutant.BossState.STOMPING, 'Mutant executes STOMP')
+	
+	mutant.enter_rush_prep()
+	assert(mutant.current_boss_state == mutant.BossState.RUSH_PREP, 'Mutant enters RUSH_PREP')
+	mutant.enter_rush()
+	assert(mutant.current_boss_state == mutant.BossState.RUSHING, 'Mutant enters RUSHING')
+	print('✔ Super Mutant Ground Stomp Shockwave & Bull Rush state machine verified')
+	
+	print('=== ALL TIERED 3D ENEMY TESTS PASSED PERFECTLY! ===')
+	get_tree().quit(0)
+"
+
+[node name="TestEnemies3D" type="Node3D"]
+script = SubResource("GDScript_test_enemies")

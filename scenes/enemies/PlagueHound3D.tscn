@@ -1,0 +1,103 @@
+[gd_scene load_steps=12 format=3]
+
+[ext_resource type="Script" path="res://scripts/plague_hound_3d.gd" id="1_hound"]
+[ext_resource type="Texture2D" path="res://assets/textures/characters/hound_hide_pbr.png" id="2_hide"]
+[ext_resource type="Texture2D" path="res://assets/textures/characters/hound_hide_pbr_n.png" id="3_norm"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_hound"]
+size = Vector3(0.65, 0.75, 1.4)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_hide"]
+albedo_texture = ExtResource("2_hide")
+normal_enabled = true
+normal_texture = ExtResource("3_norm")
+roughness = 0.75
+
+[sub_resource type="BoxMesh" id="BoxMesh_body"]
+material = SubResource("StandardMaterial3D_hide")
+size = Vector3(0.5, 0.45, 1.1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_head"]
+material = SubResource("StandardMaterial3D_hide")
+size = Vector3(0.32, 0.3, 0.45)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_eye"]
+shading_mode = 0
+albedo_color = Color(1, 0.1, 0.05, 1)
+
+[sub_resource type="SphereMesh" id="SphereMesh_eye"]
+material = SubResource("StandardMaterial3D_eye")
+radius = 0.04
+height = 0.08
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_leg"]
+material = SubResource("StandardMaterial3D_hide")
+radius = 0.07
+height = 0.5
+
+[node name="PlagueHound3D" type="CharacterBody3D"]
+collision_layer = 2
+collision_mask = 7
+script = ExtResource("1_hound")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.4, 0)
+shape = SubResource("BoxShape3D_hound")
+
+[node name="NavigationAgent3D" type="NavigationAgent3D" parent="."]
+
+[node name="Visuals" type="Node3D" parent="."]
+
+[node name="Torso" type="Node3D" parent="Visuals"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.45, 0)
+
+[node name="BodyMesh" type="MeshInstance3D" parent="Visuals/Torso"]
+mesh = SubResource("BoxMesh_body")
+
+[node name="Head" type="Node3D" parent="Visuals/Torso"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.18, -0.65)
+
+[node name="HeadMesh" type="MeshInstance3D" parent="Visuals/Torso/Head"]
+mesh = SubResource("BoxMesh_head")
+
+[node name="LeftEye" type="MeshInstance3D" parent="Visuals/Torso/Head"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.1, 0.08, -0.16)
+mesh = SubResource("SphereMesh_eye")
+
+[node name="RightEye" type="MeshInstance3D" parent="Visuals/Torso/Head"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.1, 0.08, -0.16)
+mesh = SubResource("SphereMesh_eye")
+
+[node name="EyeLight" type="OmniLight3D" parent="Visuals/Torso/Head"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.05, -0.2)
+light_color = Color(1, 0.15, 0.1, 1)
+light_energy = 1.8
+omni_range = 3.5
+
+[node name="FrontLeftLeg" type="Node3D" parent="Visuals/Torso"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.22, -0.1, -0.4)
+
+[node name="Mesh" type="MeshInstance3D" parent="Visuals/Torso/FrontLeftLeg"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.15, 0)
+mesh = SubResource("CapsuleMesh_leg")
+
+[node name="FrontRightLeg" type="Node3D" parent="Visuals/Torso"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.22, -0.1, -0.4)
+
+[node name="Mesh" type="MeshInstance3D" parent="Visuals/Torso/FrontRightLeg"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.15, 0)
+mesh = SubResource("CapsuleMesh_leg")
+
+[node name="BackLeftLeg" type="Node3D" parent="Visuals/Torso"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.22, -0.1, 0.4)
+
+[node name="Mesh" type="MeshInstance3D" parent="Visuals/Torso/BackLeftLeg"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.15, 0)
+mesh = SubResource("CapsuleMesh_leg")
+
+[node name="BackRightLeg" type="Node3D" parent="Visuals/Torso"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.22, -0.1, 0.4)
+
+[node name="Mesh" type="MeshInstance3D" parent="Visuals/Torso/BackRightLeg"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.15, 0)
+mesh = SubResource("CapsuleMesh_leg")

@@ -258,6 +258,27 @@ func play_sound(sound_name: String) -> void:
 		"wave_start":
 			duration = 0.40
 			freq = 110.0
+		"boss_roar":
+			duration = 0.85
+			freq = 65.0
+		"boss_slam":
+			duration = 0.60
+			freq = 50.0
+		"boss_cleave":
+			duration = 0.28
+			freq = 240.0
+		"boss_alarm":
+			duration = 0.50
+			freq = 620.0
+		"rock_impact":
+			duration = 0.38
+			freq = 75.0
+		"gate_slam":
+			duration = 0.48
+			freq = 95.0
+		"radiation_tick":
+			duration = 0.10
+			freq = 1200.0
 	
 	var stream = AudioStreamWAV.new()
 	stream.format = AudioStreamWAV.FORMAT_8_BITS
@@ -273,9 +294,12 @@ func play_sound(sound_name: String) -> void:
 		var decay = 1.0 - (float(i) / float(frames))
 		var val: float = 0.0
 		
-		if sound_name == "explode" or sound_name == "hit":
-			# Noise with decay
+		if sound_name in ["explode", "hit", "boss_slam", "rock_impact", "gate_slam"]:
+			# Heavy noise with distortion
 			val = (randf() * 2.0 - 1.0) * decay
+		elif sound_name == "boss_roar":
+			var low_rumble = sin(t * freq * TAU) + sin(t * (freq * 0.5) * TAU) * 0.5
+			val = (low_rumble * 0.7 + (randf() * 0.4)) * decay
 		else:
 			# Square / Sine wave with noise kick
 			var phase = sin(t * freq * TAU)
