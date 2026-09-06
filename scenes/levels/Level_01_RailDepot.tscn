@@ -1,0 +1,192 @@
+[gd_scene load_steps=29 format=3]
+
+[ext_resource type="Script" path="res://scripts/level_01_raildepot.gd" id="1_level"]
+[ext_resource type="Script" path="res://scripts/camera_isometric_3d.gd" id="2_camera"]
+[ext_resource type="PackedScene" path="res://scenes/entities/Player3D.tscn" id="3_player"]
+[ext_resource type="PackedScene" path="res://scenes/ui/ObjectiveHUD.tscn" id="4_obj_hud"]
+[ext_resource type="PackedScene" path="res://scenes/HUD.tscn" id="5_hud"]
+[ext_resource type="PackedScene" path="res://scenes/props/BatteryCell.tscn" id="6_battery"]
+[ext_resource type="PackedScene" path="res://scenes/props/RailSwitchConsole.tscn" id="7_console"]
+[ext_resource type="PackedScene" path="res://scenes/mechanics/BossArenaTrigger.tscn" id="8_boss_arena"]
+[ext_resource type="PackedScene" path="res://scenes/mechanics/ExtractionZone.tscn" id="9_extraction"]
+[ext_resource type="PackedScene" path="res://scenes/environment/ConcreteBlastWall.tscn" id="10_wall"]
+[ext_resource type="PackedScene" path="res://scenes/environment/RailwayTrack.tscn" id="11_rail"]
+[ext_resource type="PackedScene" path="res://scenes/environment/ChainlinkFence.tscn" id="12_fence"]
+[ext_resource type="PackedScene" path="res://scenes/environment/OilDrum.tscn" id="13_drum"]
+[ext_resource type="PackedScene" path="res://scenes/environment/OverturnedVehicle.tscn" id="14_wreck"]
+[ext_resource type="PackedScene" path="res://scenes/enemies/ShamblerZombie3D.tscn" id="15_shambler"]
+[ext_resource type="PackedScene" path="res://scenes/enemies/PlagueHound3D.tscn" id="16_hound"]
+[ext_resource type="ArrayMesh" path="res://assets/models/environment/blast_gate.obj" id="17_gate_mesh"]
+[ext_resource type="Texture2D" path="res://assets/textures/ground/dirt_terrain.png" id="18_dirt"]
+[ext_resource type="Texture2D" path="res://assets/textures/ground/dirt_terrain_n.png" id="19_dirt_n"]
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_sky"]
+sky_top_color = Color(0.38, 0.42, 0.48, 1)
+sky_horizon_color = Color(0.68, 0.72, 0.76, 1)
+ground_bottom_color = Color(0.2, 0.22, 0.24, 1)
+ground_horizon_color = Color(0.68, 0.72, 0.76, 1)
+
+[sub_resource type="Sky" id="Sky_env"]
+sky_material = SubResource("ProceduralSkyMaterial_sky")
+
+[sub_resource type="Environment" id="Environment_env"]
+background_mode = 2
+sky = SubResource("Sky_env")
+ambient_light_source = 2
+ambient_light_color = Color(0.88, 0.9, 0.94, 1)
+ambient_light_sky_contribution = 0.5
+tonemap_mode = 3
+volumetric_fog_enabled = true
+volumetric_fog_density = 0.022
+volumetric_fog_albedo = Color(0.75, 0.78, 0.82, 1)
+
+[sub_resource type="NavigationMesh" id="NavigationMesh_nav"]
+geometry_parsed_geometry_type = 1
+agent_radius = 0.45
+agent_height = 1.8
+agent_max_climb = 0.35
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_dirt"]
+albedo_texture = ExtResource("18_dirt")
+normal_enabled = true
+normal_texture = ExtResource("19_dirt_n")
+roughness = 0.9
+uv1_scale = Vector3(12, 12, 12)
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_ground"]
+material = SubResource("StandardMaterial3D_dirt")
+size = Vector2(80, 100)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_ground"]
+size = Vector3(80, 0.2, 100)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_gate"]
+size = Vector3(8, 5, 1)
+
+[node name="Level_01_RailDepot" type="Node3D"]
+script = ExtResource("1_level")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_env")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.819152, -0.32899, 0.469846, 0, 0.819152, 0.573576, -0.573576, -0.469846, 0.67101, 0, 20, 0)
+light_color = Color(0.96, 0.98, 1, 1)
+light_energy = 1.2
+shadow_enabled = true
+
+[node name="IsometricCamera" type="Camera3D" parent="."]
+transform = Transform3D(0.707107, -0.579228, 0.40558, 0, 0.573576, 0.819152, -0.707107, -0.579228, 0.40558, 13.76, 19.66, 13.76)
+rotation_degrees = Vector3(-55, 45, 0)
+fov = 35.0
+size = 16.0
+current = true
+script = ExtResource("2_camera")
+target_path = NodePath("../Player3D")
+distance = 24.0
+
+[node name="Player3D" parent="." instance=ExtResource("3_player")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 12)
+
+[node name="ObjectiveHUD" parent="." instance=ExtResource("4_obj_hud")]
+
+[node name="HUD" parent="." instance=ExtResource("5_hud")]
+
+[node name="NavigationRegion3D" type="NavigationRegion3D" parent="."]
+navigation_mesh = SubResource("NavigationMesh_nav")
+
+[node name="Ground" type="StaticBody3D" parent="NavigationRegion3D"]
+collision_layer = 4
+collision_mask = 7
+
+[node name="DirtMesh" type="MeshInstance3D" parent="NavigationRegion3D/Ground"]
+mesh = SubResource("PlaneMesh_ground")
+
+[node name="DirtCollision" type="CollisionShape3D" parent="NavigationRegion3D/Ground"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.1, 0)
+shape = SubResource("BoxShape3D_ground")
+
+[node name="Railway" type="Node3D" parent="NavigationRegion3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 0, 0)
+
+[node name="Track1" parent="NavigationRegion3D/Railway" instance=ExtResource("11_rail")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -18)
+
+[node name="Track2" parent="NavigationRegion3D/Railway" instance=ExtResource("11_rail")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -12)
+
+[node name="Track3" parent="NavigationRegion3D/Railway" instance=ExtResource("11_rail")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -6)
+
+[node name="Track4" parent="NavigationRegion3D/Railway" instance=ExtResource("11_rail")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+
+[node name="Track5" parent="NavigationRegion3D/Railway" instance=ExtResource("11_rail")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 6)
+
+[node name="Track6" parent="NavigationRegion3D/Railway" instance=ExtResource("11_rail")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 12)
+
+[node name="WallLeft" parent="NavigationRegion3D" instance=ExtResource("10_wall")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 0, 2)
+
+[node name="WallRight" parent="NavigationRegion3D" instance=ExtResource("10_wall")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 0, 2)
+
+[node name="Fence1" parent="NavigationRegion3D" instance=ExtResource("12_fence")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -14, 0, 8)
+
+[node name="Fence2" parent="NavigationRegion3D" instance=ExtResource("12_fence")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 14, 0, 8)
+
+[node name="VehicleWreck" parent="NavigationRegion3D" instance=ExtResource("14_wreck")]
+transform = Transform3D(0.866025, 0.173648, 0.469846, -0.2, 0.979796, 0.007, -0.459, -0.1, 0.882, -8, 0, 10)
+
+[node name="OilDrum1" parent="NavigationRegion3D" instance=ExtResource("13_drum")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 0, 5)
+
+[node name="OilDrum2" parent="NavigationRegion3D" instance=ExtResource("13_drum")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 0, -2)
+
+[node name="BatteryCell1" parent="." instance=ExtResource("6_battery")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 0.1, 4)
+
+[node name="BatteryCell2" parent="." instance=ExtResource("6_battery")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 0.1, -4)
+
+[node name="RailSwitchConsole" parent="." instance=ExtResource("7_console")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 0, -8)
+
+[node name="YardGate" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -13)
+
+[node name="Barrier" type="StaticBody3D" parent="YardGate"]
+collision_layer = 4
+collision_mask = 7
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="YardGate/Barrier"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.5, 0)
+shape = SubResource("BoxShape3D_gate")
+
+[node name="GateMeshRoot" type="Node3D" parent="YardGate"]
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="YardGate/GateMeshRoot"]
+mesh = ExtResource("17_gate_mesh")
+
+[node name="BossArenaTrigger" parent="." instance=ExtResource("8_boss_arena")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -20)
+boss_name = "TRAINYARD MUTATOR - APEX SPECIMEN"
+
+[node name="ExtractionZone" parent="." instance=ExtResource("9_extraction")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -36)
+
+[node name="Enemies" type="Node3D" parent="."]
+
+[node name="Shambler1" parent="Enemies" instance=ExtResource("15_shambler")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 0.1, 2)
+
+[node name="Shambler2" parent="Enemies" instance=ExtResource("15_shambler")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 0.1, 0)
+
+[node name="Hound1" parent="Enemies" instance=ExtResource("16_hound")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 0.1, -4)

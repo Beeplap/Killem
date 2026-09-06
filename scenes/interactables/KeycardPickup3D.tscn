@@ -1,0 +1,13 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/keycard_pickup_3d.gd" id="1"]
+
+[node name="KeycardPickup3D" type="Area3D"]
+script = ExtResource("1")
+collision_layer = 16
+collision_mask = 1
+monitoring = true
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]

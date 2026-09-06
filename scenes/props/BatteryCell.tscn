@@ -1,0 +1,28 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/battery_cell.gd" id="1_script"]
+[ext_resource type="ArrayMesh" path="res://assets/models/props/battery_cell.obj" id="2_mesh"]
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_trigger"]
+radius = 1.2
+
+[node name="BatteryCell" type="Node3D"]
+script = ExtResource("1_script")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.45, 0)
+mesh = ExtResource("2_mesh")
+
+[node name="TriggerArea" type="Area3D" parent="."]
+collision_layer = 0
+collision_mask = 1
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="TriggerArea"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+shape = SubResource("SphereShape3D_trigger")
+
+[node name="EnergyLight" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, 0)
+light_color = Color(0.2, 0.75, 1, 1)
+light_energy = 1.8
+omni_range = 3.5

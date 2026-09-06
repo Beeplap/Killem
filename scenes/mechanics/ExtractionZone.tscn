@@ -1,0 +1,228 @@
+[gd_scene load_steps=9 format=3]
+
+[ext_resource type="Script" path="res://scripts/extraction_zone.gd" id="1_script"]
+[ext_resource type="ArrayMesh" path="res://assets/models/environment/extraction_pad.obj" id="2_pad_mesh"]
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_trigger"]
+height = 2.5
+radius = 3.6
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_flare"]
+shading_mode = 0
+albedo_color = Color(0.2, 1, 0.45, 0.7)
+
+[sub_resource type="SphereMesh" id="SphereMesh_flare"]
+material = SubResource("StandardMaterial3D_flare")
+radius = 0.25
+height = 0.5
+radial_segments = 6
+rings = 3
+
+[sub_resource type="TorusMesh" id="TorusMesh_ring"]
+inner_radius = 3.3
+outer_radius = 3.6
+rings = 24
+ring_segments = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_modal"]
+bg_color = Color(0.06, 0.08, 0.1, 0.94)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.15, 0.85, 0.4, 0.9)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+content_margin_left = 24.0
+content_margin_top = 20.0
+content_margin_right = 24.0
+content_margin_bottom = 20.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn"]
+bg_color = Color(0.12, 0.65, 0.32, 0.9)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.3, 0.9, 0.5, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+content_margin_left = 16.0
+content_margin_top = 10.0
+content_margin_right = 16.0
+content_margin_bottom = 10.0
+
+[node name="ExtractionZone" type="Node3D"]
+script = ExtResource("1_script")
+
+[node name="PadMesh" type="MeshInstance3D" parent="."]
+mesh = ExtResource("2_pad_mesh")
+
+[node name="TriggerArea" type="Area3D" parent="."]
+collision_layer = 0
+collision_mask = 1
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="TriggerArea"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.25, 0)
+shape = SubResource("CylinderShape3D_trigger")
+
+[node name="BeaconLight" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.5, 0)
+light_color = Color(1, 0.5, 0.1, 1)
+light_energy = 1.8
+omni_range = 14.0
+
+[node name="FlareParticles" type="CPUParticles3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.2, 0)
+emitting = false
+amount = 28
+lifetime = 1.2
+direction = Vector3(0, 1, 0)
+spread = 20.0
+initial_velocity_min = 2.5
+initial_velocity_max = 5.0
+gravity = Vector3(0, 1.5, 0)
+mesh = SubResource("SphereMesh_flare")
+
+[node name="RingMesh" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.04, 0)
+mesh = SubResource("TorusMesh_ring")
+
+[node name="StatusLabel3D" type="Label3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.2, 0)
+billboard = 1
+text = "EXTRACTION LOCKED
+OBJECTIVES INCOMPLETE"
+font_size = 32
+outline_size = 6
+
+[node name="SummaryCanvas" type="CanvasLayer" parent="."]
+layer = 15
+visible = false
+
+[node name="SummaryContainer" type="Control" parent="SummaryCanvas"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="BackgroundDim" type="ColorRect" parent="SummaryCanvas/SummaryContainer"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.02, 0.03, 0.04, 0.78)
+
+[node name="Panel" type="PanelContainer" parent="SummaryCanvas/SummaryContainer"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -280.0
+offset_top = -220.0
+offset_right = 280.0
+offset_bottom = 220.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_modal")
+
+[node name="VBox" type="VBoxContainer" parent="SummaryCanvas/SummaryContainer/Panel"]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="TitleLabel" type="Label" parent="SummaryCanvas/SummaryContainer/Panel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.25, 1, 0.55, 1)
+theme_override_font_sizes/font_size = 24
+text = "★ MISSION ACCOMPLISHED ★"
+horizontal_alignment = 1
+
+[node name="LevelLabel" type="Label" parent="SummaryCanvas/SummaryContainer/Panel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.85, 0.9, 0.95, 1)
+theme_override_font_sizes/font_size = 15
+text = "LEVEL 1 - QUARANTINE RAIL DEPOT"
+horizontal_alignment = 1
+
+[node name="HSeparator" type="HSeparator" parent="SummaryCanvas/SummaryContainer/Panel/VBox"]
+layout_mode = 2
+
+[node name="Grid" type="GridContainer" parent="SummaryCanvas/SummaryContainer/Panel/VBox"]
+layout_mode = 2
+theme_override_constants/h_separation = 16
+theme_override_constants/v_separation = 10
+columns = 2
+
+[node name="KillsKey" type="Label" parent="SummaryCanvas/SummaryContainer/Panel/VBox/Grid"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.7, 0.75, 0.8, 1)
+text = "HOSTILES ELIMINATED:"
+
+[node name="KillsVal" type="Label" parent="SummaryCanvas/SummaryContainer/Panel/VBox/Grid"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+text = "48"
+horizontal_alignment = 2
+
+[node name="TimeKey" type="Label" parent="SummaryCanvas/SummaryContainer/Panel/VBox/Grid"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.7, 0.75, 0.8, 1)
+text = "OPERATION TIME:"
+
+[node name="TimeVal" type="Label" parent="SummaryCanvas/SummaryContainer/Panel/VBox/Grid"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+text = "02:45"
+horizontal_alignment = 2
+
+[node name="AccKey" type="Label" parent="SummaryCanvas/SummaryContainer/Panel/VBox/Grid"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.7, 0.75, 0.8, 1)
+text = "COMBAT ACCURACY:"
+
+[node name="AccVal" type="Label" parent="SummaryCanvas/SummaryContainer/Panel/VBox/Grid"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.85, 0.3, 1)
+text = "82.4%"
+horizontal_alignment = 2
+
+[node name="ScoreKey" type="Label" parent="SummaryCanvas/SummaryContainer/Panel/VBox/Grid"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.7, 0.75, 0.8, 1)
+text = "MISSION SCORE:"
+
+[node name="ScoreVal" type="Label" parent="SummaryCanvas/SummaryContainer/Panel/VBox/Grid"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.2, 0.95, 0.5, 1)
+text = "+8,500 PTS"
+horizontal_alignment = 2
+
+[node name="HSeparator2" type="HSeparator" parent="SummaryCanvas/SummaryContainer/Panel/VBox"]
+layout_mode = 2
+
+[node name="CountdownLabel" type="Label" parent="SummaryCanvas/SummaryContainer/Panel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.75, 0.8, 0.85, 0.8)
+theme_override_font_sizes/font_size = 12
+text = "PROCEEDING IN 5 SECONDS (OR PRESS [SPACE] / CLICK)"
+horizontal_alignment = 1
+
+[node name="ProceedButton" type="Button" parent="SummaryCanvas/SummaryContainer/Panel/VBox"]
+custom_minimum_size = Vector2(0, 42)
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn")
+text = "CONTINUE TO NEXT SECTOR"

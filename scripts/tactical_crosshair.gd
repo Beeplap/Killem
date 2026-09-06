@@ -27,12 +27,25 @@ func _process(delta: float) -> void:
 	is_locked_on = false
 	var player = get_tree().get_first_node_in_group("player")
 	if player and is_instance_valid(player):
-		var mouse_world = player.get_global_mouse_position()
-		var enemies = get_tree().get_nodes_in_group("enemies")
-		for enemy in enemies:
-			if is_instance_valid(enemy) and enemy.global_position.distance_to(mouse_world) < 30.0:
-				is_locked_on = true
-				break
+		if player.has_method("get_global_mouse_position"):
+			var mouse_world = player.get_global_mouse_position()
+			var enemies = get_tree().get_nodes_in_group("enemies")
+			for enemy in enemies:
+				if is_instance_valid(enemy) and enemy is Node2D and enemy.global_position.distance_to(mouse_world) < 30.0:
+					is_locked_on = true
+					break
+		else:
+			var cam = get_viewport().get_camera_3d()
+			if cam:
+				var mouse_screen = get_viewport().get_mouse_position()
+				var enemies = get_tree().get_nodes_in_group("enemies")
+				for enemy in enemies:
+					if is_instance_valid(enemy) and enemy is Node3D:
+						if not cam.is_position_behind(enemy.global_position):
+							var enemy_screen = cam.unproject_position(enemy.global_position)
+							if enemy_screen.distance_to(mouse_screen) < 40.0:
+								is_locked_on = true
+								break
 	
 	queue_redraw()
 

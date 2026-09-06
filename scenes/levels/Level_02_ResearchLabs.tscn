@@ -1,0 +1,167 @@
+[gd_scene load_steps=27 format=3]
+
+[ext_resource type="Script" path="res://scripts/level_02_researchlabs.gd" id="1_level"]
+[ext_resource type="Script" path="res://scripts/camera_isometric_3d.gd" id="2_camera"]
+[ext_resource type="PackedScene" path="res://scenes/entities/Player3D.tscn" id="3_player"]
+[ext_resource type="PackedScene" path="res://scenes/ui/ObjectiveHUD.tscn" id="4_obj_hud"]
+[ext_resource type="PackedScene" path="res://scenes/HUD.tscn" id="5_hud"]
+[ext_resource type="PackedScene" path="res://scenes/props/ChemicalValve.tscn" id="6_valve"]
+[ext_resource type="PackedScene" path="res://scenes/props/MasterKeycard.tscn" id="7_keycard"]
+[ext_resource type="PackedScene" path="res://scenes/mechanics/BossArenaTrigger.tscn" id="8_boss_arena"]
+[ext_resource type="PackedScene" path="res://scenes/mechanics/ExtractionZone.tscn" id="9_extraction"]
+[ext_resource type="PackedScene" path="res://scenes/environment/ConcreteBlastWall.tscn" id="10_wall"]
+[ext_resource type="PackedScene" path="res://scenes/enemies/ShamblerZombie3D.tscn" id="11_shambler"]
+[ext_resource type="PackedScene" path="res://scenes/enemies/ToxicSpitter3D.tscn" id="12_spitter"]
+[ext_resource type="ArrayMesh" path="res://assets/models/environment/blast_gate.obj" id="13_gate_mesh"]
+[ext_resource type="Texture2D" path="res://assets/textures/ground/asphalt_road_pbr.png" id="14_floor"]
+[ext_resource type="Texture2D" path="res://assets/textures/ground/asphalt_road_pbr_n.png" id="15_floor_n"]
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_lab"]
+sky_top_color = Color(0.05, 0.08, 0.12, 1)
+sky_horizon_color = Color(0.1, 0.15, 0.2, 1)
+ground_bottom_color = Color(0.04, 0.05, 0.08, 1)
+ground_horizon_color = Color(0.1, 0.15, 0.2, 1)
+
+[sub_resource type="Sky" id="Sky_lab"]
+sky_material = SubResource("ProceduralSkyMaterial_lab")
+
+[sub_resource type="Environment" id="Environment_lab"]
+background_mode = 2
+sky = SubResource("Sky_lab")
+ambient_light_source = 2
+ambient_light_color = Color(0.35, 0.45, 0.55, 1)
+ambient_light_sky_contribution = 0.2
+tonemap_mode = 3
+volumetric_fog_enabled = true
+volumetric_fog_density = 0.035
+volumetric_fog_albedo = Color(0.2, 0.4, 0.45, 1)
+
+[sub_resource type="NavigationMesh" id="NavigationMesh_nav"]
+geometry_parsed_geometry_type = 1
+agent_radius = 0.45
+agent_height = 1.8
+agent_max_climb = 0.35
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_floor"]
+albedo_texture = ExtResource("14_floor")
+normal_enabled = true
+normal_texture = ExtResource("15_floor_n")
+roughness = 0.5
+uv1_scale = Vector3(8, 8, 8)
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_ground"]
+material = SubResource("StandardMaterial3D_floor")
+size = Vector2(70, 90)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_ground"]
+size = Vector3(70, 0.2, 90)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_gate"]
+size = Vector3(8, 5, 1)
+
+[node name="Level_02_ResearchLabs" type="Node3D"]
+script = ExtResource("1_level")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_lab")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.819152, -0.32899, 0.469846, 0, 0.819152, 0.573576, -0.573576, -0.469846, 0.67101, 0, 20, 0)
+light_color = Color(0.4, 0.75, 0.9, 1)
+light_energy = 0.65
+shadow_enabled = true
+
+[node name="IsometricCamera" type="Camera3D" parent="."]
+transform = Transform3D(0.707107, -0.579228, 0.40558, 0, 0.573576, 0.819152, -0.707107, -0.579228, 0.40558, 13.76, 19.66, 13.76)
+rotation_degrees = Vector3(-55, 45, 0)
+fov = 35.0
+size = 16.0
+current = true
+script = ExtResource("2_camera")
+target_path = NodePath("../Player3D")
+distance = 24.0
+
+[node name="Player3D" parent="." instance=ExtResource("3_player")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 14)
+
+[node name="ObjectiveHUD" parent="." instance=ExtResource("4_obj_hud")]
+
+[node name="HUD" parent="." instance=ExtResource("5_hud")]
+
+[node name="NavigationRegion3D" type="NavigationRegion3D" parent="."]
+navigation_mesh = SubResource("NavigationMesh_nav")
+
+[node name="Ground" type="StaticBody3D" parent="NavigationRegion3D"]
+collision_layer = 4
+collision_mask = 7
+
+[node name="FloorMesh" type="MeshInstance3D" parent="NavigationRegion3D/Ground"]
+mesh = SubResource("PlaneMesh_ground")
+
+[node name="FloorCollision" type="CollisionShape3D" parent="NavigationRegion3D/Ground"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.1, 0)
+shape = SubResource("BoxShape3D_ground")
+
+[node name="CorridorWall1" parent="NavigationRegion3D" instance=ExtResource("10_wall")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9, 0, 6)
+
+[node name="CorridorWall2" parent="NavigationRegion3D" instance=ExtResource("10_wall")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9, 0, 6)
+
+[node name="CorridorWall3" parent="NavigationRegion3D" instance=ExtResource("10_wall")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9, 0, -4)
+
+[node name="CorridorWall4" parent="NavigationRegion3D" instance=ExtResource("10_wall")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9, 0, -4)
+
+[node name="NeonLight1" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 3.5, 6)
+light_color = Color(0.15, 0.85, 1, 1)
+light_energy = 2.0
+omni_range = 10.0
+
+[node name="NeonLight2" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 3.5, -4)
+light_color = Color(0.2, 1, 0.45, 1)
+light_energy = 2.0
+omni_range = 10.0
+
+[node name="ChemicalValve1" parent="." instance=ExtResource("6_valve")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7, 0, 4)
+
+[node name="ChemicalValve2" parent="." instance=ExtResource("6_valve")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7, 0, -2)
+
+[node name="MasterKeycard" parent="." instance=ExtResource("7_keycard")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 0, -6)
+
+[node name="ChamberGate" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -11)
+
+[node name="Barrier" type="StaticBody3D" parent="ChamberGate"]
+collision_layer = 4
+collision_mask = 7
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="ChamberGate/Barrier"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.5, 0)
+shape = SubResource("BoxShape3D_gate")
+
+[node name="GateMeshRoot" type="Node3D" parent="ChamberGate"]
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="ChamberGate/GateMeshRoot"]
+mesh = ExtResource("13_gate_mesh")
+
+[node name="BossArenaTrigger" parent="." instance=ExtResource("8_boss_arena")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -18)
+boss_name = "GOLIATH - SUBJECT 0 BIO-CONTAINMENT"
+
+[node name="ExtractionZone" parent="." instance=ExtResource("9_extraction")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -32)
+
+[node name="Enemies" type="Node3D" parent="."]
+
+[node name="Shambler1" parent="Enemies" instance=ExtResource("11_shambler")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 0.1, 8)
+
+[node name="Spitter1" parent="Enemies" instance=ExtResource("12_spitter")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 0.1, 2)

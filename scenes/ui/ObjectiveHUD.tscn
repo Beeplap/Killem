@@ -1,0 +1,60 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/objective_hud.gd" id="1_script"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel"]
+bg_color = Color(0.05, 0.07, 0.09, 0.82)
+border_width_left = 2
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.2, 0.6, 0.9, 0.85)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+content_margin_left = 12.0
+content_margin_top = 10.0
+content_margin_right = 14.0
+content_margin_bottom = 10.0
+
+[node name="ObjectiveHUD" type="CanvasLayer"]
+layer = 12
+script = ExtResource("1_script")
+
+[node name="Container" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -330.0
+offset_top = 18.0
+offset_right = -18.0
+offset_bottom = 160.0
+grow_horizontal = 0
+
+[node name="Panel" type="PanelContainer" parent="Container"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
+
+[node name="VBox" type="VBoxContainer" parent="Container/Panel"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="MissionTitle" type="Label" parent="Container/Panel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.35, 0.8, 1, 1)
+theme_override_font_sizes/font_size = 12
+text = "LEVEL 1 - QUARANTINE RAIL DEPOT"
+
+[node name="HSeparator" type="HSeparator" parent="Container/Panel/VBox"]
+layout_mode = 2
+
+[node name="ObjectivesList" type="VBoxContainer" parent="Container/Panel/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 4

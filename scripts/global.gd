@@ -12,6 +12,9 @@ signal player_died
 signal player_fired
 signal explosion_occurred
 
+var keycards_collected: Array[String] = []
+signal keycard_collected(color: String)
+signal objective_completed(obj_id: String)
 var score: int = 0
 var kills: int = 0
 var current_wave: int = 1
@@ -75,6 +78,7 @@ func reset_state() -> void:
 	is_game_over = false
 	Engine.time_scale = 1.0
 	hitstop_active = false
+	keycards_collected.clear()
 
 func unlock_perk(perk_id: String) -> void:
 	match perk_id:
@@ -314,3 +318,13 @@ func play_sound(sound_name: String) -> void:
 	player.volume_db = -8.0
 	player.finished.connect(player.queue_free)
 	player.play()
+
+func collect_keycard(color: String) -> void:
+	if not color in keycards_collected:
+		keycards_collected.append(color)
+	keycard_collected.emit(color)
+	play_sound("pickup")
+
+func has_keycard(color: String) -> bool:
+	return color in keycards_collected
+
