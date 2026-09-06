@@ -9,6 +9,26 @@
 radius = 12.0
 height = 28.0
 
+[sub_resource type="Gradient" id="Gradient_dust"]
+offsets = PackedFloat32Array(0, 0.25, 0.75, 1)
+colors = PackedColorArray(0.9, 0.95, 1, 0, 1, 0.85, 0.45, 0.55, 0.9, 0.6, 0.25, 0.35, 0.4, 0.4, 0.5, 0)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_dust"]
+gradient = SubResource("Gradient_dust")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_dust"]
+emission_shape = 3
+emission_box_extents = Vector3(680, 400, 1)
+gravity = Vector3(-18, 10, 0)
+initial_velocity_min = 12.0
+initial_velocity_max = 35.0
+scale_min = 1.2
+scale_max = 2.8
+color_ramp = SubResource("GradientTexture1D_dust")
+turbulence_enabled = true
+turbulence_noise_scale = 3.0
+turbulence_noise_speed_random = 0.5
+
 [node name="Player" type="CharacterBody2D"]
 collision_layer = 1
 collision_mask = 6
@@ -26,13 +46,23 @@ shape = SubResource("CapsuleShape2D_1")
 position_smoothing_enabled = true
 position_smoothing_speed = 10.0
 
+[node name="DustMotes" type="GPUParticles2D" parent="Camera2D"]
+z_index = 8
+amount = 64
+lifetime = 4.5
+preprocess = 2.5
+randomness = 0.6
+visibility_rect = Rect2(-700, -420, 1400, 840)
+process_material = SubResource("ParticleProcessMaterial_dust")
+
 [node name="Muzzle" type="Marker2D" parent="."]
 position = Vector2(28, -4)
 
 [node name="Flashlight" type="PointLight2D" parent="."]
 position = Vector2(16, -4)
 color = Color(1, 0.98, 0.92, 1)
-energy = 0.95
+energy = 1.15
+height = 65.0
 shadow_enabled = true
 shadow_filter = 1
 shadow_filter_smooth = 2.0
@@ -44,12 +74,14 @@ offset = Vector2(220, 0)
 position = Vector2(28, -4)
 enabled = false
 color = Color(1, 0.85, 0.4, 1)
-energy = 2.0
+energy = 2.4
+height = 45.0
 texture = ExtResource("4_pointlight")
-texture_scale = 0.7
+texture_scale = 0.8
 
 [node name="AmbientGlow" type="PointLight2D" parent="."]
 color = Color(0.85, 0.9, 1, 1)
-energy = 0.2
+energy = 0.25
+height = 80.0
 texture = ExtResource("4_pointlight")
-texture_scale = 1.0
+texture_scale = 1.2

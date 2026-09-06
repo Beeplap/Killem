@@ -86,6 +86,7 @@ func break_prop(hit_direction: Vector2) -> void:
 
 func trigger_explosion() -> void:
 	Global.play_sound("explode")
+	Global.explosion_occurred.emit()
 	
 	var level = get_tree().current_scene
 	if level:
@@ -162,12 +163,21 @@ func trigger_explosion() -> void:
 			var push = (player.global_position - global_position).normalized()
 			player.take_damage(explosion_damage * 0.45 * falloff, push)
 	
-	# Chain react other destructibles
+	# Interlinking fuel barrels cascading chain explosions within 180px
 	var props = get_tree().get_nodes_in_group("destructibles")
 	for prop in props:
 		if prop != self and is_instance_valid(prop) and not prop.is_broken:
-			if global_position.distance_to(prop.global_position) <= explosion_radius:
-				prop.take_damage(explosion_damage * 0.8)
+			var dist = global_position.distance_to(prop.global_position)
+			if dist <= 180.0:
+				if prop.prop_type == PropType.OIL_BARREL:
+					# Staggered cascade delay of 0.12s - 0.16s for dynamic chain detonation
+					var delay = randf_range(0.12, 0.16)
+					get_tree().create_timer(delay).timeout.connect(func():
+						if is_instance_valid(prop) and not prop.is_broken:
+							prop.take_damage(explosion_damage * 1.5)
+					)
+				else:
+					prop.take_damage(explosion_damage * 0.8)
 
 func spawn_debris(hit_dir: Vector2) -> void:
 	var level = get_tree().current_scene

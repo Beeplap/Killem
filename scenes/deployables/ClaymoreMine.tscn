@@ -1,0 +1,26 @@
+[gd_scene load_steps=5 format=3 uid="uid://claymoredeployable01"]
+
+[ext_resource type="Script" path="res://scripts/deployables/claymore_mine.gd" id="1_claymore"]
+[ext_resource type="Texture2D" path="res://assets/textures/deployables/claymore_mine.png" id="2_claymoretex"]
+[ext_resource type="Texture2D" path="res://assets/textures/lighting/point_light_cookie.png" id="3_lighttex"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_mine"]
+radius = 16.0
+
+[node name="ClaymoreMine" type="Area2D"]
+collision_layer = 0
+collision_mask = 2
+script = ExtResource("1_claymore")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture = ExtResource("2_claymoretex")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_mine")
+
+[node name="LedLight" type="PointLight2D" parent="."]
+position = Vector2(8, 0)
+color = Color(1, 0.2, 0.2, 1)
+energy = 0.65
+texture = ExtResource("3_lighttex")
+texture_scale = 0.25

@@ -2,11 +2,15 @@ extends CanvasLayer
 
 @onready var health_bar: ProgressBar = $VitalsContainer/VBox/HealthBar
 @onready var health_label: Label = $VitalsContainer/VBox/HealthLabel
+@onready var roll_bar: ProgressBar = get_node_or_null("VitalsContainer/VBox/RollBar")
+@onready var roll_label: Label = get_node_or_null("VitalsContainer/VBox/RollLabel")
+
 @onready var weapon_label: Label = $WeaponContainer/VBox/WeaponLabel
 @onready var ammo_label: Label = $WeaponContainer/VBox/AmmoLabel
 @onready var score_label: Label = $ScoreContainer/VBox/ScoreLabel
 @onready var kills_label: Label = $ScoreContainer/VBox/KillsLabel
 @onready var wave_label: Label = $WaveContainer/WaveLabel
+@onready var deploy_label: Label = get_node_or_null("DeployablesContainer/DeployLabel")
 @onready var game_over_panel: Control = $GameOverPanel
 
 @onready var wave_banner: PanelContainer = $WaveBanner
@@ -24,6 +28,9 @@ func _ready() -> void:
 	Global.wave_countdown.connect(_on_wave_countdown)
 	Global.wave_started.connect(_on_wave_started)
 	Global.player_died.connect(_on_player_died)
+	Global.roll_cooldown_updated.connect(_on_roll_cooldown_updated)
+	Global.deployables_updated.connect(_on_deployables_updated)
+	Global.perk_unlocked.connect(_on_perk_unlocked)
 	
 	if wave_banner:
 		wave_banner.visible = false
@@ -32,6 +39,8 @@ func _ready() -> void:
 	Global.emit_current_ammo()
 	_on_score_changed(Global.score, Global.kills)
 	_on_wave_changed(Global.current_wave)
+	_on_roll_cooldown_updated(1.5, 1.5)
+	_on_deployables_updated(Global.deployable_barbed_wire, Global.deployable_claymores, Global.deployable_turrets)
 
 func _unhandled_input(event: InputEvent) -> void:
 	if Global.is_game_over:
@@ -46,6 +55,36 @@ func _on_health_changed(current: float, max_val: float) -> void:
 		health_bar.value = current
 	if health_label:
 		health_label.text = "VITALS: %d / %d" % [int(current), int(max_val)]
+
+func _on_roll_cooldown_updated(current: float, max_val: float) -> void:
+	if roll_bar:
+		roll_bar.max_value = max_val
+		roll_bar.value = current
+	if roll_label:
+		if current >= max_val:
+			roll_label.text = "DODGE ROLL [SPACE]: READY"
+			roll_label.modulate = Color(0.3, 0.9, 1.0, 1.0)
+		else:
+			roll_label.text = "DODGE ROLL [SPACE]: %.1fs" % (max_val - current)
+			roll_label.modulate = Color(0.7, 0.75, 0.8, 0.8)
+
+func _on_deployables_updated(wires: int, mines: int, turrets: int) -> void:
+	if deploy_label:
+		deploy_label.text = "[E] DEPLOY [Q: CYCLE] • ⚡ WIRE: %d | 💣 MINE: %d | 🔫 TURRET: %d" % [wires, mines, turrets]
+
+func _on_perk_unlocked(perk_name: String, description: String) -> void:
+	if wave_banner and banner_title and banner_subtitle:
+		banner_title.text = "PERK UNLOCKED: " + perk_name
+		banner_title.modulate = Color(0.3, 1.0, 0.45, 1.0)
+		banner_subtitle.text = description
+		banner_subtitle.modulate = Color(1.0, 0.9, 0.3, 1.0)
+		wave_banner.visible = true
+		
+		var t = get_tree().create_timer(4.0)
+		banner_hide_timer = t
+		await t.timeout
+		if banner_hide_timer == t and wave_banner.visible and banner_title.text.begins_with("PERK UNLOCKED"):
+			wave_banner.visible = false
 
 func _on_ammo_changed(weapon_name: String, current: int, max_val: int) -> void:
 	if weapon_label:
@@ -86,7 +125,6 @@ func _on_wave_started(wave_num: int) -> void:
 		banner_subtitle.modulate = Color(0.9, 0.9, 0.95, 1.0)
 		wave_banner.visible = true
 		
-		# Auto-hide banner after 2.4 seconds so player has clear view
 		var t = get_tree().create_timer(2.4)
 		banner_hide_timer = t
 		await t.timeout
@@ -111,3 +149,9 @@ func _on_weapon_btn_2_pressed() -> void:
 
 func _on_weapon_btn_3_pressed() -> void:
 	Global.set_weapon(Global.WeaponType.ASSAULT_RIFLE)
+
+func _on_weapon_btn_4_pressed() -> void:
+	Global.set_weapon(Global.WeaponType.FLAMETHROWER)
+
+func _on_weapon_btn_5_pressed() -> void:
+	Global.set_weapon(Global.WeaponType.MINIGUN)

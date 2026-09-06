@@ -2,6 +2,13 @@
 
 [ext_resource type="Script" path="res://scripts/destructible_prop.gd" id="1_prop"]
 [ext_resource type="Texture2D" path="res://assets/textures/props/crate_isometric.png" id="2_cratetex"]
+[ext_resource type="Texture2D" path="res://assets/textures/props/crate_isometric_n.png" id="3_cratetex_n"]
+
+[sub_resource type="CanvasTexture" id="CanvasTexture_crate"]
+diffuse_texture = ExtResource("2_cratetex")
+normal_texture = ExtResource("3_cratetex_n")
+specular_color = Color(0.35, 0.35, 0.38, 1)
+specular_shininess = 12.0
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_1"]
 size = Vector2(36, 32)
@@ -16,7 +23,7 @@ script = ExtResource("1_prop")
 prop_type = 0
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
-texture = ExtResource("2_cratetex")
+texture = SubResource("CanvasTexture_crate")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 position = Vector2(0, 8)

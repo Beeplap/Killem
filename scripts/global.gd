@@ -9,6 +9,8 @@ signal wave_cleared(wave_num: int, cooldown_duration: float)
 signal wave_countdown(seconds_left: int)
 signal wave_started(wave_num: int)
 signal player_died
+signal player_fired
+signal explosion_occurred
 
 var score: int = 0
 var kills: int = 0
@@ -18,13 +20,31 @@ var player_max_health: float = 100.0
 var is_game_over: bool = false
 
 # Weapons
-enum WeaponType { PISTOL, SHOTGUN, ASSAULT_RIFLE }
+enum WeaponType { PISTOL, SHOTGUN, ASSAULT_RIFLE, FLAMETHROWER, MINIGUN }
 
 var current_weapon: WeaponType = WeaponType.PISTOL
 var shotgun_ammo: int = 24
 var shotgun_max_ammo: int = 64
 var rifle_ammo: int = 90
 var rifle_max_ammo: int = 240
+var flamethrower_fuel: int = 150
+var flamethrower_max_fuel: int = 300
+var minigun_ammo: int = 300
+var minigun_max_ammo: int = 600
+
+# Perks
+var perk_full_auto: bool = false
+var perk_extended_mags: bool = false
+var perk_armor_plating: bool = false
+
+# Deployables inventory
+var deployable_barbed_wire: int = 2
+var deployable_claymores: int = 2
+var deployable_turrets: int = 1
+
+signal perk_unlocked(perk_name: String, description: String)
+signal roll_cooldown_updated(current: float, max_val: float)
+signal deployables_updated(wires: int, mines: int, turrets: int)
 
 var hitstop_active: bool = false
 
@@ -39,10 +59,47 @@ func reset_state() -> void:
 	player_max_health = 100.0
 	shotgun_ammo = 24
 	rifle_ammo = 90
+	flamethrower_fuel = 150
+	minigun_ammo = 300
+	shotgun_max_ammo = 64
+	rifle_max_ammo = 240
+	flamethrower_max_fuel = 300
+	minigun_max_ammo = 600
 	current_weapon = WeaponType.PISTOL
+	perk_full_auto = false
+	perk_extended_mags = false
+	perk_armor_plating = false
+	deployable_barbed_wire = 2
+	deployable_claymores = 2
+	deployable_turrets = 1
 	is_game_over = false
 	Engine.time_scale = 1.0
 	hitstop_active = false
+
+func unlock_perk(perk_id: String) -> void:
+	match perk_id:
+		"full_auto":
+			perk_full_auto = true
+			perk_unlocked.emit("FULL AUTO RECEIVER", "Pistol modified with continuous rapid-fire trigger!")
+		"extended_mags":
+			perk_extended_mags = true
+			shotgun_max_ammo = int(shotgun_max_ammo * 1.5)
+			rifle_max_ammo = int(rifle_max_ammo * 1.5)
+			flamethrower_max_fuel = int(flamethrower_max_fuel * 1.5)
+			minigun_max_ammo = int(minigun_max_ammo * 1.5)
+			shotgun_ammo = shotgun_max_ammo
+			rifle_ammo = rifle_max_ammo
+			flamethrower_fuel = flamethrower_max_fuel
+			minigun_ammo = minigun_max_ammo
+			emit_current_ammo()
+			perk_unlocked.emit("EXTENDED MAGAZINES", "+50% maximum ammo capacity for all firearms!")
+		"armor_plating":
+			perk_armor_plating = true
+			player_max_health += 50.0
+			player_health = min(player_max_health, player_health + 50.0)
+			health_changed.emit(player_health, player_max_health)
+			perk_unlocked.emit("BALLISTIC ARMOR PLATING", "+50 Maximum Health and instant vitality surge!")
+	play_sound("perk")
 
 func trigger_hitstop(duration: float = 0.04, scale_factor: float = 0.05) -> void:
 	if is_game_over or hitstop_active:
@@ -74,8 +131,10 @@ func heal_player(amount: float) -> void:
 	health_changed.emit(player_health, player_max_health)
 
 func add_ammo_crate() -> void:
-	shotgun_ammo = min(shotgun_max_ammo, shotgun_ammo + 12)
-	rifle_ammo = min(rifle_max_ammo, rifle_ammo + 45)
+	shotgun_ammo = min(shotgun_max_ammo, shotgun_ammo + 16)
+	rifle_ammo = min(rifle_max_ammo, rifle_ammo + 60)
+	flamethrower_fuel = min(flamethrower_max_fuel, flamethrower_fuel + 80)
+	minigun_ammo = min(minigun_max_ammo, minigun_ammo + 120)
 	emit_current_ammo()
 
 func has_ammo(type: WeaponType) -> bool:
@@ -86,6 +145,10 @@ func has_ammo(type: WeaponType) -> bool:
 			return shotgun_ammo > 0
 		WeaponType.ASSAULT_RIFLE:
 			return rifle_ammo > 0
+		WeaponType.FLAMETHROWER:
+			return flamethrower_fuel > 0
+		WeaponType.MINIGUN:
+			return minigun_ammo > 0
 	return false
 
 func consume_ammo(type: WeaponType) -> bool:
@@ -104,6 +167,18 @@ func consume_ammo(type: WeaponType) -> bool:
 				emit_current_ammo()
 				return true
 			return false
+		WeaponType.FLAMETHROWER:
+			if flamethrower_fuel > 0:
+				flamethrower_fuel -= 1
+				emit_current_ammo()
+				return true
+			return false
+		WeaponType.MINIGUN:
+			if minigun_ammo > 0:
+				minigun_ammo -= 1
+				emit_current_ammo()
+				return true
+			return false
 	return false
 
 func emit_current_ammo() -> void:
@@ -114,6 +189,10 @@ func emit_current_ammo() -> void:
 			ammo_changed.emit("12G SHOTGUN", shotgun_ammo, shotgun_max_ammo)
 		WeaponType.ASSAULT_RIFLE:
 			ammo_changed.emit("ASSAULT RIFLE", rifle_ammo, rifle_max_ammo)
+		WeaponType.FLAMETHROWER:
+			ammo_changed.emit("FLAMETHROWER", flamethrower_fuel, flamethrower_max_fuel)
+		WeaponType.MINIGUN:
+			ammo_changed.emit("ROTARY MINIGUN", minigun_ammo, minigun_max_ammo)
 
 func set_weapon(type: WeaponType) -> void:
 	current_weapon = type
@@ -140,6 +219,15 @@ func play_sound(sound_name: String) -> void:
 		"rifle":
 			duration = 0.07
 			freq = 380.0
+		"flame":
+			duration = 0.14
+			freq = 85.0
+		"minigun_spin":
+			duration = 0.25
+			freq = 520.0
+		"minigun_fire":
+			duration = 0.05
+			freq = 175.0
 		"hit":
 			duration = 0.08
 			freq = 120.0
@@ -152,6 +240,18 @@ func play_sound(sound_name: String) -> void:
 		"zombie_groan":
 			duration = 0.30
 			freq = 110.0
+		"screamer":
+			duration = 0.45
+			freq = 880.0
+		"electric_zap":
+			duration = 0.20
+			freq = 950.0
+		"roll":
+			duration = 0.16
+			freq = 210.0
+		"perk":
+			duration = 0.42
+			freq = 784.0
 		"wave_clear":
 			duration = 0.36
 			freq = 587.33

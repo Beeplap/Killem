@@ -1,0 +1,47 @@
+[gd_scene load_steps=8 format=3 uid="uid://supplycrate01"]
+
+[ext_resource type="Script" path="res://scripts/supply_crate.gd" id="1_crate"]
+[ext_resource type="Texture2D" path="res://assets/textures/props/supply_crate.png" id="2_cratetex"]
+[ext_resource type="Texture2D" path="res://assets/textures/props/supply_crate_n.png" id="3_crate_n"]
+[ext_resource type="Texture2D" path="res://assets/textures/lighting/point_light_cookie.png" id="4_lighttex"]
+
+[sub_resource type="CanvasTexture" id="CanvasTexture_crate"]
+diffuse_texture = ExtResource("2_cratetex")
+normal_texture = ExtResource("3_crate_n")
+specular_color = Color(0.7, 0.75, 0.8, 1)
+specular_shininess = 22.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_radius"]
+radius = 90.0
+
+[sub_resource type="Gradient" id="Gradient_smoke"]
+offsets = PackedFloat32Array(0, 0.4, 1)
+colors = PackedColorArray(1, 0.25, 0.15, 0.85, 0.9, 0.15, 0.1, 0.6, 0.25, 0.2, 0.2, 0)
+
+[node name="SupplyCrate" type="Area2D"]
+collision_layer = 0
+collision_mask = 1
+script = ExtResource("1_crate")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture = SubResource("CanvasTexture_crate")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_radius")
+
+[node name="FlareLight" type="PointLight2D" parent="."]
+color = Color(1, 0.3, 0.2, 1)
+energy = 1.8
+texture = ExtResource("4_lighttex")
+texture_scale = 2.2
+
+[node name="SmokeParticles" type="CPUParticles2D" parent="."]
+position = Vector2(0, -10)
+amount = 22
+lifetime = 1.4
+gravity = Vector2(0, -60)
+initial_velocity_min = 15.0
+initial_velocity_max = 35.0
+scale_amount_min = 6.0
+scale_amount_max = 18.0
+color_ramp = SubResource("Gradient_smoke")

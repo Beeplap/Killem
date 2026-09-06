@@ -6,6 +6,7 @@ const HEAVY_ZOMBIE: PackedScene = preload("res://scenes/HeavyZombie.tscn")
 const SPITTER_ZOMBIE: PackedScene = preload("res://scenes/SpitterZombie.tscn")
 const ARMORED_ZOMBIE: PackedScene = preload("res://scenes/ArmoredZombie.tscn")
 const COLOSSUS_ZOMBIE: PackedScene = preload("res://scenes/ColossusZombie.tscn")
+const SCREAMER_ZOMBIE: PackedScene = preload("res://scenes/ScreamerZombie.tscn")
 
 var zombie_scenes: Dictionary = {
 	"walker": REGULAR_ZOMBIE,
@@ -14,7 +15,8 @@ var zombie_scenes: Dictionary = {
 	"heavy": HEAVY_ZOMBIE,
 	"spitter": SPITTER_ZOMBIE,
 	"armored": ARMORED_ZOMBIE,
-	"colossus": COLOSSUS_ZOMBIE
+	"colossus": COLOSSUS_ZOMBIE,
+	"screamer": SCREAMER_ZOMBIE
 }
 
 # Wave Configuration Variables
@@ -96,28 +98,47 @@ func _process(delta: float) -> void:
 			if cooldown_timer <= 0.0:
 				start_wave(wave_number + 1)
 
+var current_wave_params: Dictionary = {}
+
+func calculate_wave_parameters(wave: int) -> Dictionary:
+	var total_enemies = int(20 + pow(wave, 1.35) * 4)
+	var dog_ratio = clamp(0.15 + (wave * 0.03), 0.15, 0.45)
+	var heavy_ratio = clamp((wave - 4) * 0.04, 0.05, 0.35) if wave >= 5 else 0.0
+	var spawn_delay = max(0.15, 0.65 - (wave * 0.03))
+	return {
+		"count": total_enemies,
+		"dog_ratio": dog_ratio,
+		"heavy_ratio": heavy_ratio,
+		"delay": spawn_delay
+	}
+
 func start_wave(target_wave: int) -> void:
 	wave_number = target_wave
 	Global.current_wave = wave_number
 	Global.wave_changed.emit(wave_number)
 	
-	# Wave 1 starts with 18 zombies (15-20 range), scaling up by 8 (5-10 range) each wave
-	enemies_per_wave = 18 + (wave_number - 1) * wave_scaling_increment
+	current_wave_params = calculate_wave_parameters(wave_number)
+	enemies_per_wave = current_wave_params["count"]
+	spawn_interval = current_wave_params["delay"]
 	zombies_remaining_to_spawn = enemies_per_wave
 	spawn_timer = 0.0
 	boss_spawned_for_wave = false
 	current_state = State.SPAWNING
 	
-	var weights = get_wave_weights(wave_number)
-	var desc_parts: Array[String] = []
-	for k in weights:
-		if weights[k] > 0.0:
-			desc_parts.append("%s: %d%%" % [k.capitalize(), int(round(weights[k] * 100))])
-	var dist_str = ", ".join(desc_parts)
-	print("[SPAWNER] STARTING WAVE %d: %d zombies in batches of 3-5 every %.1fs [%s]" % [wave_number, enemies_per_wave, spawn_interval, dist_str])
+	print("[SPAWNER] STARTING WAVE %d (Endless Survival): %d zombies in batches of 3-5 every %.2fs [Dogs: %d%%, Heavies: %d%%]" % [
+		wave_number,
+		enemies_per_wave,
+		spawn_interval,
+		int(current_wave_params["dog_ratio"] * 100),
+		int(current_wave_params["heavy_ratio"] * 100)
+	])
 	
 	Global.wave_started.emit(wave_number)
 	Global.play_sound("wave_start")
+	
+	# Air drop every 4 waves (waves 4, 8, 12...)
+	if wave_number % 4 == 0:
+		spawn_air_drop()
 
 func spawn_batch(count: int) -> void:
 	if player == null or not is_instance_valid(player):
@@ -165,47 +186,49 @@ func spawn_boss_zombie() -> void:
 	spawn_pos.x = clamp(spawn_pos.x, -1300.0, 1300.0)
 	spawn_pos.y = clamp(spawn_pos.y, -1300.0, 1300.0)
 	
-	var boss = zombie_scenes["colossus"].instantiate()
+	var boss = COLOSSUS_ZOMBIE.instantiate()
 	boss.global_position = spawn_pos
 	boss.wave_number = wave_number
 	get_parent().add_child(boss)
 	Global.play_sound("zombie_groan")
 
-func get_wave_weights(wave: int) -> Dictionary:
-	# Wave-gated progression rules:
-	# Wave 1 & 2: 100% Regular Walkers
-	# Wave 3 & 4: Introduce Infected Dogs (70% Walkers, 30% Dogs)
-	# Wave 5+: Introduce Heavy Mutants (50% Walkers, 35% Dogs, 15% Heavy Mutants)
-	match wave:
-		1:
-			return {"walker": 1.0, "dog": 0.0, "heavy": 0.0}
-		2:
-			return {"walker": 1.0, "dog": 0.0, "heavy": 0.0}
-		3:
-			return {"walker": 0.72, "dog": 0.28, "heavy": 0.0}
-		4:
-			return {"walker": 0.68, "dog": 0.32, "heavy": 0.0}
-		5:
-			return {"walker": 0.50, "dog": 0.35, "heavy": 0.15}
-		6:
-			return {"walker": 0.48, "dog": 0.35, "heavy": 0.17}
-		7:
-			return {"walker": 0.45, "dog": 0.35, "heavy": 0.20}
-		_:
-			# Wave 8+: Scaled distribution with progressive mutant pressure
-			var heavy_w = min(0.28, 0.15 + (wave - 5) * 0.02)
-			var dog_w = 0.35
-			var walker_w = max(0.30, 1.0 - (heavy_w + dog_w))
-			return {"walker": walker_w, "dog": dog_w, "heavy": heavy_w}
+func spawn_air_drop() -> void:
+	if player == null or not is_instance_valid(player):
+		return
+	var crate_scene = preload("res://scenes/SupplyCrate.tscn")
+	var crate = crate_scene.instantiate()
+	var angle = randf() * TAU
+	var dist = randf_range(200.0, 340.0)
+	var pos = player.global_position + Vector2(cos(angle), sin(angle)) * dist
+	pos.x = clamp(pos.x, -1100.0, 1100.0)
+	pos.y = clamp(pos.y, -1100.0, 1100.0)
+	crate.global_position = pos
+	get_parent().call_deferred("add_child", crate)
 
 func select_zombie_scene() -> PackedScene:
-	var weights = get_wave_weights(wave_number)
 	var roll = randf()
-	var cumulative: float = 0.0
+	var dog_ratio: float = current_wave_params.get("dog_ratio", 0.15)
+	var heavy_ratio: float = current_wave_params.get("heavy_ratio", 0.0)
 	
-	for enemy_key in weights.keys():
-		cumulative += weights[enemy_key]
-		if roll <= cumulative and weights[enemy_key] > 0.0:
-			return zombie_scenes.get(enemy_key, REGULAR_ZOMBIE)
+	var armored_ratio = clamp((wave_number - 3) * 0.03, 0.0, 0.22) if wave_number >= 4 else 0.0
+	var spitter_ratio = clamp((wave_number - 1) * 0.025, 0.0, 0.18) if wave_number >= 2 else 0.0
+	var screamer_ratio = clamp((wave_number - 2) * 0.025, 0.0, 0.15) if wave_number >= 3 else 0.0
 	
-	return zombie_scenes.get("walker", REGULAR_ZOMBIE)
+	var t_dog = dog_ratio
+	var t_heavy = t_dog + heavy_ratio
+	var t_armored = t_heavy + armored_ratio
+	var t_spitter = t_armored + spitter_ratio
+	var t_screamer = t_spitter + screamer_ratio
+	
+	if roll < t_dog:
+		return INFECTED_DOG
+	elif roll < t_heavy:
+		return HEAVY_ZOMBIE
+	elif roll < t_armored:
+		return ARMORED_ZOMBIE
+	elif roll < t_spitter:
+		return SPITTER_ZOMBIE
+	elif roll < t_screamer:
+		return SCREAMER_ZOMBIE
+	else:
+		return REGULAR_ZOMBIE

@@ -1,0 +1,44 @@
+[gd_scene load_steps=7 format=3 uid="uid://powertransformer01"]
+
+[ext_resource type="Script" path="res://scripts/power_transformer.gd" id="1_trans"]
+[ext_resource type="Texture2D" path="res://assets/textures/props/power_transformer.png" id="2_transtex"]
+[ext_resource type="Texture2D" path="res://assets/textures/props/power_transformer_n.png" id="3_trans_n"]
+[ext_resource type="Texture2D" path="res://assets/textures/lighting/point_light_cookie.png" id="4_lighttex"]
+
+[sub_resource type="CanvasTexture" id="CanvasTexture_trans"]
+diffuse_texture = ExtResource("2_transtex")
+normal_texture = ExtResource("3_trans_n")
+specular_color = Color(0.65, 0.7, 0.8, 1)
+specular_shininess = 20.0
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_trans"]
+size = Vector2(32, 38)
+
+[node name="PowerTransformer" type="StaticBody2D"]
+collision_layer = 4
+collision_mask = 7
+script = ExtResource("1_trans")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture = SubResource("CanvasTexture_trans")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_trans")
+
+[node name="PointLight2D" type="PointLight2D" parent="."]
+enabled = false
+color = Color(0.4, 0.85, 1, 1)
+energy = 2.0
+texture = ExtResource("4_lighttex")
+texture_scale = 2.5
+
+[node name="CPUParticles2D" type="CPUParticles2D" parent="."]
+emitting = false
+amount = 32
+lifetime = 0.35
+spread = 180.0
+initial_velocity_min = 90.0
+initial_velocity_max = 240.0
+scale_amount_min = 1.5
+scale_amount_max = 4.0
+color = Color(0.45, 0.9, 1, 1)

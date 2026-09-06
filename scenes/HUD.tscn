@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3 uid="uid://chudscene001"]
+[gd_scene load_steps=10 format=3 uid="uid://chudscene001"]
 
 [ext_resource type="Script" path="res://scripts/hud.gd" id="1_hud"]
 [ext_resource type="Shader" path="res://shaders/post_process.gdshader" id="2_postprocess"]
@@ -30,6 +30,14 @@ border_width_top = 1
 border_width_right = 1
 border_width_bottom = 1
 border_color = Color(1, 0.4, 0.4, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_roll_fill"]
+bg_color = Color(0.2, 0.65, 0.95, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.5, 0.85, 1, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel"]
 bg_color = Color(0.08, 0.1, 0.12, 0.88)
@@ -117,7 +125,7 @@ anchors_preset = 2
 anchor_top = 1.0
 anchor_bottom = 1.0
 offset_left = 24.0
-offset_top = -88.0
+offset_top = -128.0
 offset_right = 320.0
 offset_bottom = -24.0
 grow_vertical = 0
@@ -125,19 +133,35 @@ theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
 
 [node name="VBox" type="VBoxContainer" parent="VitalsContainer"]
 layout_mode = 2
+theme_override_constants/separation = 3
 
 [node name="HealthLabel" type="Label" parent="VitalsContainer/VBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.95, 0.25, 0.25, 1)
-theme_override_font_sizes/font_size = 14
+theme_override_font_sizes/font_size = 13
 text = "VITALS: 100 / 100"
 
 [node name="HealthBar" type="ProgressBar" parent="VitalsContainer/VBox"]
-custom_minimum_size = Vector2(0, 20)
+custom_minimum_size = Vector2(0, 16)
 layout_mode = 2
 theme_override_styles/background = SubResource("StyleBoxFlat_health_bg")
 theme_override_styles/fill = SubResource("StyleBoxFlat_health_fill")
 value = 100.0
+show_percentage = false
+
+[node name="RollLabel" type="Label" parent="VitalsContainer/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.3, 0.85, 1, 1)
+theme_override_font_sizes/font_size = 12
+text = "DODGE ROLL [SPACE]: READY"
+
+[node name="RollBar" type="ProgressBar" parent="VitalsContainer/VBox"]
+custom_minimum_size = Vector2(0, 10)
+layout_mode = 2
+theme_override_styles/background = SubResource("StyleBoxFlat_health_bg")
+theme_override_styles/fill = SubResource("StyleBoxFlat_roll_fill")
+max_value = 1.5
+value = 1.5
 show_percentage = false
 
 [node name="WeaponContainer" type="PanelContainer" parent="."]
@@ -172,49 +196,85 @@ theme_override_font_sizes/font_size = 15
 text = "AMMO: ∞"
 horizontal_alignment = 2
 
+[node name="DeployablesContainer" type="PanelContainer" parent="."]
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -260.0
+offset_top = -118.0
+offset_right = 260.0
+offset_bottom = -82.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
+
+[node name="DeployLabel" type="Label" parent="DeployablesContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.95, 0.85, 0.3, 1)
+theme_override_font_sizes/font_size = 13
+text = "[E] DEPLOY [Q: CYCLE] • ⚡ WIRE: 2 | 💣 MINE: 2 | 🔫 TURRET: 1"
+horizontal_alignment = 1
+vertical_alignment = 1
+
 [node name="MobileWeaponButtons" type="HBoxContainer" parent="."]
 anchors_preset = 7
 anchor_left = 0.5
 anchor_top = 1.0
 anchor_right = 0.5
 anchor_bottom = 1.0
-offset_left = -110.0
+offset_left = -190.0
 offset_top = -70.0
-offset_right = 110.0
+offset_right = 190.0
 offset_bottom = -22.0
 grow_horizontal = 2
 grow_vertical = 0
-theme_override_constants/separation = 12
+theme_override_constants/separation = 8
 
 [node name="Btn1" type="Button" parent="MobileWeaponButtons"]
-custom_minimum_size = Vector2(60, 44)
+custom_minimum_size = Vector2(66, 44)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.98, 0.82, 0.15, 1)
-theme_override_font_sizes/font_size = 14
+theme_override_font_sizes/font_size = 13
 text = "[1] 9MM"
 
 [node name="Btn2" type="Button" parent="MobileWeaponButtons"]
-custom_minimum_size = Vector2(60, 44)
+custom_minimum_size = Vector2(66, 44)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.98, 0.82, 0.15, 1)
-theme_override_font_sizes/font_size = 14
+theme_override_font_sizes/font_size = 13
 text = "[2] SHG"
 
 [node name="Btn3" type="Button" parent="MobileWeaponButtons"]
-custom_minimum_size = Vector2(60, 44)
+custom_minimum_size = Vector2(66, 44)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.98, 0.82, 0.15, 1)
-theme_override_font_sizes/font_size = 14
+theme_override_font_sizes/font_size = 13
 text = "[3] RIFLE"
+
+[node name="Btn4" type="Button" parent="MobileWeaponButtons"]
+custom_minimum_size = Vector2(66, 44)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.98, 0.82, 0.15, 1)
+theme_override_font_sizes/font_size = 13
+text = "[4] FLM"
+
+[node name="Btn5" type="Button" parent="MobileWeaponButtons"]
+custom_minimum_size = Vector2(66, 44)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.98, 0.82, 0.15, 1)
+theme_override_font_sizes/font_size = 13
+text = "[5] MINI"
 
 [node name="WaveBanner" type="PanelContainer" parent="."]
 visible = false
 anchors_preset = 5
 anchor_left = 0.5
 anchor_right = 0.5
-offset_left = -220.0
+offset_left = -280.0
 offset_top = 28.0
-offset_right = 220.0
+offset_right = 280.0
 offset_bottom = 108.0
 grow_horizontal = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_banner")
@@ -290,3 +350,5 @@ script = ExtResource("3_crosshair")
 [connection signal="pressed" from="MobileWeaponButtons/Btn1" to="." method="_on_weapon_btn_1_pressed"]
 [connection signal="pressed" from="MobileWeaponButtons/Btn2" to="." method="_on_weapon_btn_2_pressed"]
 [connection signal="pressed" from="MobileWeaponButtons/Btn3" to="." method="_on_weapon_btn_3_pressed"]
+[connection signal="pressed" from="MobileWeaponButtons/Btn4" to="." method="_on_weapon_btn_4_pressed"]
+[connection signal="pressed" from="MobileWeaponButtons/Btn5" to="." method="_on_weapon_btn_5_pressed"]

@@ -3,7 +3,7 @@ class_name Zombie
 
 const BLOOD_SPLAT_SCRIPT = preload("res://scripts/blood_splat.gd")
 
-enum ZombieType { REGULAR, INFECTED_DOG, HEAVY, SPITTER, ARMORED, COLOSSUS }
+enum ZombieType { REGULAR, INFECTED_DOG, HEAVY, SPITTER, ARMORED, COLOSSUS, SCREAMER }
 
 @export var zombie_type: ZombieType = ZombieType.REGULAR
 @export var wave_number: int = 1
@@ -18,6 +18,17 @@ var current_health: float = 70.0
 var attack_timer: float = 0.0
 var hit_flash_timer: float = 0.0
 var knockback_velocity: Vector2 = Vector2.ZERO
+var current_facing_dir: Vector2 = Vector2.DOWN
+
+# Status Effects
+var slow_factor: float = 1.0
+var slow_timer: float = 0.0
+var burning_timer: float = 0.0
+var burning_dps: float = 0.0
+var burning_tick_timer: float = 0.0
+var enrage_timer: float = 0.0
+var stagger_timer: float = 0.0
+var screamer_cooldown_timer: float = 4.0
 
 var player: Node2D = null
 
@@ -57,7 +68,7 @@ func configure_type() -> void:
 		ZombieType.REGULAR:
 			max_health = 70.0
 			speed = 125.0
-			attack_damage = 6.0 # Reduced from 18
+			attack_damage = 6.0
 			attack_range = 38.0
 			attack_cooldown = 0.95
 			score_value = 100
@@ -69,7 +80,7 @@ func configure_type() -> void:
 		ZombieType.INFECTED_DOG:
 			max_health = 40.0
 			speed = 235.0
-			attack_damage = 4.0 # Reduced from 14
+			attack_damage = 4.0
 			attack_range = 40.0
 			attack_cooldown = 0.65
 			score_value = 140
@@ -81,7 +92,7 @@ func configure_type() -> void:
 		ZombieType.HEAVY:
 			max_health = 250.0
 			speed = 70.0
-			attack_damage = 14.0 # Reduced from 40
+			attack_damage = 14.0
 			attack_range = 50.0
 			attack_cooldown = 1.3
 			score_value = 280
@@ -125,6 +136,18 @@ func configure_type() -> void:
 			if sprite:
 				sprite.texture = load("res://assets/textures/characters/zombie_colossus_8dir.png")
 				sprite.hframes = 8
+		
+		ZombieType.SCREAMER:
+			max_health = 110.0
+			speed = 135.0
+			attack_damage = 5.0
+			attack_range = 36.0
+			attack_cooldown = 1.0
+			score_value = 220
+			base_scale = 1.05
+			if sprite:
+				sprite.texture = load("res://assets/textures/characters/zombie_screamer_8dir.png")
+				sprite.hframes = 8
 	
 	# Progressive growth in size as waves and time pass
 	var wave_growth = 1.0 + min((wave_number - 1) * 0.045, 0.40)
@@ -134,6 +157,20 @@ func configure_type() -> void:
 func _find_player() -> void:
 	player = get_tree().get_first_node_in_group("player")
 
+func apply_slow(factor: float, duration: float) -> void:
+	slow_factor = min(slow_factor, factor)
+	slow_timer = max(slow_timer, duration)
+
+func ignite(duration: float, dps: float) -> void:
+	burning_timer = max(burning_timer, duration)
+	burning_dps = max(burning_dps, dps)
+
+func enrage(duration: float) -> void:
+	enrage_timer = max(enrage_timer, duration)
+
+func stagger(duration: float) -> void:
+	stagger_timer = max(stagger_timer, duration)
+
 func _physics_process(delta: float) -> void:
 	if current_health <= 0.0:
 		return
@@ -141,6 +178,37 @@ func _physics_process(delta: float) -> void:
 	if player == null or not is_instance_valid(player):
 		_find_player()
 		return
+	
+	# Handle Stagger (e.g. from shotgun blast, explosive, or screaming)
+	if stagger_timer > 0.0:
+		stagger_timer -= delta
+		velocity = velocity.move_toward(Vector2.ZERO, 800.0 * delta)
+		move_and_slide()
+		return
+	
+	# Handle Slow status
+	if slow_timer > 0.0:
+		slow_timer -= delta
+		if slow_timer <= 0.0:
+			slow_factor = 1.0
+	
+	# Handle Burning DOT
+	if burning_timer > 0.0:
+		burning_timer -= delta
+		burning_tick_timer -= delta
+		if burning_tick_timer <= 0.0:
+			burning_tick_timer = 0.25
+			take_damage(burning_dps * 0.25, Vector2.ZERO)
+		
+		# Visual flame flicker
+		if sprite and hit_flash_timer <= 0.0:
+			sprite.modulate = Color(1.8, 0.7 + sin(burning_timer * 25.0) * 0.25, 0.25, 1.0)
+	
+	# Handle Enrage status
+	if enrage_timer > 0.0:
+		enrage_timer -= delta
+		if sprite and hit_flash_timer <= 0.0 and burning_timer <= 0.0:
+			sprite.modulate = Color(1.35, 0.45, 0.45, 1.0) # Crimson enraged tint
 	
 	if attack_timer > 0.0:
 		attack_timer -= delta
@@ -152,6 +220,9 @@ func _physics_process(delta: float) -> void:
 				sprite.material.set_shader_parameter("flash_amount", 0.0)
 			elif sprite:
 				sprite.modulate = Color.WHITE
+	elif burning_timer <= 0.0 and enrage_timer <= 0.0:
+		if sprite:
+			sprite.modulate = Color.WHITE
 	
 	# Apply knockback decay
 	if knockback_velocity.length_squared() > 1.0:
@@ -160,23 +231,42 @@ func _physics_process(delta: float) -> void:
 	var target_pos = player.global_position
 	var dist_to_player = global_position.distance_to(target_pos)
 	
-	# 8-Directional 2.5D Isometric orientation (do not rotate node, change sprite frame)
+	# 8-Directional 2.5D Isometric orientation
 	var face_dir = (target_pos - global_position).normalized()
 	update_facing(face_dir)
 	
-	# Pathfinding using NavigationAgent2D with direct fallback
-	var move_dir: Vector2 = Vector2.ZERO
-	if nav_agent and not nav_agent.is_navigation_finished():
-		nav_agent.target_position = target_pos
-		var next_path_pos = nav_agent.get_next_path_position()
-		move_dir = (next_path_pos - global_position).normalized()
+	# Screamer special behavior: Maintain 280-350px distance and emit shockwave every 8s
+	if zombie_type == ZombieType.SCREAMER:
+		screamer_cooldown_timer -= delta
+		if screamer_cooldown_timer <= 0.0:
+			screamer_cooldown_timer = 8.0
+			screech_and_buff()
 	
-	# Fallback if navigation path is not ready or blocked
-	if move_dir == Vector2.ZERO or nav_agent.is_target_reached():
-		move_dir = (target_pos - global_position).normalized()
+	var move_dir: Vector2 = Vector2.ZERO
+	if zombie_type == ZombieType.SCREAMER:
+		if dist_to_player < 260.0:
+			# Retreat from player
+			move_dir = -(target_pos - global_position).normalized()
+		elif dist_to_player > 360.0:
+			move_dir = (target_pos - global_position).normalized()
+		else:
+			# Circle / hover at range
+			move_dir = Vector2(-face_dir.y, face_dir.x) * 0.4
+	else:
+		# Pathfinding using NavigationAgent2D with direct fallback
+		if nav_agent and not nav_agent.is_navigation_finished():
+			nav_agent.target_position = target_pos
+			var next_path_pos = nav_agent.get_next_path_position()
+			move_dir = (next_path_pos - global_position).normalized()
+		
+		# Fallback if navigation path is not ready or blocked
+		if move_dir == Vector2.ZERO or nav_agent.is_target_reached():
+			move_dir = (target_pos - global_position).normalized()
+	
+	var current_speed = speed * slow_factor * (1.30 if enrage_timer > 0.0 else 1.0)
 	
 	if dist_to_player > (attack_range * 0.75):
-		velocity = (move_dir * speed) + knockback_velocity
+		velocity = (move_dir * current_speed) + knockback_velocity
 	else:
 		velocity = knockback_velocity
 		if attack_timer <= 0.0 and dist_to_player <= attack_range:
@@ -184,7 +274,39 @@ func _physics_process(delta: float) -> void:
 	
 	move_and_slide()
 
+func screech_and_buff() -> void:
+	stagger(0.65)
+	Global.play_sound("screamer")
+	
+	var level = get_tree().current_scene
+	if level:
+		# Shockwave ring
+		var wave = CPUParticles2D.new()
+		wave.emitting = true
+		wave.one_shot = true
+		wave.explosiveness = 0.95
+		wave.amount = 30
+		wave.lifetime = 0.55
+		wave.spread = 180.0
+		wave.initial_velocity_min = 180.0
+		wave.initial_velocity_max = 360.0
+		wave.scale_amount_min = 3.0
+		wave.scale_amount_max = 6.0
+		wave.color = Color(1.0, 0.2, 0.2, 0.85)
+		wave.global_position = global_position
+		wave.finished.connect(wave.queue_free)
+		level.add_child(wave)
+	
+	# Buff nearby allies within 360px with +30% speed and red rage
+	var allies = get_tree().get_nodes_in_group("enemies")
+	for ally in allies:
+		if is_instance_valid(ally) and ally != self:
+			if global_position.distance_to(ally.global_position) <= 360.0:
+				if ally.has_method("enrage"):
+					ally.enrage(6.0)
+
 func update_facing(face_dir: Vector2) -> void:
+	current_facing_dir = face_dir
 	var angle = face_dir.angle()
 	var dir_idx = int(round(angle / (PI / 4.0)))
 	if dir_idx < 0:
@@ -207,10 +329,22 @@ func take_damage(amount: float, hit_direction: Vector2 = Vector2.ZERO) -> void:
 	if current_health <= 0.0:
 		return
 	
-	# Armored zombie resists 40% of incoming bullet damage
 	var effective_damage = amount
+	
+	# Armored Riot Zombie frontal riot shield deflecting 80% direct bullet damage
 	if zombie_type == ZombieType.ARMORED:
-		effective_damage *= 0.60
+		if hit_direction != Vector2.ZERO:
+			# hit_direction points along bullet trajectory.
+			# If bullet is hitting frontal shield, it travels opposite to zombie's facing direction.
+			if hit_direction.normalized().dot(current_facing_dir) < -0.2:
+				effective_damage = amount * 0.20 # 80% deflected!
+				spawn_shield_ricochet(hit_direction)
+				Global.play_sound("hit")
+				# Stagger if hit by heavy blast (e.g. shotgun or explosive)
+				if amount >= 35.0:
+					stagger(0.45)
+		else:
+			effective_damage = amount * 0.50
 	
 	current_health -= effective_damage
 	hit_flash_timer = 0.08
@@ -233,15 +367,47 @@ func take_damage(amount: float, hit_direction: Vector2 = Vector2.ZERO) -> void:
 	if current_health <= 0.0:
 		die(hit_direction)
 
+func spawn_shield_ricochet(hit_dir: Vector2) -> void:
+	var level = get_tree().current_scene
+	if level:
+		var sparks = CPUParticles2D.new()
+		sparks.emitting = true
+		sparks.one_shot = true
+		sparks.explosiveness = 0.95
+		sparks.amount = 8
+		sparks.lifetime = 0.2
+		sparks.direction = -hit_dir
+		sparks.spread = 50.0
+		sparks.initial_velocity_min = 100.0
+		sparks.initial_velocity_max = 220.0
+		sparks.scale_amount_min = 1.5
+		sparks.scale_amount_max = 3.0
+		sparks.color = Color(1.0, 0.9, 0.35)
+		sparks.global_position = global_position
+		sparks.finished.connect(sparks.queue_free)
+		level.add_child(sparks)
+
 func die(hit_direction: Vector2) -> void:
 	Global.add_kill(score_value)
 	spawn_blood_splat(hit_direction)
+	
+	# Toxic Bloater / Acid Spitter leaves a 6-second glowing green acid pool
+	if zombie_type == ZombieType.SPITTER:
+		var acid_scene = preload("res://scenes/AcidPool.tscn")
+		var pool = acid_scene.instantiate()
+		pool.global_position = global_position
+		var level = get_tree().current_scene
+		if level:
+			level.add_child(pool)
+		elif get_parent():
+			get_parent().add_child(pool)
 	
 	# Micro-Hitstop freeze frame when killing a heavy zombie or boss
 	if zombie_type in [ZombieType.HEAVY, ZombieType.ARMORED, ZombieType.COLOSSUS]:
 		Global.trigger_hitstop(0.04, 0.05)
 	
 	if zombie_type == ZombieType.COLOSSUS:
+		Global.explosion_occurred.emit()
 		if player and player.has_method("trigger_shake"):
 			player.trigger_shake(14.0, 0.4)
 		# Colossus drops guaranteed health and ammo

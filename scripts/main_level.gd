@@ -1,46 +1,65 @@
 extends Node2D
 
 @onready var bunker_light: PointLight2D = get_node_or_null("EnvironmentObjects/BunkerBuilding/BunkerLamp")
+@onready var yard_light_1: PointLight2D = get_node_or_null("Lighting/YardFloodlight1")
+@onready var yard_light_2: PointLight2D = get_node_or_null("Lighting/YardFloodlight2")
 @onready var player: CharacterBody2D = $Player
 @onready var spawner: Node2D = $ZombieSpawner
+@onready var post_process_rect: ColorRect = get_node_or_null("PostProcessLayer/PostProcessRect")
 
+var post_process_mat: ShaderMaterial = null
+var firing_dirt_intensity: float = 0.0
+var explosion_aberration_intensity: float = 0.0
+var action_grain_boost: float = 0.0
 var flicker_time: float = 0.0
 
 func _ready() -> void:
-	# Ensure Y-sort is active for 2.5D visual depth
 	y_sort_enabled = true
-	apply_procedural_textures()
-
-func apply_procedural_textures() -> void:
-	# 1. Ground / Ballast repeating noise texture (512x512 Simplex freq 0.05 + gravel grain)
-	var dirt_bg: TextureRect = get_node_or_null("GroundLayers/DirtBackground")
-	if dirt_bg:
-		dirt_bg.texture = ProceduralTextures.get_ground_texture()
-		dirt_bg.texture_repeat = CanvasItem.TEXTURE_REPEAT_ENABLED
 	
-	# 2. Concrete wall vertical streaks & edge grunge
-	var wall_tex = ProceduralTextures.get_concrete_wall_texture()
-	var wall1 = get_node_or_null("EnvironmentObjects/ConcreteWall1/Sprite2D")
-	if wall1:
-		wall1.texture = wall_tex
-	var wall2 = get_node_or_null("EnvironmentObjects/ConcreteWall2/Sprite2D")
-	if wall2:
-		wall2.texture = wall_tex
+	if post_process_rect and post_process_rect.material is ShaderMaterial:
+		post_process_mat = post_process_rect.material
 	
-	# 3. Metal rail edge highlights and rust mottling (#8b4513 specs)
-	var rail_tex = ProceduralTextures.get_metal_rail_texture()
-	var tracks = get_node_or_null("GroundLayers/RailwayTracks")
-	if tracks:
-		for child in tracks.get_children():
-			if child is Sprite2D and child.name.begins_with("Track"):
-				child.texture = rail_tex
+	Global.player_fired.connect(_on_player_fired)
+	Global.explosion_occurred.connect(_on_explosion_occurred)
 
 func _process(delta: float) -> void:
+	# Bunker sodium worklight flicker
 	if bunker_light:
 		flicker_time += delta * 14.0
-		# Atmospheric sodium floodlight humming flicker
 		var flicker = sin(flicker_time) * 0.06 + sin(flicker_time * 2.7) * 0.04
 		if randf() < 0.008:
-			bunker_light.energy = 0.45 # Voltage drop flicker
+			bunker_light.energy = 0.45
 		else:
 			bunker_light.energy = lerp(bunker_light.energy, 1.55 + flicker, delta * 10.0)
+	
+	# Update cinematic post-processing dynamic action parameters
+	if post_process_mat:
+		if firing_dirt_intensity > 0.0:
+			firing_dirt_intensity = move_toward(firing_dirt_intensity, 0.0, delta * 3.5)
+			post_process_mat.set_shader_parameter("firing_lens_dirt", firing_dirt_intensity)
+		
+		if explosion_aberration_intensity > 0.0:
+			explosion_aberration_intensity = move_toward(explosion_aberration_intensity, 0.0, delta * 0.12)
+			post_process_mat.set_shader_parameter("action_burst_aberration", explosion_aberration_intensity)
+		
+		if action_grain_boost > 0.0:
+			action_grain_boost = move_toward(action_grain_boost, 0.0, delta * 0.25)
+			post_process_mat.set_shader_parameter("action_grain_boost", action_grain_boost)
+
+func trigger_firing_effect() -> void:
+	firing_dirt_intensity = 0.65
+	if post_process_mat:
+		post_process_mat.set_shader_parameter("firing_lens_dirt", firing_dirt_intensity)
+
+func trigger_explosion_effect() -> void:
+	explosion_aberration_intensity = 0.045
+	action_grain_boost = 0.15
+	if post_process_mat:
+		post_process_mat.set_shader_parameter("action_burst_aberration", explosion_aberration_intensity)
+		post_process_mat.set_shader_parameter("action_grain_boost", action_grain_boost)
+
+func _on_player_fired() -> void:
+	trigger_firing_effect()
+
+func _on_explosion_occurred() -> void:
+	trigger_explosion_effect()
