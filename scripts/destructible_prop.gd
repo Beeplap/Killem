@@ -166,17 +166,18 @@ func trigger_explosion() -> void:
 	# Interlinking fuel barrels cascading chain explosions within 180px
 	var props = get_tree().get_nodes_in_group("destructibles")
 	for prop in props:
-		if prop != self and is_instance_valid(prop) and not prop.is_broken:
+		if prop != self and is_instance_valid(prop) and not prop.get("is_broken"):
 			var dist = global_position.distance_to(prop.global_position)
 			if dist <= 180.0:
-				if prop.prop_type == PropType.OIL_BARREL:
+				# Guard: not all destructibles have prop_type (e.g. power_transformer)
+				if "prop_type" in prop and prop.prop_type == PropType.OIL_BARREL:
 					# Staggered cascade delay of 0.12s - 0.16s for dynamic chain detonation
 					var delay = randf_range(0.12, 0.16)
 					get_tree().create_timer(delay).timeout.connect(func():
-						if is_instance_valid(prop) and not prop.is_broken:
+						if is_instance_valid(prop) and not prop.get("is_broken"):
 							prop.take_damage(explosion_damage * 1.5)
 					)
-				else:
+				elif prop.has_method("take_damage"):
 					prop.take_damage(explosion_damage * 0.8)
 
 func spawn_debris(hit_dir: Vector2) -> void:

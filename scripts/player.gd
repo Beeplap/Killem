@@ -514,11 +514,12 @@ func process_flame_cone(base_dir: Vector2, spawn_pos: Vector2) -> void:
 	# Ignite / damage destructibles
 	var props = get_tree().get_nodes_in_group("destructibles")
 	for prop in props:
-		if is_instance_valid(prop) and not ("is_broken" in prop and prop.is_broken) and not ("is_burned_out" in prop and prop.is_burned_out):
+		if is_instance_valid(prop) and not (prop.get("is_broken")) and not (prop.get("is_burned_out")):
 			var diff = prop.global_position - spawn_pos
 			if diff.length() <= flame_range:
 				if base_dir.dot(diff.normalized()) >= flame_cos:
-					prop.take_damage(26.0, base_dir)
+					if prop.has_method("take_damage"):
+						prop.take_damage(26.0, base_dir)
 
 func add_trauma(amount: float) -> void:
 	trauma = clampf(trauma + amount, 0.0, 1.0)
