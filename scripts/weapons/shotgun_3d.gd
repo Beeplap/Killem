@@ -63,8 +63,8 @@ func pump_cycle() -> void:
 		var audio_mgr = Engine.get_main_loop().root.get_node_or_null("AudioManager") if Engine.get_main_loop() else null
 		if audio_mgr and audio_mgr.has_method("play_sound"):
 			audio_mgr.play_sound("shotgun_pump", eject_pos, "Weapons")
-		else:
-			Global.play_sound("perk", eject_pos)
+		elif Engine.get_main_loop() and Engine.get_main_loop().root.has_node("Global"):
+			Engine.get_main_loop().root.get_node("Global").play_sound("perk", eject_pos)
 	)
 	
 	# Push forward into chambered battery

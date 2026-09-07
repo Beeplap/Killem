@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3]
+[gd_scene load_steps=14 format=3]
 
 [ext_resource type="Script" path="res://scripts/player_3d.gd" id="1_script"]
 [ext_resource type="PackedScene" path="res://scenes/weapons/Pistol3D.tscn" id="2_pistol"]
@@ -6,14 +6,15 @@
 [ext_resource type="PackedScene" path="res://scenes/weapons/AK3D.tscn" id="4_ak"]
 [ext_resource type="PackedScene" path="res://assets/models/weapons/Flamethrower3D.tscn" id="5_flame"]
 [ext_resource type="PackedScene" path="res://assets/models/weapons/Minigun3D.tscn" id="6_minigun"]
-[ext_resource type="ArrayMesh" uid="uid://oyos2rxdbqyt" path="res://assets/models/weapons/swat_operator.obj" id="7_operator_mesh"]
+[ext_resource type="ArrayMesh" uid="uid://ct7uipuyrqmil" path="res://assets/models/character/mercenary_legs.obj" id="7_legs_mesh"]
+[ext_resource type="ArrayMesh" uid="uid://dixti7bmpxrja" path="res://assets/models/character/mercenary_torso.obj" id="8_torso_mesh"]
+[ext_resource type="ArrayMesh" uid="uid://bgmvidwp4bt0i" path="res://assets/models/character/mercenary_head.obj" id="9_head_mesh"]
+[ext_resource type="ArrayMesh" uid="uid://dyvwewi3co4qk" path="res://assets/models/character/mercenary_left_arm.obj" id="10_l_arm_mesh"]
+[ext_resource type="ArrayMesh" uid="uid://d3iakd0egw52q" path="res://assets/models/character/mercenary_right_arm.obj" id="11_r_arm_mesh"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_player"]
 radius = 0.35
 height = 1.8
-
-[sub_resource type="BoxMesh" id="BoxMesh_arm"]
-size = Vector3(0.09, 0.09, 0.35)
 
 [node name="Player3D" type="CharacterBody3D"]
 collision_layer = 1
@@ -43,14 +44,20 @@ fov = 48.0
 
 [node name="BodyMesh" type="Node3D" parent="."]
 
-[node name="OperatorMesh" type="MeshInstance3D" parent="BodyMesh"]
-mesh = ExtResource("7_operator_mesh")
+[node name="LegsMesh" type="MeshInstance3D" parent="BodyMesh"]
+mesh = ExtResource("7_legs_mesh")
 
 [node name="TorsoPivot" type="Node3D" parent="BodyMesh"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.15, 0)
 
+[node name="TorsoMesh" type="MeshInstance3D" parent="BodyMesh/TorsoPivot"]
+mesh = ExtResource("8_torso_mesh")
+
 [node name="HeadPivot" type="Node3D" parent="BodyMesh/TorsoPivot"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.42, 0)
+
+[node name="HeadMesh" type="MeshInstance3D" parent="BodyMesh/TorsoPivot/HeadPivot"]
+mesh = ExtResource("9_head_mesh")
 
 [node name="Flashlight" type="SpotLight3D" parent="BodyMesh/TorsoPivot"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.22, 0.05, 0.1)
@@ -62,21 +69,19 @@ spot_attenuation = 0.8
 spot_angle = 32.0
 
 [node name="LeftArm" type="Node3D" parent="BodyMesh/TorsoPivot"]
-transform = Transform3D(0.965926, 0, 0.258819, 0, 1, 0, -0.258819, 0, 0.965926, -0.24, 0.02, 0.06)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.24, 0.02, 0.06)
 
 [node name="ArmMesh" type="MeshInstance3D" parent="BodyMesh/TorsoPivot/LeftArm"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.06, -0.04, 0.16)
-mesh = SubResource("BoxMesh_arm")
+mesh = ExtResource("10_l_arm_mesh")
 
 [node name="RightArm" type="Node3D" parent="BodyMesh/TorsoPivot"]
-transform = Transform3D(0.984808, 0, -0.173648, 0, 1, 0, 0.173648, 0, 0.984808, 0.24, 0.02, 0.06)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.24, 0.02, 0.06)
 
 [node name="ArmMesh" type="MeshInstance3D" parent="BodyMesh/TorsoPivot/RightArm"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.04, -0.04, 0.16)
-mesh = SubResource("BoxMesh_arm")
+mesh = ExtResource("11_r_arm_mesh")
 
 [node name="RightHandSocket" type="Node3D" parent="BodyMesh/TorsoPivot/RightArm"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.08, -0.04, 0.32)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.06, -0.07, 0.38)
 
 [node name="Pistol3D" parent="BodyMesh/TorsoPivot/RightArm/RightHandSocket" instance=ExtResource("2_pistol")]
 
@@ -93,4 +98,4 @@ visible = false
 visible = false
 
 [node name="RightHandAttachment" type="Marker3D" parent="BodyMesh/TorsoPivot/RightArm"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.08, -0.04, 0.32)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.06, -0.07, 0.38)

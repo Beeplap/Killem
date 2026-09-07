@@ -41,7 +41,7 @@ window/stretch/mode="canvas_items"
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/phantom_camera", "res://addons/terrain_3d")
+enabled=PackedStringArray("res://addons/terrain_3d")
 
 [input]
 
@@ -114,7 +114,3 @@ deploy_item={
 
 textures/vram_compression/import_etc2_astc=true
 environment/defaults/default_clear_color=Color(0.690196, 0.709804, 0.741176, 1)
-
-[editor_plugins]
-
-enabled=PackedStringArray("res://addons/terrain_3d")

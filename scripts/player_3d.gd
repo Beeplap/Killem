@@ -40,8 +40,13 @@ var trauma: float = 0.0
 # Node References
 @onready var camera_mount: Node3D = get_node_or_null("CameraMount")
 @onready var camera: Camera3D = get_node_or_null("CameraMount/Camera3D")
+@onready var legs_mesh: MeshInstance3D = get_node_or_null("BodyMesh/LegsMesh")
 @onready var torso_pivot: Node3D = get_node_or_null("BodyMesh/TorsoPivot")
+@onready var torso_mesh: MeshInstance3D = get_node_or_null("BodyMesh/TorsoPivot/TorsoMesh")
 @onready var head_pivot: Node3D = get_node_or_null("BodyMesh/TorsoPivot/HeadPivot")
+@onready var head_mesh: MeshInstance3D = get_node_or_null("BodyMesh/TorsoPivot/HeadPivot/HeadMesh")
+@onready var left_arm_mesh: MeshInstance3D = get_node_or_null("BodyMesh/TorsoPivot/LeftArm/ArmMesh")
+@onready var right_arm_mesh: MeshInstance3D = get_node_or_null("BodyMesh/TorsoPivot/RightArm/ArmMesh")
 @onready var right_hand_socket: Node3D = get_node_or_null("BodyMesh/TorsoPivot/RightArm/RightHandSocket")
 @onready var right_hand_attachment: Node3D = right_hand_socket if right_hand_socket else get_node_or_null("BodyMesh/TorsoPivot/RightArm/RightHandAttachment")
 @onready var flashlight: SpotLight3D = get_node_or_null("BodyMesh/TorsoPivot/Flashlight")
@@ -73,6 +78,19 @@ func _find_weapon_node(w_name: String) -> Node3D:
 		if n: return n
 	return null
 
+func _apply_pbr_character_materials() -> void:
+	var meshes = [legs_mesh, torso_mesh, head_mesh, left_arm_mesh, right_arm_mesh]
+	for m in meshes:
+		if m and m is MeshInstance3D and m.mesh:
+			for i in range(m.mesh.get_surface_count()):
+				var surf_mat = m.mesh.surface_get_material(i)
+				if surf_mat and surf_mat.resource_name:
+					var pbr_path = "res://assets/materials/character/" + surf_mat.resource_name + ".tres"
+					if ResourceLoader.exists(pbr_path):
+						var custom_mat = load(pbr_path)
+						if custom_mat:
+							m.set_surface_override_material(i, custom_mat)
+
 func _ready() -> void:
 	add_to_group("player")
 	add_to_group("player3d")
@@ -85,6 +103,7 @@ func _ready() -> void:
 		default_hand_pos = hand_node.position
 		default_hand_rot = hand_node.rotation
 	
+	_apply_pbr_character_materials()
 	switch_weapon(WeaponType3D.PISTOL)
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -164,6 +183,15 @@ func handle_movement(delta: float) -> void:
 		velocity.x = move_toward(velocity.x, target_vel.x, acceleration * delta)
 		velocity.z = move_toward(velocity.z, target_vel.z, acceleration * delta)
 		
+		# Smoothly swivel legs mesh toward movement heading
+		if legs_mesh and input_vec.length_squared() > 0.01:
+			var target_move_yaw: float = atan2(-input_vec.x, -input_vec.z)
+			legs_mesh.rotation.y = lerp_angle(legs_mesh.rotation.y, target_move_yaw, delta * 12.0)
+		
+		# Subtle walking bob on upper body
+		if torso_pivot:
+			torso_pivot.position.y = 1.15 + sin(Time.get_ticks_msec() * 0.014) * 0.018
+		
 		# Align step-up raycasts along movement heading
 		if step_ray_low and step_ray_high:
 			step_ray_low.target_position = input_vec * 0.5
@@ -177,6 +205,11 @@ func handle_movement(delta: float) -> void:
 	else:
 		velocity.x = move_toward(velocity.x, 0.0, friction * delta)
 		velocity.z = move_toward(velocity.z, 0.0, friction * delta)
+		
+		if torso_pivot:
+			torso_pivot.position.y = lerpf(torso_pivot.position.y, 1.15, delta * 8.0)
+		if legs_mesh and torso_pivot:
+			legs_mesh.rotation.y = lerp_angle(legs_mesh.rotation.y, torso_pivot.rotation.y, delta * 4.0)
 	
 	# Gravity on ground
 	if not is_on_floor():

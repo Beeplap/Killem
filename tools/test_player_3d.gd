@@ -10,11 +10,12 @@ func _init() -> void:
 	player.global_position = Vector3(0, 0, 0)
 	
 	# 2. Verify Mesh Hierarchy
-	assert(player.get_node("BodyMesh/OperatorMesh") != null, "OperatorMesh must exist")
-	assert(player.get_node("BodyMesh/TorsoPivot") != null, "TorsoPivot must exist")
+	assert(player.get_node("BodyMesh/LegsMesh") != null, "LegsMesh must exist")
+	assert(player.get_node("BodyMesh/TorsoPivot/TorsoMesh") != null, "TorsoMesh must exist")
+	assert(player.get_node("BodyMesh/TorsoPivot/HeadPivot/HeadMesh") != null, "HeadMesh must exist")
 	assert(player.get_node("BodyMesh/TorsoPivot/Flashlight") != null, "Flashlight SpotLight3D must exist")
 	assert(player.get_node("BodyMesh/TorsoPivot/RightArm/RightHandAttachment") != null, "RightHandAttachment must exist")
-	print("✔ Dedicated SWAT Operator Mesh Hierarchy verified")
+	print("✔ High-Detail Cyber-Mercenary Operative Mesh Hierarchy verified")
 	
 	# 3. Verify Weapon Socket & All 5 Weapons
 	assert(player.weapon_pistol != null, "Pistol3D must be present")
