@@ -33,12 +33,16 @@ enum State {
 	WAVE_CLEARED_REST
 }
 
+const SUPPLY_DROP_SCENE: PackedScene = preload("res://scenes/mechanics/SupplyDrop.tscn")
+const SUPPLY_DROP_INTERVAL: float = 30.0
+
 var current_state: State = State.SPAWNING
 var zombies_remaining_to_spawn: int = 0
 var spawn_timer: float = 0.0
 var cooldown_timer: float = 0.0
 var last_announced_second: int = -1
 var boss_spawned_for_wave: bool = false
+var supply_drop_timer: float = 0.0
 
 var player: Node2D = null
 
@@ -52,6 +56,12 @@ func _process(delta: float) -> void:
 	if player == null or not is_instance_valid(player):
 		player = get_tree().get_first_node_in_group("player")
 		return
+	
+	# Repeating 30-Second Tactical Supply Drop
+	supply_drop_timer += delta
+	if supply_drop_timer >= SUPPLY_DROP_INTERVAL:
+		supply_drop_timer = 0.0
+		spawn_air_drop()
 	
 	match current_state:
 		State.SPAWNING:
@@ -178,15 +188,18 @@ func spawn_boss_zombie() -> void:
 	Global.play_sound("zombie_groan")
 
 func spawn_air_drop() -> void:
+	spawn_supply_drop()
+
+func spawn_supply_drop() -> void:
 	if player == null or not is_instance_valid(player):
 		return
-	var crate_scene = preload("res://scenes/SupplyCrate.tscn")
-	var crate = crate_scene.instantiate()
+	var drop = SUPPLY_DROP_SCENE.instantiate()
 	var angle = randf() * TAU
-	var dist = randf_range(200.0, 340.0)
+	var dist = randf_range(180.0, 320.0)
 	var pos = player.global_position + Vector2(cos(angle), sin(angle)) * dist
-	crate.global_position = pos
-	get_parent().call_deferred("add_child", crate)
+	drop.global_position = pos
+	get_parent().call_deferred("add_child", drop)
+	print("[SPAWNER] 30s Tactical Supply Airdrop inbound at LZ: ", pos)
 
 func select_zombie_scene() -> PackedScene:
 	var roll = randf()

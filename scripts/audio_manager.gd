@@ -87,7 +87,8 @@ const SOUND_BUS_MAP = {
 	# Environment & SFX
 	"explode": BUS_SFX,
 	"gate_slam": BUS_SFX,
-	"electric_zap": BUS_SFX
+	"electric_zap": BUS_SFX,
+	"aircraft_flyby": BUS_SFX
 }
 
 # Ducking variables
