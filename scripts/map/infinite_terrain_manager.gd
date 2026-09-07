@@ -170,16 +170,19 @@ func is_chunk_active(c: Vector2i) -> bool:
 func get_active_chunks() -> Dictionary:
 	return _active_chunks
 
+func is_highway_corridor(c: Vector2i) -> bool:
+	return posmod(c.y + 1, 4) == 0
+
+func is_rail_corridor(c: Vector2i) -> bool:
+	return posmod(c.x + 2, 6) == 0
+
 func get_biome_at(world_pos: Vector2) -> String:
 	var c = get_chunk_coord(world_pos)
 	if _active_chunks.has(c):
 		return _active_chunks[c].biome
-	var world_center_x = (float(c.x) + 0.5) * CHUNK_SIZE
-	var world_center_y = (float(c.y) + 0.5) * CHUNK_SIZE
-	var b_val = biome_noise.get_noise_2d(world_center_x * 0.35, world_center_y * 0.35)
-	if b_val < -0.10: return "marsh"
-	elif b_val > 0.14: return "railyard"
-	return "highway"
+	if is_rail_corridor(c): return "railyard"
+	elif is_highway_corridor(c): return "highway"
+	return "wasteland"
 
 ## Core Streaming Update: Instantiates chunks in 7x7 grid and pools chunks beyond active radius
 func update_chunks(player_chunk: Vector2i) -> void:

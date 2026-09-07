@@ -45,7 +45,10 @@ func set_pause_state(should_pause: bool) -> void:
 		menu_root.visible = should_pause
 	
 	if should_pause:
+		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 		_load_current_settings()
+	else:
+		Input.mouse_mode = Input.MOUSE_MODE_HIDDEN
 
 func _connect_controls() -> void:
 	if master_slider:

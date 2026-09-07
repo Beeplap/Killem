@@ -170,7 +170,7 @@ func spawn_batch(count: int) -> void:
 		var zombie = zombie_scene.instantiate()
 		zombie.global_position = spawn_pos
 		zombie.wave_number = wave_number
-		get_parent().add_child(zombie)
+		get_parent().call_deferred("add_child", zombie)
 		zombies_remaining_to_spawn -= 1
 
 func spawn_boss_zombie() -> void:
@@ -184,7 +184,7 @@ func spawn_boss_zombie() -> void:
 	var boss = COLOSSUS_ZOMBIE.instantiate()
 	boss.global_position = spawn_pos
 	boss.wave_number = wave_number
-	get_parent().add_child(boss)
+	get_parent().call_deferred("add_child", boss)
 	Global.boss_spawned.emit(boss)
 	Global.play_sound("zombie_groan")
 

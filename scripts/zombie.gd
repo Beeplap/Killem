@@ -428,9 +428,9 @@ func die(hit_direction: Vector2) -> void:
 		pool.global_position = global_position
 		var level = get_tree().current_scene
 		if level:
-			level.add_child(pool)
+			level.call_deferred("add_child", pool)
 		elif get_parent():
-			get_parent().add_child(pool)
+			get_parent().call_deferred("add_child", pool)
 	
 	# Micro-Hitstop freeze frame when killing a heavy zombie or boss
 	if zombie_type in [ZombieType.HEAVY, ZombieType.ARMORED, ZombieType.COLOSSUS]:
@@ -469,4 +469,4 @@ func spawn_pickup(pickup_type: int) -> void:
 		var pickup = pickup_scene.instantiate()
 		pickup.global_position = global_position
 		pickup.pickup_type = pickup_type
-		level.add_child(pickup)
+		level.call_deferred("add_child", pickup)

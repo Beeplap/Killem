@@ -240,4 +240,4 @@ func spawn_pickup(pickup_type: int) -> void:
 		var pickup = pickup_scene.instantiate()
 		pickup.global_position = global_position
 		pickup.pickup_type = pickup_type
-		level.add_child(pickup)
+		level.call_deferred("add_child", pickup)
