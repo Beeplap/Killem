@@ -437,6 +437,7 @@ func die(hit_direction: Vector2) -> void:
 		Global.trigger_hitstop(0.04, 0.05)
 	
 	if zombie_type == ZombieType.COLOSSUS:
+		Global.boss_defeated.emit(self)
 		Global.explosion_occurred.emit()
 		if player and player.has_method("trigger_shake"):
 			player.trigger_shake(14.0, 0.4)

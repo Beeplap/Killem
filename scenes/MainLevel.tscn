@@ -30,6 +30,7 @@
 [ext_resource type="Shader" path="res://shaders/volumetric_fog.gdshader" id="28_fog_shader"]
 [ext_resource type="Shader" path="res://shaders/post_process.gdshader" id="29_post_shader"]
 [ext_resource type="PackedScene" path="res://scenes/PowerTransformer.tscn" id="30_transformer"]
+[ext_resource type="PackedScene" path="res://scenes/CameraController.tscn" id="31_camera"]
 
 [sub_resource type="CanvasTexture" id="CanvasTexture_wall_h"]
 diffuse_texture = ExtResource("16_wall_h")
@@ -299,6 +300,8 @@ position = Vector2(-180, -170)
 
 [node name="Player" parent="." instance=ExtResource("3_player")]
 position = Vector2(0, 0)
+
+[node name="CameraController" parent="." instance=ExtResource("31_camera")]
 
 [node name="ZombieSpawner" type="Node2D" parent="."]
 script = ExtResource("4_spawner")

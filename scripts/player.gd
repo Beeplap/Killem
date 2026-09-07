@@ -4,7 +4,7 @@ extends CharacterBody2D
 @export var acceleration: float = 2800.0
 @export var friction: float = 3200.0
 
-@onready var camera: Camera2D = $Camera2D
+@onready var camera: Camera2D = get_node_or_null("Camera2D")
 @onready var muzzle: Marker2D = $Muzzle
 @onready var sprite: Sprite2D = $Sprite2D
 @onready var flashlight: PointLight2D = get_node_or_null("Flashlight")
@@ -519,6 +519,7 @@ func process_flame_cone(base_dir: Vector2, spawn_pos: Vector2) -> void:
 
 func add_trauma(amount: float) -> void:
 	trauma = clampf(trauma + amount, 0.0, 1.0)
+	Global.camera_trauma_requested.emit(amount)
 
 func trigger_shake(intensity: float, _duration: float = 0.1) -> void:
 	add_trauma(clampf(intensity * 0.06, 0.1, 0.85))

@@ -185,6 +185,7 @@ func spawn_boss_zombie() -> void:
 	boss.global_position = spawn_pos
 	boss.wave_number = wave_number
 	get_parent().add_child(boss)
+	Global.boss_spawned.emit(boss)
 	Global.play_sound("zombie_groan")
 
 func spawn_air_drop() -> void:

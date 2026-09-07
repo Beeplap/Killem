@@ -1,0 +1,75 @@
+[gd_scene load_steps=9 format=3]
+
+[ext_resource type="Script" path="res://scripts/camera_controller.gd" id="1_controller"]
+[ext_resource type="Script" uid="uid://bd046eokvcnu2" path="res://addons/phantom_camera/scripts/phantom_camera_host/phantom_camera_host.gd" id="2_host"]
+[ext_resource type="Script" uid="uid://bhexx6mj1xv3q" path="res://addons/phantom_camera/scripts/phantom_camera/phantom_camera_2d.gd" id="3_pcam"]
+[ext_resource type="Script" uid="uid://8umksf8e80fw" path="res://addons/phantom_camera/scripts/resources/tween_resource.gd" id="4_tween"]
+
+[sub_resource type="Gradient" id="Gradient_dust"]
+offsets = PackedFloat32Array(0, 0.25, 0.75, 1)
+colors = PackedColorArray(0.9, 0.95, 1, 0, 1, 0.85, 0.45, 0.55, 0.9, 0.6, 0.25, 0.35, 0.4, 0.4, 0.5, 0)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_dust"]
+gradient = SubResource("Gradient_dust")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_dust"]
+emission_shape = 3
+emission_box_extents = Vector3(680, 400, 1)
+gravity = Vector3(-18, 10, 0)
+initial_velocity_min = 12.0
+initial_velocity_max = 35.0
+scale_min = 1.2
+scale_max = 2.8
+color_ramp = SubResource("GradientTexture1D_dust")
+turbulence_enabled = true
+turbulence_noise_scale = 3.0
+turbulence_noise_speed_random = 0.5
+
+[sub_resource type="Resource" id="Resource_boss_tween"]
+script = ExtResource("4_tween")
+duration = 1.2
+transition = 3
+ease = 2
+
+[node name="CameraController" type="Node2D"]
+script = ExtResource("1_controller")
+
+[node name="MainCamera2D" type="Camera2D" parent="."]
+physics_interpolation_mode = 1
+ignore_rotation = false
+process_callback = 0
+
+[node name="PhantomCameraHost" type="Node" parent="MainCamera2D"]
+process_priority = 300
+process_physics_priority = 300
+script = ExtResource("2_host")
+
+[node name="DustMotes" type="GPUParticles2D" parent="MainCamera2D"]
+z_index = 8
+amount = 64
+lifetime = 4.5
+preprocess = 2.5
+randomness = 0.6
+visibility_rect = Rect2(-700, -420, 1400, 840)
+process_material = SubResource("ParticleProcessMaterial_dust")
+
+[node name="PlayerPhantomCamera2D" type="Node2D" parent="."]
+top_level = true
+script = ExtResource("3_pcam")
+priority = 10
+follow_mode = 2
+follow_damping = true
+follow_damping_value = Vector2(0.15, 0.15)
+
+[node name="BossPhantomCamera2D" type="Node2D" parent="."]
+top_level = true
+script = ExtResource("3_pcam")
+priority = 0
+follow_mode = 3
+follow_damping = true
+follow_damping_value = Vector2(0.15, 0.15)
+auto_zoom = true
+auto_zoom_min = 0.65
+auto_zoom_max = 1.15
+auto_zoom_margin = Vector4(160, 120, 160, 120)
+tween_resource = SubResource("Resource_boss_tween")

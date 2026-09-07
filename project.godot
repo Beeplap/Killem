@@ -31,6 +31,7 @@ Global="*res://scripts/global.gd"
 CampaignManager="*res://scripts/campaign_manager.gd"
 DecalManager="*res://scripts/decal_manager.gd"
 InfiniteTerrainManager="*res://scripts/map/infinite_terrain_manager.gd"
+PhantomCameraManager="*res://addons/phantom_camera/scripts/managers/phantom_camera_manager.gd"
 
 
 [display]
@@ -41,7 +42,7 @@ window/stretch/mode="canvas_items"
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/terrain_3d")
+enabled=PackedStringArray("res://addons/phantom_camera", "res://addons/terrain_3d")
 
 [input]
 

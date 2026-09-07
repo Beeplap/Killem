@@ -18,6 +18,9 @@ signal roll_cooldown_updated(current: float, max_val: float)
 signal deployables_updated(wires: int, mines: int, turrets: int)
 signal weapon_changed(new_weapon: WeaponType)
 signal active_deployable_changed(deployable_type: int)
+signal boss_spawned(boss_node: Node2D)
+signal boss_defeated(boss_node: Node2D)
+signal camera_trauma_requested(amount: float)
 
 # Core State
 var keycards_collected: Array[String] = []
