@@ -1,10 +1,11 @@
-[gd_scene load_steps=15 format=3 uid="uid://chudscene001"]
+[gd_scene load_steps=16 format=3 uid="uid://chudscene001"]
 
 [ext_resource type="Script" path="res://scripts/hud.gd" id="1_hud"]
 [ext_resource type="Shader" path="res://shaders/post_process.gdshader" id="2_postprocess"]
 [ext_resource type="Script" path="res://scripts/tactical_crosshair.gd" id="3_crosshair"]
 [ext_resource type="PackedScene" path="res://scenes/ui/Minimap.tscn" id="4_minimap"]
 [ext_resource type="PackedScene" path="res://scenes/ui/PauseMenu.tscn" id="5_pause"]
+[ext_resource type="PackedScene" path="res://scenes/ui/MobileControls.tscn" id="6_mobile"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_postprocess"]
 shader = ExtResource("2_postprocess")
@@ -713,6 +714,8 @@ layout_mode = 3
 anchors_preset = 0
 mouse_filter = 2
 script = ExtResource("3_crosshair")
+
+[node name="MobileControls" parent="." instance=ExtResource("6_mobile")]
 
 [connection signal="pressed" from="TacticalEquipment/DeployablesBar/WireCard" to="." method="_on_wire_card_pressed"]
 [connection signal="pressed" from="TacticalEquipment/DeployablesBar/MineCard" to="." method="_on_mine_card_pressed"]

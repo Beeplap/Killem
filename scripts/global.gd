@@ -58,6 +58,11 @@ var active_deployable_type: int = 0
 var hitstop_active: bool = false
 var screenshake_multiplier: float = 1.0
 
+# Mobile Twin-Stick Input Override State
+var virtual_aim_active: bool = false
+var virtual_aim_dir: Vector2 = Vector2.RIGHT
+var mobile_controls_enabled: int = 0 # 0: Auto, 1: Forced On, 2: Forced Off
+
 func _ready() -> void:
 	reset_state()
 

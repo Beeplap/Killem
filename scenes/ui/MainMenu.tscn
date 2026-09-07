@@ -1,0 +1,260 @@
+[gd_scene load_steps=10 format=3 uid="uid://mainmenu001"]
+
+[ext_resource type="Script" path="res://scripts/ui/main_menu.gd" id="1_menu"]
+[ext_resource type="Texture2D" uid="uid://brd6rqbmehjnl" path="res://assets/textures/lighting/point_light_cookie.png" id="2_cookie"]
+[ext_resource type="PackedScene" path="res://scenes/ui/SettingsMenu.tscn" id="3_settings"]
+
+[sub_resource type="Gradient" id="Gradient_fog"]
+offsets = PackedFloat32Array(0, 0.5, 1)
+colors = PackedColorArray(0.3, 0.35, 0.4, 0, 0.35, 0.4, 0.48, 0.25, 0.1, 0.12, 0.15, 0)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn_play"]
+content_margin_left = 24.0
+content_margin_top = 14.0
+content_margin_right = 24.0
+content_margin_bottom = 14.0
+bg_color = Color(0.12, 0.5, 0.28, 0.9)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.3, 0.95, 0.55, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+shadow_color = Color(0.2, 0.9, 0.45, 0.3)
+shadow_size = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn_play_hover"]
+content_margin_left = 24.0
+content_margin_top = 14.0
+content_margin_right = 24.0
+content_margin_bottom = 14.0
+bg_color = Color(0.16, 0.65, 0.36, 0.96)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.4, 1, 0.65, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+shadow_color = Color(0.2, 0.9, 0.45, 0.5)
+shadow_size = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn_menu"]
+content_margin_left = 20.0
+content_margin_top = 11.0
+content_margin_right = 20.0
+content_margin_bottom = 11.0
+bg_color = Color(0.08, 0.11, 0.15, 0.88)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.22, 0.55, 0.75, 0.8)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+shadow_color = Color(0, 0, 0, 0.4)
+shadow_size = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn_menu_hover"]
+content_margin_left = 20.0
+content_margin_top = 11.0
+content_margin_right = 20.0
+content_margin_bottom = 11.0
+bg_color = Color(0.12, 0.16, 0.22, 0.95)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.3, 0.75, 0.95, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+shadow_color = Color(0.2, 0.65, 0.9, 0.3)
+shadow_size = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel_frame"]
+bg_color = Color(0.04, 0.06, 0.08, 0.65)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.2, 0.3, 0.4, 0.4)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[node name="MainMenu" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_menu")
+
+[node name="Background" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="ColorRect" type="ColorRect" parent="Background"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.04, 0.05, 0.07, 1)
+
+[node name="FogParticles" type="CPUParticles2D" parent="Background"]
+position = Vector2(640, 680)
+amount = 45
+lifetime = 6.0
+preprocess = 3.0
+emission_shape = 3
+emission_rect_extents = Vector2(700, 100)
+direction = Vector2(1, -0.2)
+spread = 20.0
+gravity = Vector2(0, -10)
+initial_velocity_min = 15.0
+initial_velocity_max = 35.0
+scale_amount_min = 80.0
+scale_amount_max = 160.0
+color_ramp = SubResource("Gradient_fog")
+
+[node name="HazardLight1" type="PointLight2D" parent="Background"]
+position = Vector2(180, 220)
+color = Color(0.98, 0.7, 0.15, 1)
+energy = 1.6
+texture = ExtResource("2_cookie")
+texture_scale = 3.5
+
+[node name="HazardLight2" type="PointLight2D" parent="Background"]
+position = Vector2(1080, 280)
+color = Color(0.95, 0.25, 0.15, 1)
+energy = 1.4
+texture = ExtResource("2_cookie")
+texture_scale = 3.0
+
+[node name="Content" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 80
+theme_override_constants/margin_top = 60
+theme_override_constants/margin_right = 80
+theme_override_constants/margin_bottom = 40
+
+[node name="VBox" type="VBoxContainer" parent="Content"]
+layout_mode = 2
+theme_override_constants/separation = 28
+alignment = 1
+
+[node name="TitleBox" type="VBoxContainer" parent="Content/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="Subtitle" type="Label" parent="Content/VBox/TitleBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.3, 0.85, 1, 1)
+theme_override_font_sizes/font_size = 14
+text = "SECTOR 7 EMERGENCY CONTAINMENT PROTOCOL"
+
+[node name="Title" type="Label" parent="Content/VBox/TitleBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.98, 0.82, 0.15, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.85)
+theme_override_constants/shadow_offset_x = 3
+theme_override_constants/shadow_offset_y = 3
+theme_override_font_sizes/font_size = 52
+text = "OUTBREAK: ZERO HOUR"
+
+[node name="Tagline" type="Label" parent="Content/VBox/TitleBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.65, 0.7, 0.78, 1)
+theme_override_font_sizes/font_size = 15
+text = "TACTICAL MULTI-STAGE HORDE SURVIVAL & SECTOR DEFENSE"
+
+[node name="Buttons" type="VBoxContainer" parent="Content/VBox"]
+custom_minimum_size = Vector2(340, 0)
+layout_mode = 2
+size_flags_horizontal = 0
+theme_override_constants/separation = 12
+
+[node name="PlayButton" type="Button" parent="Content/VBox/Buttons"]
+custom_minimum_size = Vector2(340, 52)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.95, 1, 0.95, 1)
+theme_override_font_sizes/font_size = 17
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn_play")
+theme_override_styles/hover = SubResource("StyleBoxFlat_btn_play_hover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_btn_play_hover")
+text = "▶  SURVIVE (SURVIVAL MODE)"
+
+[node name="Play3DButton" type="Button" parent="Content/VBox/Buttons"]
+custom_minimum_size = Vector2(340, 46)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.85, 0.92, 1, 1)
+theme_override_font_sizes/font_size = 15
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn_menu")
+theme_override_styles/hover = SubResource("StyleBoxFlat_btn_menu_hover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_btn_menu_hover")
+text = "⚔  EXPEDITION (3D CAMPAIGN)"
+
+[node name="SettingsButton" type="Button" parent="Content/VBox/Buttons"]
+custom_minimum_size = Vector2(340, 46)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.85, 0.92, 1, 1)
+theme_override_font_sizes/font_size = 15
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn_menu")
+theme_override_styles/hover = SubResource("StyleBoxFlat_btn_menu_hover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_btn_menu_hover")
+text = "⚙  OPERATIONS (SETTINGS)"
+
+[node name="QuitButton" type="Button" parent="Content/VBox/Buttons"]
+custom_minimum_size = Vector2(340, 46)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.95, 0.4, 0.4, 1)
+theme_override_font_sizes/font_size = 15
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn_menu")
+theme_override_styles/hover = SubResource("StyleBoxFlat_btn_menu_hover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_btn_menu_hover")
+text = "⏻  ABORT (QUIT)"
+
+[node name="Spacer" type="Control" parent="Content/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Footer" type="HBoxContainer" parent="Content/VBox"]
+layout_mode = 2
+
+[node name="BuildLabel" type="Label" parent="Content/VBox/Footer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.4, 0.45, 0.52, 1)
+theme_override_font_sizes/font_size = 12
+text = "BUILD 1.2.0 • PC & MOBILE COMPATIBILITY ENGINE • GODOT 4"
+
+[node name="StatusLabel" type="Label" parent="Content/VBox/Footer"]
+layout_mode = 2
+size_flags_horizontal = 10
+theme_override_colors/font_color = Color(0.2, 0.85, 0.5, 0.8)
+theme_override_font_sizes/font_size = 12
+text = "SYSTEMS NOMINAL • HARDWARE DETECTED"
+
+[node name="SettingsMenu" parent="." instance=ExtResource("3_settings")]
+visible = false

@@ -301,6 +301,9 @@ func _get_active_deployable_stock() -> int:
 func handle_aiming() -> void:
 	var mouse_pos = get_global_mouse_position()
 	var aim_dir = (mouse_pos - global_position).normalized()
+	if Global.virtual_aim_active and Global.virtual_aim_dir != Vector2.ZERO:
+		aim_dir = Global.virtual_aim_dir
+		mouse_pos = global_position + aim_dir * 180.0
 	var angle = aim_dir.angle()
 	
 	var dir_idx = int(round(angle / (PI / 4.0)))

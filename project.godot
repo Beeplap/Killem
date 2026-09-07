@@ -16,7 +16,7 @@ compatibility/default_parent_skeleton_in_mesh_instance_3d=true
 
 config/name="Outbreak: Zombie Shooter"
 config/description="Top-Down Post-Apocalyptic Zombie Shooter in Godot 4"
-run/main_scene="res://scenes/MainLevel.tscn"
+run/main_scene="res://scenes/ui/MainMenu.tscn"
 config/features=PackedStringArray("4.7", "GL Compatibility")
 config/icon="res://icon.svg"
 
@@ -32,7 +32,6 @@ CampaignManager="*res://scripts/campaign_manager.gd"
 DecalManager="*res://scripts/decal_manager.gd"
 InfiniteTerrainManager="*res://scripts/map/infinite_terrain_manager.gd"
 PhantomCameraManager="*res://addons/phantom_camera/scripts/managers/phantom_camera_manager.gd"
-
 
 [display]
 

@@ -5,7 +5,8 @@ extends Node
 # Zero node instantiation overhead at runtime, single draw-call rendering.
 
 const MAX_BLOOD_INSTANCES: int = 1000
-const MAX_CASING_INSTANCES: int = 1000
+const MAX_CASING_INSTANCES: int = 40
+const CASING_LIFETIME: float = 4.0
 
 var blood_multimesh_instance: MultiMeshInstance2D = null
 var blood_multimesh: MultiMesh = null
@@ -23,6 +24,7 @@ class ActiveCasing:
 	var vel: Vector2
 	var ang_vel: float
 	var settled: bool = false
+	var age: float = 0.0
 
 var active_casings: Array[ActiveCasing] = []
 
@@ -124,6 +126,13 @@ func spawn_bullet_casing(spawn_pos: Vector2, shoot_dir: Vector2) -> void:
 		if not casing_multimesh:
 			return
 	
+	# Hard Cap Culling: enforce strict ceiling of 40 active casings
+	if active_casings.size() >= MAX_CASING_INSTANCES:
+		var oldest = active_casings.pop_front()
+		var zero_xform = Transform2D(0.0, Vector2.ZERO, 0.0, Vector2(-9999, -9999))
+		casing_multimesh.set_instance_transform_2d(oldest.index, zero_xform)
+		casing_multimesh.set_instance_color(oldest.index, Color(1, 1, 1, 0))
+	
 	var idx = casing_index
 	casing_index = (casing_index + 1) % MAX_CASING_INSTANCES
 	
@@ -145,6 +154,7 @@ func spawn_bullet_casing(spawn_pos: Vector2, shoot_dir: Vector2) -> void:
 	ac.vel = vel
 	ac.ang_vel = randf_range(-35.0, 35.0)
 	ac.settled = false
+	ac.age = 0.0
 	active_casings.append(ac)
 
 func _physics_process(delta: float) -> void:
@@ -154,6 +164,8 @@ func _physics_process(delta: float) -> void:
 	var i = 0
 	while i < active_casings.size():
 		var ac = active_casings[i]
+		ac.age += delta
+		
 		if not ac.settled:
 			ac.pos += ac.vel * delta
 			ac.rot += ac.ang_vel * delta
@@ -165,12 +177,35 @@ func _physics_process(delta: float) -> void:
 			
 			if ac.vel.length_squared() < 16.0:
 				ac.settled = true
-				active_casings.remove_at(i)
-				continue
-		else:
+		
+		# Auto-Despawn Lifetime (4.0s) with 0.8s fadeout
+		if ac.age >= (CASING_LIFETIME - 0.8):
+			var alpha = clampf((CASING_LIFETIME - ac.age) / 0.8, 0.0, 1.0)
+			casing_multimesh.set_instance_color(ac.index, Color(1, 0.9, 0.6, alpha))
+		
+		if ac.age >= CASING_LIFETIME:
+			var zero_xform = Transform2D(0.0, Vector2.ZERO, 0.0, Vector2(-9999, -9999))
+			casing_multimesh.set_instance_transform_2d(ac.index, zero_xform)
+			casing_multimesh.set_instance_color(ac.index, Color(1, 1, 1, 0))
 			active_casings.remove_at(i)
 			continue
+		
 		i += 1
+
+func register_transient_debris(debris_node: Node, lifetime: float = 4.0) -> void:
+	if not is_instance_valid(debris_node):
+		return
+	var tree = get_tree()
+	if not tree:
+		return
+	var tween = tree.create_tween()
+	var fade_start = max(0.1, lifetime - 0.8)
+	tween.tween_interval(fade_start)
+	if debris_node is CanvasItem:
+		tween.tween_property(debris_node, "modulate:a", 0.0, 0.8)
+	elif debris_node is Node3D and "transparency" in debris_node:
+		tween.tween_property(debris_node, "transparency", 1.0, 0.8)
+	tween.tween_callback(debris_node.queue_free)
 
 # Particle Cleanup Policy Helper
 # Ensures transient particle nodes auto-terminate with 100% explosiveness and zero leak

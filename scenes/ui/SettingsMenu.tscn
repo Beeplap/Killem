@@ -1,0 +1,343 @@
+[gd_scene load_steps=6 format=3 uid="uid://settingsmenu001"]
+
+[ext_resource type="Script" path="res://scripts/ui/settings_menu.gd" id="1_settings"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_modal_panel"]
+content_margin_left = 28.0
+content_margin_top = 24.0
+content_margin_right = 28.0
+content_margin_bottom = 24.0
+bg_color = Color(0.06, 0.08, 0.11, 0.97)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.2, 0.75, 0.95, 0.85)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+shadow_color = Color(0, 0, 0, 0.6)
+shadow_size = 12
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn_save"]
+content_margin_left = 16.0
+content_margin_top = 8.0
+content_margin_right = 16.0
+content_margin_bottom = 8.0
+bg_color = Color(0.12, 0.55, 0.32, 0.9)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.3, 0.95, 0.55, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn_cancel"]
+content_margin_left = 16.0
+content_margin_top = 8.0
+content_margin_right = 16.0
+content_margin_bottom = 8.0
+bg_color = Color(0.15, 0.18, 0.22, 0.9)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.4, 0.45, 0.52, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_tab_bg"]
+content_margin_left = 16.0
+content_margin_top = 16.0
+content_margin_right = 16.0
+content_margin_bottom = 16.0
+bg_color = Color(0.04, 0.05, 0.07, 0.6)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.18, 0.24, 0.3, 0.6)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[node name="SettingsMenu" type="CanvasLayer"]
+process_mode = 3
+layer = 110
+script = ExtResource("1_settings")
+
+[node name="Root" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Backdrop" type="ColorRect" parent="Root"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.02, 0.03, 0.04, 0.75)
+
+[node name="Panel" type="PanelContainer" parent="Root"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -290.0
+offset_top = -240.0
+offset_right = 290.0
+offset_bottom = 240.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_modal_panel")
+
+[node name="VBox" type="VBoxContainer" parent="Root/Panel"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="Title" type="Label" parent="Root/Panel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.2, 0.85, 1, 1)
+theme_override_font_sizes/font_size = 20
+text = "TACTICAL OPERATIONS & SETTINGS"
+horizontal_alignment = 1
+
+[node name="Tabs" type="TabContainer" parent="Root/Panel/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+current_tab = 0
+
+[node name="Display" type="MarginContainer" parent="Root/Panel/VBox/Tabs"]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 14
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 14
+metadata/_tab_index = 0
+
+[node name="DisplayGrid" type="GridContainer" parent="Root/Panel/VBox/Tabs/Display"]
+layout_mode = 2
+theme_override_constants/h_separation = 20
+theme_override_constants/v_separation = 14
+columns = 2
+
+[node name="ModeLabel" type="Label" parent="Root/Panel/VBox/Tabs/Display/DisplayGrid"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.85, 0.9, 0.95, 1)
+text = "Display Mode:"
+
+[node name="DisplayModeOption" type="OptionButton" parent="Root/Panel/VBox/Tabs/Display/DisplayGrid"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="VsyncLabel" type="Label" parent="Root/Panel/VBox/Tabs/Display/DisplayGrid"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.85, 0.9, 0.95, 1)
+text = "Vertical Sync (V-Sync):"
+
+[node name="VsyncCheck" type="CheckButton" parent="Root/Panel/VBox/Tabs/Display/DisplayGrid"]
+layout_mode = 2
+
+[node name="FpsLabel" type="Label" parent="Root/Panel/VBox/Tabs/Display/DisplayGrid"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.85, 0.9, 0.95, 1)
+text = "Target Framerate (FPS):"
+
+[node name="FpsOption" type="OptionButton" parent="Root/Panel/VBox/Tabs/Display/DisplayGrid"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Graphics" type="MarginContainer" parent="Root/Panel/VBox/Tabs"]
+visible = false
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 14
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 14
+metadata/_tab_index = 1
+
+[node name="GraphicsGrid" type="GridContainer" parent="Root/Panel/VBox/Tabs/Graphics"]
+layout_mode = 2
+theme_override_constants/h_separation = 20
+theme_override_constants/v_separation = 14
+columns = 2
+
+[node name="PresetLabel" type="Label" parent="Root/Panel/VBox/Tabs/Graphics/GraphicsGrid"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.85, 0.9, 0.95, 1)
+text = "Quality Preset:"
+
+[node name="PresetOption" type="OptionButton" parent="Root/Panel/VBox/Tabs/Graphics/GraphicsGrid"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="MsaaLabel" type="Label" parent="Root/Panel/VBox/Tabs/Graphics/GraphicsGrid"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.85, 0.9, 0.95, 1)
+text = "Anti-Aliasing (MSAA):"
+
+[node name="MsaaOption" type="OptionButton" parent="Root/Panel/VBox/Tabs/Graphics/GraphicsGrid"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="ResScaleLabel" type="Label" parent="Root/Panel/VBox/Tabs/Graphics/GraphicsGrid"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.85, 0.9, 0.95, 1)
+text = "3D Resolution Scale:"
+
+[node name="ResScaleBox" type="HBoxContainer" parent="Root/Panel/VBox/Tabs/Graphics/GraphicsGrid"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 10
+
+[node name="ResScaleSlider" type="HSlider" parent="Root/Panel/VBox/Tabs/Graphics/GraphicsGrid/ResScaleBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+min_value = 0.5
+max_value = 1.0
+step = 0.05
+value = 1.0
+
+[node name="ResScaleVal" type="Label" parent="Root/Panel/VBox/Tabs/Graphics/GraphicsGrid/ResScaleBox"]
+custom_minimum_size = Vector2(45, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.3, 0.9, 1, 1)
+text = "100%"
+horizontal_alignment = 2
+
+[node name="ShakeLabel" type="Label" parent="Root/Panel/VBox/Tabs/Graphics/GraphicsGrid"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.85, 0.9, 0.95, 1)
+text = "Screen Shake:"
+
+[node name="ShakeBox" type="HBoxContainer" parent="Root/Panel/VBox/Tabs/Graphics/GraphicsGrid"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 10
+
+[node name="ShakeSlider" type="HSlider" parent="Root/Panel/VBox/Tabs/Graphics/GraphicsGrid/ShakeBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+max_value = 1.5
+step = 0.05
+value = 1.0
+
+[node name="ShakeVal" type="Label" parent="Root/Panel/VBox/Tabs/Graphics/GraphicsGrid/ShakeBox"]
+custom_minimum_size = Vector2(45, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.3, 0.9, 1, 1)
+text = "100%"
+horizontal_alignment = 2
+
+[node name="Audio" type="MarginContainer" parent="Root/Panel/VBox/Tabs"]
+visible = false
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 14
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 14
+metadata/_tab_index = 2
+
+[node name="AudioGrid" type="GridContainer" parent="Root/Panel/VBox/Tabs/Audio"]
+layout_mode = 2
+theme_override_constants/h_separation = 20
+theme_override_constants/v_separation = 14
+columns = 2
+
+[node name="MasterLabel" type="Label" parent="Root/Panel/VBox/Tabs/Audio/AudioGrid"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.85, 0.9, 0.95, 1)
+text = "Master Volume:"
+
+[node name="MasterSlider" type="HSlider" parent="Root/Panel/VBox/Tabs/Audio/AudioGrid"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+max_value = 1.0
+step = 0.02
+value = 0.85
+
+[node name="MusicLabel" type="Label" parent="Root/Panel/VBox/Tabs/Audio/AudioGrid"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.85, 0.9, 0.95, 1)
+text = "Music Volume:"
+
+[node name="MusicSlider" type="HSlider" parent="Root/Panel/VBox/Tabs/Audio/AudioGrid"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+max_value = 1.0
+step = 0.02
+value = 0.7
+
+[node name="SfxLabel" type="Label" parent="Root/Panel/VBox/Tabs/Audio/AudioGrid"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.85, 0.9, 0.95, 1)
+text = "SFX & Combat:"
+
+[node name="SfxSlider" type="HSlider" parent="Root/Panel/VBox/Tabs/Audio/AudioGrid"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+max_value = 1.0
+step = 0.02
+value = 0.85
+
+[node name="Controls" type="MarginContainer" parent="Root/Panel/VBox/Tabs"]
+visible = false
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 14
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 14
+metadata/_tab_index = 3
+
+[node name="ControlsGrid" type="GridContainer" parent="Root/Panel/VBox/Tabs/Controls"]
+layout_mode = 2
+theme_override_constants/h_separation = 20
+theme_override_constants/v_separation = 14
+columns = 2
+
+[node name="TouchLabel" type="Label" parent="Root/Panel/VBox/Tabs/Controls/ControlsGrid"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.85, 0.9, 0.95, 1)
+text = "Touch Controls:"
+
+[node name="TouchOption" type="OptionButton" parent="Root/Panel/VBox/Tabs/Controls/ControlsGrid"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Footer" type="HBoxContainer" parent="Root/Panel/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 16
+alignment = 2
+
+[node name="CloseButton" type="Button" parent="Root/Panel/VBox/Footer"]
+custom_minimum_size = Vector2(110, 38)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.85, 0.9, 0.95, 1)
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn_cancel")
+text = "CLOSE"
+
+[node name="SaveButton" type="Button" parent="Root/Panel/VBox/Footer"]
+custom_minimum_size = Vector2(140, 38)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.95, 1, 0.95, 1)
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn_save")
+text = "APPLY & SAVE"
