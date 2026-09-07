@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3 uid="uid://mainmenu001"]
+[gd_scene format=3 uid="uid://mainmenu001"]
 
 [ext_resource type="Script" path="res://scripts/ui/main_menu.gd" id="1_menu"]
 [ext_resource type="Texture2D" uid="uid://brd6rqbmehjnl" path="res://assets/textures/lighting/point_light_cookie.png" id="2_cookie"]
@@ -182,7 +182,7 @@ theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.85)
 theme_override_constants/shadow_offset_x = 3
 theme_override_constants/shadow_offset_y = 3
 theme_override_font_sizes/font_size = 52
-text = "OUTBREAK: ZERO HOUR"
+text = "KILLEM"
 
 [node name="Tagline" type="Label" parent="Content/VBox/TitleBox"]
 layout_mode = 2

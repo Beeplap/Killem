@@ -1,5 +1,5 @@
 """
-Generates crisp, professional 16-bit PCM WAV assets for Outbreak Zombie Shooter
+Generates crisp, professional 16-bit PCM WAV assets for KillEm
 covering weapons, foley, zombie vocalizations, footsteps, and pickups.
 """
 import os

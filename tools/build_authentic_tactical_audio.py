@@ -1,5 +1,5 @@
 """
-High-Fidelity Tactical Audio Generator & Foley Pack Extractor for Outbreak Zombie Shooter
+High-Fidelity Tactical Audio Generator & Foley Pack Extractor for KillEm
 Eliminates all cartoon/8-bit synthesizer artifacts.
 Generates cinema-grade 16-bit 44.1kHz PCM WAV assets using physical acoustic models
 and extracts authentic CC0 recorded foley from Kenney.nl.

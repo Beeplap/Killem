@@ -1,6 +1,6 @@
-# OUTBREAK: Post-Apocalyptic 2.5D Isometric Zombie Shooter (Godot 4)
+# KillEm: Post-Apocalyptic Isometric Zombie Shooter (Godot 4)
 
-A gritty, realistic 2.5D isometric survival zombie shooter built natively in **Godot 4.x** with the **GL Compatibility / Mobile** rendering method, heavily inspired by the classic arcade aesthetics of *Zombie Shooter 2* and *Alien Shooter* by Sigma Team.
+A gritty, tactical isometric survival zombie shooter built natively in **Godot 4.x** with the **GL Compatibility / Mobile** rendering method, heavily inspired by the arcade aesthetics of *Zombie Shooter 2* and *Alien Shooter* by Sigma Team.
 
 Pre-configured for cross-platform desktop and mobile deployment (**Windows PC .exe** and **Android .apk**).
 
@@ -8,40 +8,56 @@ Pre-configured for cross-platform desktop and mobile deployment (**Windows PC .e
 
 ## 🎮 Gameplay & Visual Architecture
 
-### 1. 2.5D Isometric View & Multi-Directional Sprites
-* **Classic 2.5D Slanted Perspective**: Replaced flat bird's-eye circles with multi-directional standing profile sprites. Characters, walls, buildings, and props display realistic vertical height and depth.
-* **Y-Sorting Depth**: Real-time Y-sorting (`y_sort_enabled = true`) across the level, entities, walls, and props ensures correct depth ordering as actors walk behind or in front of obstacles.
-* **8-Directional Pre-Rendered Characters**:
-  * **Soldier**: Full standing profile with combat boots, tactical Kevlar armor, ballistic helmet with night-vision mount, and assault rifle aimed forward in 8 compass directions.
-  * **Infected Walker**: Decayed rotting flesh, tattered clothing, blood-stained chest, and lunging posture (6 DMG).
-  * **Infected Dog / Hound**: Agile quadruped canine carcass with exposed ribcage and snarling jaws (4 DMG).
-  * **Heavy Mutant Brute**: Hulking mutant brute with industrial scrap armor plating and massive fists (14 DMG).
-  * **Spitter Mutant**: Acid-mutated zombie with glowing toxic bile pustules (6 DMG).
-  * **Armored SWAT Zombie**: Infected military operative with riot helmet and bullet-resistant Kevlar (40% damage resistance).
-  * **Colossus Boss**: Enormous behemoth boss with ground-slam fists, volcanic magma fissures, and screen-shaking presence.
-* **Tactical Military Crosshair**: Custom precision reticle that dynamically expands and flashes combat red upon firing.
-* **Dynamic Wave Progression & Size Scaling**: As waves advance, horde sizes increase progressively, spawn intervals quicken, and zombies grow larger and more menacing!
+### 1. Dual Mode Engine: Classic 2.5D & Next-Gen True 3D
+* **True 3D Terrain3D Integration (`scenes/levels/BaseLevel3D.tscn`)**:
+  * Utilizes high-performance GDExtension `Terrain3D` with multi-texture PBR materials:
+    * **Slot 0:** Dark Muddy Wasteland Dirt (`dirt_terrain.png` + normal map)
+    * **Slot 1:** Cracked Weathered Asphalt with gravel undertones (`cracked_asphalt.png` + normal map)
+    * **Slot 2:** Dead Dry Scrubland Grass (`scrub_grass_512.png` + normal map)
+  * Continuous procedural heightmap with a flat central tactical clearing (36m radius) blended into undulating perimeter trenches.
+  * Zero draw-call GPU foliage and debris instancing (dead grass clumps, small rocks, weathered debris pallets).
+  * Runtime 3D navigation mesh baking via `NavigationServer3D` parsing 39,000+ terrain faces and static obstacle geometry.
+  * Dual-layer height clamping on player and zombie physics bodies to prevent surface clipping.
+* **Classic 2.5D Isometric Mode (`scenes/MainLevel.tscn`)**:
+  * Multi-directional standing profile sprites with real-time Y-sorting (`y_sort_enabled = true`).
+  * Tactical flashlight casting soft shadows via `LightOccluder2D` and atmospheric sodium vapor floodlights.
+  * Persistent blood decals, bullet tracers, and particle sparks.
 
-### 2. High-Detail Realistic Textures (Zero Vector Drawings)
-* **Ground**: Gritty seamless dark muddy soil with pebble noise, cracked cold asphalt road, and withered dry dead grass tufts.
-* **Railway Corridor**: Granite stone ballast, distressed dark wooden ties with iron plates, and dual oxidized rails with polished specular chrome heads.
-* **Structures & Objects**:
-  * **Bunker Building**: Industrial concrete bunker ruin with slanted roof, recessed doorway, shattered windows, and an exterior hanging sodium floodlight.
-  * **Military Vehicle Wrecks**: Overturned olive-drab pickup and abandoned sedans with rusted body panels and deflated tires.
-  * **Reinforced Concrete Walls & Chain-Link Fences**: Modular horizontal and vertical wall blocks with chipped edges and chain-link wire mesh with barbed wire.
-* **Destructibles & Props**:
-  * **Weathered Wooden Crates**: 3D-shaded isometric crates with diagonal wooden braces and iron corner rivets.
-  * **Heavy Polyethylene Trash Bags**: Wrinkled black garbage sacks with glossy reflections.
-  * **Explosive Chemical Barrels**: Rusted industrial drums with biohazard markings.
-* **Decals**: Visceral coagulated crimson blood splat decals randomly generated on enemy deaths.
+### 2. Tiered Zombie AI Hierarchy
+* **Shambler / Infected Walker**: Decayed decaying flesh, lunging posture, swarm behavior (6 DMG).
+* **Plague Hound**: Agile quadruped canine runner that sprints and flanks the player (4 DMG).
+* **Toxic Spitter**: Long-range mutant that launches acidic bile globes (6 DMG).
+* **Super Mutant Brute**: Hulking bullet sponge with reinforced scrap armor and ground-pound knockback (14 DMG).
+* **Armored SWAT Zombie**: Infected military operative with riot helmet and bullet-resistant Kevlar (40% damage resistance).
+* **Colossus Boss**: Enormous behemoth boss with ground-slam fissures and screen-shaking presence.
 
-### 3. Realistic 2D Lighting, Shadows & Particle Effects
-* **Overcast Slate Daylight (`#b0b5bd`)**: The level features visible overcast daylight illumination, ensuring ground, tracks, walls, and zombie silhouettes are visible across the screen at all times.
-* **Tactical Weapon Flashlight**: PointLight2D cone with a realistic volumetric light cookie attached to the player's weapon aim vector, casting dynamic realtime soft shadows via `LightOccluder2D` on walls, fences, vehicles, and crates.
-* **Atmospheric Bunker Sodium Lamp**: Flickering overhead industrial lamp casting warm amber light over the bunker entrance with dynamic shadows.
-* **Impact & Explosion Particles**:
-  * **Bullet Impacts**: Dynamic sparks flying along the ricochet normal, concrete/metal dust, blood spray on enemy hits, and lingering smoke puffs.
-  * **Barrel Detonations**: Blinding light flash, burst of fiery embers, and billowing heavy black smoke.
+### 3. Procedural 3D Weapon Models & Socket Rigging
+* Custom procedural PBR weapon meshes created directly in Godot 4:
+  * **9mm Combat Pistol**: Matte gunmetal steel slide, tactical polymer frame, tritium night-sights.
+  * **Pump-Action Shotgun**: Heat shield barrel, textured slide pump, brass 12-gauge shells.
+  * **Tactical AK-47**: Weathered dark composite stock, ribbed steel receiver, curved magazine, zero screen-shake profile.
+  * **Flamethrower & Minigun**: High-output heavy suppression weapons.
+* Mechanical animated slides, recoil kickback, brass shell ejector particles, and hand socket rigging (`RightHandSocket`).
+
+### 4. Tactical Cover & Choke Points
+* **Waist-High Cover Points**: Modular `SandbagBarricade.tscn` positions, concrete blast walls, and wooden pallets providing strategic firing bunkers.
+* **Funneling Choke Points**: Derailed `IndustrialContainer.tscn` shipping containers and chainlink fences creating narrow kill zones and ambush corridors.
+* **Explosive Chain Cascades**: Rusted biohazard `OilDrum.tscn` barrels with delayed chain-reaction detonations.
+
+### 5. Multi-Bus Tactical Audio Architecture
+* Mastering pipeline configured in `default_bus_layout.tres`:
+  * **Master Bus**: `AudioEffectLimiter` (Ceiling: `-0.5 dB`, Threshold: `-2.0 dB`) to prevent combat distortion.
+  * **Weapons Bus**: Fast-attack compression ducking SFX bus by `-2.5 dB` during rapid firing.
+  * **Zombies Bus**: Atmospheric industrial reverb (wet `0.12`, room `0.2`).
+  * **Foley & Footsteps**: Subtle, non-intrusive footstep audio modulated by surface material (dirt, asphalt, metal).
+  * **Pickups & UI**: Crisp interaction chimes.
+
+### 6. Campaign & Objective System (`scripts/mission_manager.gd`)
+* Dynamic objective tracker with state progression:
+  * **Find Keycard**: Search the railway yard depot to locate the Yellow Security Keycard.
+  * **Override Blast Door**: Insert keycard into blast gate terminal to unlock the northern perimeter.
+  * **Defend Generator**: Insert fuel cell and hold out during a 45-second siege horde attack.
+  * **Survivor Data Extraction**: Hack military terminal and repel room breaches.
 
 ---
 
@@ -49,44 +65,47 @@ Pre-configured for cross-platform desktop and mobile deployment (**Windows PC .e
 
 ```
 game/
-├── project.godot                # Godot 4.x project settings (GL Compatibility, 1280x720 canvas_items)
-├── export_presets.cfg           # Pre-configured Windows Desktop (.exe) & Android (.apk) presets
-├── icon.svg                     # Vector biohazard crosshair project icon
+├── project.godot                # Godot 4.x project settings (KillEm, 1280x720)
+├── export_presets.cfg           # Windows Desktop (KillEm.exe) & Android (KillEm.apk)
+├── default_bus_layout.tres      # Multi-bus audio mastering layout
+├── icon.svg                     # Biohazard tactical crosshair icon
+├── addons/
+│   └── terrain_3d/              # Terrain3D GDExtension plugin & shaders
+├── data/
+│   └── terrain/                 # terrain_assets.tres, terrain_material.tres
 ├── assets/
-│   └── textures/
-│       ├── ground/              # dirt_terrain.png, cracked_asphalt.png, dead_grass.png
-│       ├── railway/             # railway_track.png, hazard_platform.png
-│       ├── environment/         # bunker_building.png, military_truck_wreck.png, concrete_wall_h/v.png, chainlink_fence_h.png
-│       ├── props/               # crate_isometric.png, trash_bag.png, oil_barrel.png, pickup_health/ammo.png, bullet_tracer.png
-│       ├── decals/              # blood_splat_1.png, blood_splat_2.png, blood_splat_3.png
-│       ├── lighting/            # flashlight_cookie.png, point_light_cookie.png
-│       └── characters/          # soldier_8dir.png, zombie_regular_8dir.png, zombie_dog_8dir.png, zombie_heavy_8dir.png
+│   ├── textures/
+│   │   ├── ground/              # dirt_terrain, cracked_asphalt, scrub_grass_512
+│   │   ├── props/               # metal_barrel, crates, pallets
+│   │   └── decals/              # blood_splat, oil_slick, blast_scorch
+│   └── audio/                   # 16-bit 44.1kHz tactical sound library
 ├── scenes/
-│   ├── MainLevel.tscn           # 2.5D Isometric map with dynamic lighting, shadows, walls, props
-│   ├── Player.tscn              # 2.5D Soldier CharacterBody2D with Camera2D, Flashlight, Muzzle
-│   ├── Zombie.tscn              # 2.5D Walker zombie with NavigationAgent2D
-│   ├── InfectedDog.tscn         # 2.5D Infected dog
-│   ├── HeavyZombie.tscn         # 2.5D Heavy mutant brute
-│   ├── Bullet.tscn              # Area2D bullet projectile with tracer sprite
-│   ├── DestructibleCrate.tscn   # Weathered wooden crate with LightOccluder2D
-│   ├── TrashBag.tscn            # Destructible trash bag
-│   ├── OilBarrel.tscn           # Explosive barrel with LightOccluder2D
-│   ├── Pickup.tscn              # Medkit and ammo pickups
-│   └── HUD.tscn                 # Retro arcade CanvasLayer interface
+│   ├── levels/
+│   │   └── BaseLevel3D.tscn     # True 3D Terrain3D Level with cover, choke points & navmesh
+│   ├── MainLevel.tscn           # Classic 2.5D Isometric Survival Level
+│   ├── entities/
+│   │   └── Player3D.tscn        # 3D Player with socket rigging & procedural weapons
+│   ├── enemies/
+│   │   ├── ShamblerZombie3D.tscn
+│   │   ├── PlagueHound3D.tscn
+│   │   ├── ToxicSpitter3D.tscn
+│   │   └── SuperMutant3D.tscn
+│   ├── environment/             # SandbagBarricade, IndustrialContainer, ConcreteBlastWall, etc.
+│   ├── interactables/           # KeycardPickup3D, BlastDoor3D, GeneratorDefense3D, DataTerminal3D
+│   └── ui/
+│       ├── MainMenu.tscn        # Tactical landing page with mode selector & settings
+│       ├── SettingsMenu.tscn    # Graphics, audio bus sliders & control remap
+│       └── MobileControls.tscn  # Responsive virtual twin-stick controls
 ├── scripts/
-│   ├── global.gd                # Autoload singleton managing score, wave, audio, and weapon state
-│   ├── player.gd                # 8-directional movement, aiming, scroll zoom, flashlight, and shooting
-│   ├── zombie.gd                # 8-directional NavigationAgent2D AI, variant behaviors, loot drops
-│   ├── bullet.gd                # High-speed projectile with impact spark/smoke particles
-│   ├── bullet_pool.gd           # Node pool managing pre-allocated projectiles
-│   ├── destructible_prop.gd     # Damage, fire/smoke explosion effects, and debris particles
-│   ├── blood_splat.gd           # High-resolution persistent blood decal placement
-│   ├── pickup.gd                # Auto-collectible health and ammo items
-│   ├── spawner.gd               # Wave progression and horde perimeter spawner
-│   ├── main_level.gd            # Atmospheric sodium light flicker and 2.5D depth setup
-│   └── hud.gd                   # HUD signals, health bar, and game-over overlay
+│   ├── global.gd                # Global game state, scoring, signals, weapon cache
+│   ├── audio_manager.gd         # Spatial 3D/2D audio pool manager
+│   ├── base_level_3d.gd         # 3D terrain setup, navmesh baking & mission bootstrap
+│   ├── player_3d.gd             # 3D kinematic movement, aiming, weapon handling & terrain snapping
+│   ├── base_zombie_3d.gd        # NavigationAgent3D zombie AI with terrain height snapping
+│   └── mission_manager.gd       # Dynamic campaign objective tracking
 └── tools/
-    └── generate_all_assets.py   # Procedural realistic texture and sprite sheet generator
+    ├── build_authentic_tactical_audio.py # Audio synthesis pipeline
+    └── generate_all_assets.py   # Procedural texture generator
 ```
 
 ---
@@ -95,24 +114,30 @@ game/
 
 | Action | PC Controls | Mobile / Touch |
 | :--- | :--- | :--- |
-| **Move** | `W`, `A`, `S`, `D` or Arrow Keys | Left Screen Drag / Touch |
-| **Aim** | Mouse Cursor | Touch Direction |
-| **Fire** | Left Mouse Button | Right Screen Tap / Fire |
-| **Camera Zoom** | Mouse Scroll Wheel (Up/Down) | Pinch Gesture |
-| **Pistol (9MM)** | Key `[1]` | On-screen `[1] 9MM` button |
-| **Shotgun (12G)** | Key `[2]` | On-screen `[2] SHG` button |
-| **Assault Rifle** | Key `[3]` | On-screen `[3] RIFLE` button |
-| **Restart (Game Over)**| Key `[R]` | Tap Screen |
+| **Move** | `W`, `A`, `S`, `D` or Arrow Keys | Left Virtual Joystick |
+| **Aim** | Mouse Cursor / 3D Raycast Plane | Right Virtual Aim Joystick |
+| **Fire** | Left Mouse Button | Auto-fire / Right Trigger Button |
+| **Dodge Dash** | `Space` | On-screen Dodge Button |
+| **Reload** | `R` | On-screen Reload Button |
+| **Interact / Objective**| `E` | Contextual Interact Button |
+| **Pistol (9MM)** | Key `[1]` | On-screen `[1]` Weapon Tab |
+| **Shotgun (12G)** | Key `[2]` | On-screen `[2]` Weapon Tab |
+| **Assault Rifle (AK)**| Key `[3]` | On-screen `[3]` Weapon Tab |
+| **Flamethrower** | Key `[4]` | On-screen `[4]` Weapon Tab |
+| **Minigun** | Key `[5]` | On-screen `[5]` Weapon Tab |
+| **Settings / Pause** | `Esc` | Top-right Cog Icon |
 
 ---
 
 ## 🚀 Running & Exporting
 
 ### Running in Godot 4
-1. Open Godot 4.x.
+1. Open Godot 4.x (v4.3+ or v4.7+ compatible).
 2. Select the `project.godot` file in this directory.
-3. Click **Run Project** (`F5`) to play `scenes/MainLevel.tscn`.
+3. Click **Run Project** (`F5`) to launch the `MainMenu.tscn` landing page.
+4. Choose **Survive (2.5D)** or **3D Campaign** to enter combat.
 
 ### Exporting
-* **Windows Desktop**: Project -> Export -> Select `Windows Desktop` -> Export Project (`Builds/Windows/Outbreak.exe`).
-* **Android**: Project -> Export -> Select `Android` -> Export Project (`Builds/Android/Outbreak.apk`).
+* **Windows Desktop**: Project -> Export -> Select `Windows Desktop` -> Export Project (`Builds/Windows/KillEm.exe`).
+* **Android Mobile**: Project -> Export -> Select `Android` -> Export Project (`Builds/Android/KillEm.apk`).
+

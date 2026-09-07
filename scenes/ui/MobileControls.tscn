@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3 uid="uid://mobilectrl001"]
+[gd_scene format=3 uid="uid://22vs7k220eqq"]
 
 [ext_resource type="Script" path="res://scripts/ui/mobile_controls.gd" id="1_mctrl"]
 

@@ -1,7 +1,7 @@
 class_name MainMenu
 extends Control
 
-## Outbreak: Zero Hour Main Landing Page
+## KillEm Main Landing Page
 ## Atmospheric post-apocalyptic title screen with tactile navigation,
 ## audio cues, settings drawer integration, and mobile platform adaptation.
 

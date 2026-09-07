@@ -1,6 +1,6 @@
 extends Node
 
-# Global state and signals for Outbreak Zombie Shooter
+# Global state and signals for KillEm
 signal health_changed(current: float, max_val: float)
 signal ammo_changed(weapon_name: String, current: int, max_val: int)
 signal score_changed(score: int, kills: int)
