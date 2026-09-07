@@ -1,0 +1,61 @@
+[gd_resource type="Terrain3DAssets" load_steps=13 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/textures/ground/dirt_terrain.png" id="1_dirt"]
+[ext_resource type="Texture2D" path="res://assets/textures/ground/dirt_terrain_n.png" id="2_dirt_n"]
+[ext_resource type="Texture2D" path="res://assets/textures/ground/cracked_asphalt.png" id="3_asphalt"]
+[ext_resource type="Texture2D" path="res://assets/textures/ground/cracked_asphalt_n.png" id="4_asphalt_n"]
+[ext_resource type="Texture2D" path="res://assets/textures/ground/scrub_grass_512.png" id="5_grass"]
+[ext_resource type="Texture2D" path="res://assets/textures/ground/scrub_grass_512_n.png" id="6_grass_n"]
+[ext_resource type="PackedScene" path="res://scenes/environment/GrassTuft.tscn" id="7_grasstuft"]
+[ext_resource type="PackedScene" path="res://demo/assets/models/RockA.tscn" id="8_rock"]
+[ext_resource type="PackedScene" path="res://scenes/environment/WoodenPallet.tscn" id="9_debris"]
+
+[sub_resource type="Terrain3DTextureAsset" id="Terrain3DTextureAsset_dirt"]
+name = "MuddyDirt"
+albedo_color = Color(0.42, 0.38, 0.32, 1)
+albedo_texture = ExtResource("1_dirt")
+normal_texture = ExtResource("2_dirt_n")
+normal_depth = 1.2
+roughness = 0.85
+uv_scale = 0.15
+
+[sub_resource type="Terrain3DTextureAsset" id="Terrain3DTextureAsset_asphalt"]
+name = "CrackedAsphalt"
+id = 1
+albedo_color = Color(0.35, 0.36, 0.38, 1)
+albedo_texture = ExtResource("3_asphalt")
+normal_texture = ExtResource("4_asphalt_n")
+normal_depth = 1.0
+roughness = 0.78
+uv_scale = 0.12
+
+[sub_resource type="Terrain3DTextureAsset" id="Terrain3DTextureAsset_grass"]
+name = "ScrublandGrass"
+id = 2
+albedo_color = Color(0.55, 0.52, 0.38, 1)
+albedo_texture = ExtResource("5_grass")
+normal_texture = ExtResource("6_grass_n")
+normal_depth = 1.0
+roughness = 0.9
+uv_scale = 0.18
+
+[sub_resource type="Terrain3DMeshAsset" id="Terrain3DMeshAsset_grass"]
+name = "DeadGrassClump"
+scene_file = ExtResource("7_grasstuft")
+height_offset = 0.1
+
+[sub_resource type="Terrain3DMeshAsset" id="Terrain3DMeshAsset_rock"]
+name = "SmallRock"
+id = 1
+scene_file = ExtResource("8_rock")
+height_offset = 0.1
+
+[sub_resource type="Terrain3DMeshAsset" id="Terrain3DMeshAsset_debris"]
+name = "DebrisPallet"
+id = 2
+scene_file = ExtResource("9_debris")
+height_offset = 0.1
+
+[resource]
+mesh_list = Array[Terrain3DMeshAsset]([SubResource("Terrain3DMeshAsset_grass"), SubResource("Terrain3DMeshAsset_rock"), SubResource("Terrain3DMeshAsset_debris")])
+texture_list = Array[Terrain3DTextureAsset]([SubResource("Terrain3DTextureAsset_dirt"), SubResource("Terrain3DTextureAsset_asphalt"), SubResource("Terrain3DTextureAsset_grass")])

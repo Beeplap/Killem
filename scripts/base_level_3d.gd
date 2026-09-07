@@ -4,6 +4,7 @@ extends Node3D
 @onready var camera: Camera3D = $IsometricCamera
 @onready var player: CharacterBody3D = $Player3D
 @onready var enemies_container: Node3D = $Enemies
+@onready var terrain: Terrain3D = get_node_or_null("NavigationRegion3D/Terrain3D")
 
 const SHAMBLER_SCENE = preload("res://scenes/enemies/ShamblerZombie3D.tscn")
 const HOUND_SCENE = preload("res://scenes/enemies/PlagueHound3D.tscn")
@@ -11,7 +12,10 @@ const SPITTER_SCENE = preload("res://scenes/enemies/ToxicSpitter3D.tscn")
 const MUTANT_SCENE = preload("res://scenes/enemies/SuperMutant3D.tscn")
 
 func _ready() -> void:
-	print("[BASE LEVEL 3D] Initializing True 3D Isometric Level with PBR Shading & Volumetric Atmosphere...")
+	print("[BASE LEVEL 3D] Initializing True 3D Isometric Level with Terrain3D PBR Shading & Volumetric Atmosphere...")
+	if terrain and camera:
+		terrain.set_camera(camera)
+		_setup_terrain_and_foliage()
 	setup_mission_infrastructure()
 	if nav_region:
 		call_deferred("_bake_navmesh")
@@ -183,10 +187,92 @@ func _on_all_objectives_complete() -> void:
 	Global.score += 2500
 	Global.score_changed.emit(Global.score, Global.kills)
 
+func _setup_terrain_and_foliage() -> void:
+	if not terrain:
+		return
+	
+	if terrain.material:
+		terrain.material.world_background = Terrain3DMaterial.NONE
+		terrain.material.auto_shader = true
+		terrain.material.dual_scaling = true
+	
+	# Populate procedural heightmap if not already imported
+	if terrain.data and terrain.data.get_region_count() == 0:
+		var noise = FastNoiseLite.new()
+		noise.seed = 2026
+		noise.frequency = 0.012
+		var img: Image = Image.create_empty(512, 512, false, Image.FORMAT_RF)
+		for x in range(512):
+			for y in range(512):
+				var n = noise.get_noise_2d(x, y)
+				var dx = float(x - 256)
+				var dy = float(y - 256)
+				var dist = sqrt(dx * dx + dy * dy)
+				# Smooth flat combat clearing in center (radius 36m), undulating terrain beyond
+				var factor = clampf((dist - 36.0) / 85.0, 0.0, 1.0)
+				img.set_pixel(x, y, Color(n * factor, 0.0, 0.0, 1.0))
+		terrain.region_size = 256
+		terrain.data.import_images([img, null, null], Vector3(-256, 0, -256), 0.0, 4.5)
+		print("[BASE LEVEL 3D] Imported Terrain3D heightmap with tactical central combat clearing and undulating trenches.")
+	
+	# Configure Foliage & Debris Instancing across playable area with zero draw-call overhead
+	if terrain.instancer and terrain.data:
+		var grass_xforms: Array[Transform3D] = []
+		var rock_xforms: Array[Transform3D] = []
+		var debris_xforms: Array[Transform3D] = []
+		
+		# 1. Dead grass clumps (Slot 0)
+		for i in range(45):
+			var rx = randf_range(-28.0, 28.0)
+			var rz = randf_range(-28.0, 28.0)
+			var pos = Vector3(rx, 0.0, rz)
+			pos.y = terrain.data.get_height(pos)
+			if not is_nan(pos.y):
+				var s = randf_range(0.7, 1.3)
+				var rot_y = randf_range(0.0, TAU)
+				var basis = Basis(Vector3.UP, rot_y).scaled(Vector3(s, s, s))
+				grass_xforms.append(Transform3D(basis, pos))
+		
+		# 2. Small rocks (Slot 1) along perimeter slopes
+		for i in range(20):
+			var angle = randf() * TAU
+			var dist = randf_range(18.0, 34.0)
+			var pos = Vector3(cos(angle) * dist, 0.0, sin(angle) * dist)
+			pos.y = terrain.data.get_height(pos)
+			if not is_nan(pos.y):
+				var s = randf_range(0.4, 0.85)
+				var rot_y = randf_range(0.0, TAU)
+				var basis = Basis(Vector3.UP, rot_y).scaled(Vector3(s, s, s))
+				rock_xforms.append(Transform3D(basis, pos))
+		
+		# 3. Debris tufts / wooden pallets (Slot 2)
+		for i in range(10):
+			var pos = Vector3(randf_range(3.0, 18.0), 0.0, randf_range(-16.0, 14.0))
+			pos.y = terrain.data.get_height(pos)
+			if not is_nan(pos.y):
+				var rot_y = randf_range(-0.6, 0.6)
+				debris_xforms.append(Transform3D(Basis(Vector3.UP, rot_y), pos))
+		
+		terrain.instancer.add_transforms(0, grass_xforms)
+		terrain.instancer.add_transforms(1, rock_xforms)
+		terrain.instancer.add_transforms(2, debris_xforms)
+		print("[BASE LEVEL 3D] Instanced Foliage & Debris: ", grass_xforms.size(), " grass clumps, ", rock_xforms.size(), " rocks, ", debris_xforms.size(), " debris tufts.")
+
 func _bake_navmesh() -> void:
 	if nav_region and nav_region.navigation_mesh:
-		nav_region.bake_navigation_mesh(false)
-		print("[BASE LEVEL 3D] 3D NavigationMesh baked for AI horde traversal.")
+		var nav_mesh = nav_region.navigation_mesh
+		var source_geom = NavigationMeshSourceGeometryData3D.new()
+		NavigationServer3D.parse_source_geometry_data(nav_mesh, source_geom, self)
+		
+		if terrain:
+			var aabb = AABB(Vector3(-70, -10, -70), Vector3(140, 20, 140))
+			var faces: PackedVector3Array = terrain.generate_nav_mesh_source_geometry(aabb, false)
+			if not faces.is_empty():
+				source_geom.add_faces(faces, Transform3D.IDENTITY)
+		
+		NavigationServer3D.bake_from_source_geometry_data(nav_mesh, source_geom)
+		nav_region.navigation_mesh = nav_mesh
+		print("[BASE LEVEL 3D] 3D NavigationMesh baked with Terrain3D slopes and obstacle cutouts. Polygons: ", nav_mesh.get_polygon_count())
 	
 	spawn_tier_hierarchy()
 
@@ -205,5 +291,10 @@ func spawn_tier_hierarchy() -> void:
 			enemies_container.add_child(enemy)
 		else:
 			add_child(enemy)
-		enemy.global_position = v["pos"]
-		print("[BASE LEVEL 3D] Spawned Tiered 3D Zombie: ", v["name"], " at ", v["pos"])
+		var spawn_pos: Vector3 = v["pos"]
+		if terrain and terrain.data:
+			var h = terrain.data.get_height(spawn_pos)
+			if not is_nan(h):
+				spawn_pos.y = h + 0.05
+		enemy.global_position = spawn_pos
+		print("[BASE LEVEL 3D] Spawned Tiered 3D Zombie: ", v["name"], " at ", enemy.global_position)

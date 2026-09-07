@@ -1,0 +1,36 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/textures/ground/dirt_terrain.png" id="1_tex"]
+[ext_resource type="Texture2D" path="res://assets/textures/ground/dirt_terrain_n.png" id="2_norm"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_sandbag"]
+albedo_color = Color(0.68, 0.62, 0.50, 1)
+albedo_texture = ExtResource("1_tex")
+normal_enabled = true
+normal_texture = ExtResource("2_norm")
+roughness = 0.95
+uv1_scale = Vector3(3, 1.5, 1.5)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_sandbag"]
+size = Vector3(2.4, 0.9, 0.8)
+
+[sub_resource type="BoxMesh" id="BoxMesh_base"]
+size = Vector3(2.4, 0.45, 0.8)
+
+[node name="SandbagBarricade" type="StaticBody3D" groups=["obstacles"]]
+collision_layer = 4
+collision_mask = 7
+
+[node name="SandbagBottom" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.225, 0)
+material_override = SubResource("StandardMaterial3D_sandbag")
+mesh = SubResource("BoxMesh_base")
+
+[node name="SandbagTop" type="MeshInstance3D" parent="."]
+transform = Transform3D(0.9, 0, 0, 0, 0.9, 0, 0, 0, 0.8, 0, 0.65, 0)
+material_override = SubResource("StandardMaterial3D_sandbag")
+mesh = SubResource("BoxMesh_base")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.45, 0)
+shape = SubResource("BoxShape3D_sandbag")

@@ -1,0 +1,32 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/textures/props/metal_barrel_pbr.png" id="1_tex"]
+[ext_resource type="Texture2D" path="res://assets/textures/props/metal_barrel_pbr_n.png" id="2_norm"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_container"]
+albedo_color = Color(0.48, 0.28, 0.22, 1)
+albedo_texture = ExtResource("1_tex")
+metallic = 0.8
+roughness = 0.65
+normal_enabled = true
+normal_texture = ExtResource("2_norm")
+uv1_scale = Vector3(4, 2, 2)
+
+[sub_resource type="BoxMesh" id="BoxMesh_container"]
+size = Vector3(2.6, 2.6, 6.2)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_container"]
+size = Vector3(2.6, 2.6, 6.2)
+
+[node name="IndustrialContainer" type="StaticBody3D" groups=["obstacles"]]
+collision_layer = 4
+collision_mask = 7
+
+[node name="ContainerMesh" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.3, 0)
+material_override = SubResource("StandardMaterial3D_container")
+mesh = SubResource("BoxMesh_container")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.3, 0)
+shape = SubResource("BoxShape3D_container")

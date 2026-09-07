@@ -1,4 +1,4 @@
-[gd_scene load_steps=23 format=3]
+[gd_scene load_steps=26 format=3]
 
 [ext_resource type="Script" path="res://scripts/base_level_3d.gd" id="1_level"]
 [ext_resource type="Script" path="res://scripts/camera_isometric_3d.gd" id="2_camera"]
@@ -17,6 +17,10 @@
 [ext_resource type="Texture2D" path="res://assets/textures/decals/oil_slick.png" id="15_slick"]
 [ext_resource type="Texture2D" path="res://assets/textures/decals/blast_scorch.png" id="16_scorch"]
 [ext_resource type="PackedScene" path="res://scenes/mechanics/BossArenaTrigger.tscn" id="17_boss_arena"]
+[ext_resource type="Terrain3DAssets" path="res://data/terrain/terrain_assets.tres" id="18_terrain_assets"]
+[ext_resource type="Terrain3DMaterial" path="res://data/terrain/terrain_material.tres" id="19_terrain_mat"]
+[ext_resource type="PackedScene" path="res://scenes/environment/SandbagBarricade.tscn" id="20_sandbag"]
+[ext_resource type="PackedScene" path="res://scenes/environment/IndustrialContainer.tscn" id="21_container"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_sky"]
 sky_top_color = Color(0.35, 0.4, 0.48, 1)
@@ -49,35 +53,6 @@ agent_radius = 0.45
 agent_height = 1.8
 agent_max_climb = 0.35
 agent_max_slope = 45.0
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_dirt"]
-albedo_texture = ExtResource("11_dirt")
-normal_enabled = true
-normal_texture = ExtResource("12_dirt_n")
-roughness = 0.9
-uv1_scale = Vector3(12, 12, 12)
-
-[sub_resource type="PlaneMesh" id="PlaneMesh_ground"]
-material = SubResource("StandardMaterial3D_dirt")
-size = Vector2(70, 70)
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_ground"]
-size = Vector3(70, 0.2, 70)
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_road"]
-albedo_texture = ExtResource("13_asphalt")
-normal_enabled = true
-normal_texture = ExtResource("14_asphalt_n")
-roughness = 0.82
-uv1_scale = Vector3(1, 6, 1)
-
-[sub_resource type="PlaneMesh" id="PlaneMesh_road"]
-material = SubResource("StandardMaterial3D_road")
-size = Vector2(10, 60)
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_road"]
-size = Vector3(10, 0.2, 60)
-
 [node name="BaseLevel3D" type="Node3D"]
 script = ExtResource("1_level")
 
@@ -109,28 +84,39 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 0)
 [node name="NavigationRegion3D" type="NavigationRegion3D" parent="."]
 navigation_mesh = SubResource("NavigationMesh_nav")
 
-[node name="Ground" type="StaticBody3D" parent="NavigationRegion3D"]
+[node name="Terrain3D" type="Terrain3D" parent="NavigationRegion3D" groups=["terrain", "terrain3d"]]
+data_directory = "res://data/terrain"
+material = ExtResource("19_terrain_mat")
+assets = ExtResource("18_terrain_assets")
 collision_layer = 4
 collision_mask = 7
+collision_mode = 3
+mesh_size = 48
+top_level = true
 
-[node name="DirtMesh" type="MeshInstance3D" parent="NavigationRegion3D/Ground"]
-mesh = SubResource("PlaneMesh_ground")
+[node name="SandbagBarricade1" parent="NavigationRegion3D" instance=ExtResource("20_sandbag")]
+transform = Transform3D(0.939693, 0, 0.34202, 0, 1, 0, -0.34202, 0, 0.939693, -8.5, 0, 5.5)
 
-[node name="DirtCollision" type="CollisionShape3D" parent="NavigationRegion3D/Ground"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.1, 0)
-shape = SubResource("BoxShape3D_ground")
+[node name="SandbagBarricade2" parent="NavigationRegion3D" instance=ExtResource("20_sandbag")]
+transform = Transform3D(0.866025, 0, -0.5, 0, 1, 0, 0.5, 0, 0.866025, 4.2, 0, -5.0)
 
-[node name="AsphaltRoad" type="StaticBody3D" parent="NavigationRegion3D"]
-transform = Transform3D(0.92388, 0, 0.382683, 0, 1, 0, -0.382683, 0, 0.92388, -2, 0.02, 0)
-collision_layer = 4
-collision_mask = 7
+[node name="SandbagBarricade3" parent="NavigationRegion3D" instance=ExtResource("20_sandbag")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0, 0, 6.8)
 
-[node name="RoadMesh" type="MeshInstance3D" parent="NavigationRegion3D/AsphaltRoad"]
-mesh = SubResource("PlaneMesh_road")
+[node name="SandbagBarricade4" parent="NavigationRegion3D" instance=ExtResource("20_sandbag")]
+transform = Transform3D(0.707107, 0, 0.707107, 0, 1, 0, -0.707107, 0, 0.707107, 9.5, 0, 7.2)
 
-[node name="RoadCollision" type="CollisionShape3D" parent="NavigationRegion3D/AsphaltRoad"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.1, 0)
-shape = SubResource("BoxShape3D_road")
+[node name="SandbagBarricade5" parent="NavigationRegion3D" instance=ExtResource("20_sandbag")]
+transform = Transform3D(0.965926, 0, -0.258819, 0, 1, 0, 0.258819, 0, 0.965926, -1.8, 0, -10.5)
+
+[node name="ContainerChoke1" parent="NavigationRegion3D" instance=ExtResource("21_container")]
+transform = Transform3D(0.819152, 0, 0.573576, 0, 1, 0, -0.573576, 0, 0.819152, -13.5, 0, -4.0)
+
+[node name="ContainerChoke2" parent="NavigationRegion3D" instance=ExtResource("21_container")]
+transform = Transform3D(0.939693, 0, -0.34202, 0, 1, 0, 0.34202, 0, 0.939693, 10.5, 0, -3.2)
+
+[node name="ContainerChoke3" parent="NavigationRegion3D" instance=ExtResource("21_container")]
+transform = Transform3D(0.34202, 0, 0.939693, 0, 1, 0, -0.939693, 0, 0.34202, -6.0, 0, 13.0)
 
 [node name="Railway" type="Node3D" parent="NavigationRegion3D"]
 transform = Transform3D(0.707107, 0, -0.707107, 0, 1, 0, 0.707107, 0, 0.707107, 8, 0, -8)

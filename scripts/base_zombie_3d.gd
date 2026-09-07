@@ -182,6 +182,53 @@ func handle_movement_and_combat(delta: float) -> void:
 			velocity.y = -0.5
 	
 	move_and_slide()
+	_clamp_to_terrain_surface()
+
+var _cached_terrain: Node = null
+
+func _get_terrain_3d() -> Node:
+	if _cached_terrain and is_instance_valid(_cached_terrain):
+		return _cached_terrain
+	var t = get_tree().get_first_node_in_group("terrain3d")
+	if not t:
+		var all_t = get_tree().get_nodes_in_group("terrain")
+		for node in all_t:
+			if node is Terrain3D:
+				t = node
+				break
+	if not t and get_parent():
+		t = get_parent().find_child("Terrain3D", true, false)
+	_cached_terrain = t
+	return _cached_terrain
+
+func _clamp_to_terrain_surface() -> void:
+	# 1. Direct Terrain3D heightmap query
+	var t = _get_terrain_3d()
+	if t and "data" in t and t.data:
+		var target_y = t.data.get_height(global_position)
+		if not is_nan(target_y):
+			if global_position.y < target_y:
+				global_position.y = target_y
+				if velocity.y < 0.0:
+					velocity.y = 0.0
+			elif global_position.y <= target_y + 0.4 and velocity.y <= 0.0:
+				global_position.y = lerpf(global_position.y, target_y, 0.45)
+				velocity.y = 0.0
+	
+	# 2. Physics Raycast fallback for collision surface / static colliders
+	var space_state = get_world_3d().direct_space_state
+	if space_state:
+		var ray_origin = global_position + Vector3.UP * 1.2
+		var ray_end = global_position + Vector3.DOWN * 2.5
+		var query = PhysicsRayQueryParameters3D.create(ray_origin, ray_end, 4)
+		query.exclude = [get_rid()]
+		var result = space_state.intersect_ray(query)
+		if result:
+			var col_y = result.position.y
+			if global_position.y < col_y:
+				global_position.y = col_y
+				if velocity.y < 0.0:
+					velocity.y = 0.0
 
 func perform_melee_attack() -> void:
 	if target_player and is_instance_valid(target_player):
