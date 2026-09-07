@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3 uid="uid://chudscene001"]
+[gd_scene load_steps=15 format=3 uid="uid://chudscene001"]
 
 [ext_resource type="Script" path="res://scripts/hud.gd" id="1_hud"]
 [ext_resource type="Shader" path="res://shaders/post_process.gdshader" id="2_postprocess"]
@@ -68,6 +68,46 @@ corner_radius_top_left = 6
 corner_radius_top_right = 6
 corner_radius_bottom_right = 6
 corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_card_inactive"]
+bg_color = Color(0.07, 0.09, 0.11, 0.9)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.25, 0.28, 0.32, 0.85)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_card_active"]
+bg_color = Color(0.12, 0.16, 0.2, 0.96)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.98, 0.82, 0.15, 1)
+shadow_color = Color(0.98, 0.82, 0.15, 0.35)
+shadow_size = 4
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_deployable_active"]
+bg_color = Color(0.08, 0.18, 0.14, 0.95)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.2, 0.95, 0.55, 1)
+shadow_color = Color(0.2, 0.95, 0.55, 0.35)
+shadow_size = 4
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
 
 [node name="HUD" type="CanvasLayer"]
 script = ExtResource("1_hud")
@@ -189,76 +229,397 @@ theme_override_font_sizes/font_size = 15
 text = "AMMO: ∞"
 horizontal_alignment = 2
 
-[node name="DeployablesContainer" type="PanelContainer" parent="."]
+[node name="TacticalEquipment" type="VBoxContainer" parent="."]
 anchors_preset = 7
 anchor_left = 0.5
 anchor_top = 1.0
 anchor_right = 0.5
 anchor_bottom = 1.0
-offset_left = -260.0
-offset_top = -118.0
-offset_right = 260.0
-offset_bottom = -82.0
+offset_left = -236.0
+offset_top = -124.0
+offset_right = 236.0
+offset_bottom = -14.0
 grow_horizontal = 2
 grow_vertical = 0
-theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
+theme_override_constants/separation = 5
+alignment = 2
 
-[node name="DeployLabel" type="Label" parent="DeployablesContainer"]
+[node name="DeployablesBar" type="HBoxContainer" parent="TacticalEquipment"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.95, 0.85, 0.3, 1)
-theme_override_font_sizes/font_size = 13
-text = "[E] DEPLOY [Q: CYCLE] • ⚡ WIRE: 2 | 💣 MINE: 2 | 🔫 TURRET: 1"
+theme_override_constants/separation = 6
+alignment = 1
+
+[node name="WireCard" type="Button" parent="TacticalEquipment/DeployablesBar"]
+custom_minimum_size = Vector2(152, 34)
+layout_mode = 2
+pivot_offset = Vector2(76, 17)
+theme_override_styles/normal = SubResource("StyleBoxFlat_card_inactive")
+theme_override_styles/hover = SubResource("StyleBoxFlat_card_inactive")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_deployable_active")
+
+[node name="HBox" type="HBoxContainer" parent="TacticalEquipment/DeployablesBar/WireCard"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 6.0
+offset_right = -6.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 6
+alignment = 1
+
+[node name="Icon" type="TextureRect" parent="TacticalEquipment/DeployablesBar/WireCard/HBox"]
+custom_minimum_size = Vector2(22, 22)
+layout_mode = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Name" type="Label" parent="TacticalEquipment/DeployablesBar/WireCard/HBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.92, 0.95, 1)
+theme_override_font_sizes/font_size = 11
+text = "[Q] WIRE"
+
+[node name="Stock" type="Label" parent="TacticalEquipment/DeployablesBar/WireCard/HBox"]
+layout_mode = 2
+size_flags_horizontal = 10
+theme_override_colors/font_color = Color(0.2, 0.95, 0.55, 1)
+theme_override_font_sizes/font_size = 12
+text = "x2"
+
+[node name="MineCard" type="Button" parent="TacticalEquipment/DeployablesBar"]
+custom_minimum_size = Vector2(152, 34)
+layout_mode = 2
+pivot_offset = Vector2(76, 17)
+theme_override_styles/normal = SubResource("StyleBoxFlat_card_inactive")
+theme_override_styles/hover = SubResource("StyleBoxFlat_card_inactive")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_deployable_active")
+
+[node name="HBox" type="HBoxContainer" parent="TacticalEquipment/DeployablesBar/MineCard"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 6.0
+offset_right = -6.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 6
+alignment = 1
+
+[node name="Icon" type="TextureRect" parent="TacticalEquipment/DeployablesBar/MineCard/HBox"]
+custom_minimum_size = Vector2(22, 22)
+layout_mode = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Name" type="Label" parent="TacticalEquipment/DeployablesBar/MineCard/HBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.92, 0.95, 1)
+theme_override_font_sizes/font_size = 11
+text = "[Q] MINE"
+
+[node name="Stock" type="Label" parent="TacticalEquipment/DeployablesBar/MineCard/HBox"]
+layout_mode = 2
+size_flags_horizontal = 10
+theme_override_colors/font_color = Color(0.2, 0.95, 0.55, 1)
+theme_override_font_sizes/font_size = 12
+text = "x2"
+
+[node name="TurretCard" type="Button" parent="TacticalEquipment/DeployablesBar"]
+custom_minimum_size = Vector2(152, 34)
+layout_mode = 2
+pivot_offset = Vector2(76, 17)
+theme_override_styles/normal = SubResource("StyleBoxFlat_card_inactive")
+theme_override_styles/hover = SubResource("StyleBoxFlat_card_inactive")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_deployable_active")
+
+[node name="HBox" type="HBoxContainer" parent="TacticalEquipment/DeployablesBar/TurretCard"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 6.0
+offset_right = -6.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 6
+alignment = 1
+
+[node name="Icon" type="TextureRect" parent="TacticalEquipment/DeployablesBar/TurretCard/HBox"]
+custom_minimum_size = Vector2(22, 22)
+layout_mode = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Name" type="Label" parent="TacticalEquipment/DeployablesBar/TurretCard/HBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.92, 0.95, 1)
+theme_override_font_sizes/font_size = 11
+text = "[Q] TURRET"
+
+[node name="Stock" type="Label" parent="TacticalEquipment/DeployablesBar/TurretCard/HBox"]
+layout_mode = 2
+size_flags_horizontal = 10
+theme_override_colors/font_color = Color(0.2, 0.95, 0.55, 1)
+theme_override_font_sizes/font_size = 12
+text = "x1"
+
+[node name="WeaponCardsBar" type="HBoxContainer" parent="TacticalEquipment"]
+layout_mode = 2
+theme_override_constants/separation = 5
+alignment = 1
+
+[node name="Card1" type="Button" parent="TacticalEquipment/WeaponCardsBar"]
+custom_minimum_size = Vector2(90, 64)
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_card_inactive")
+theme_override_styles/hover = SubResource("StyleBoxFlat_card_inactive")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_card_active")
+
+[node name="VBox" type="VBoxContainer" parent="TacticalEquipment/WeaponCardsBar/Card1"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 4.0
+offset_top = 2.0
+offset_right = -4.0
+offset_bottom = -2.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 1
+alignment = 1
+
+[node name="Header" type="HBoxContainer" parent="TacticalEquipment/WeaponCardsBar/Card1/VBox"]
+layout_mode = 2
+
+[node name="Badge" type="Label" parent="TacticalEquipment/WeaponCardsBar/Card1/VBox/Header"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.98, 0.82, 0.15, 1)
+theme_override_font_sizes/font_size = 10
+text = "[1]"
+
+[node name="Name" type="Label" parent="TacticalEquipment/WeaponCardsBar/Card1/VBox/Header"]
+layout_mode = 2
+size_flags_horizontal = 10
+theme_override_colors/font_color = Color(0.7, 0.75, 0.8, 1)
+theme_override_font_sizes/font_size = 10
+text = "9MM"
+
+[node name="Icon" type="TextureRect" parent="TacticalEquipment/WeaponCardsBar/Card1/VBox"]
+custom_minimum_size = Vector2(44, 24)
+layout_mode = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Ammo" type="Label" parent="TacticalEquipment/WeaponCardsBar/Card1/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.9, 0.95, 1)
+theme_override_font_sizes/font_size = 10
+text = "AMMO: ∞"
 horizontal_alignment = 1
-vertical_alignment = 1
 
-[node name="MobileWeaponButtons" type="HBoxContainer" parent="."]
-anchors_preset = 7
-anchor_left = 0.5
-anchor_top = 1.0
-anchor_right = 0.5
+[node name="Card2" type="Button" parent="TacticalEquipment/WeaponCardsBar"]
+custom_minimum_size = Vector2(90, 64)
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_card_inactive")
+theme_override_styles/hover = SubResource("StyleBoxFlat_card_inactive")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_card_active")
+
+[node name="VBox" type="VBoxContainer" parent="TacticalEquipment/WeaponCardsBar/Card2"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = -190.0
-offset_top = -70.0
-offset_right = 190.0
-offset_bottom = -22.0
+offset_left = 4.0
+offset_top = 2.0
+offset_right = -4.0
+offset_bottom = -2.0
 grow_horizontal = 2
-grow_vertical = 0
-theme_override_constants/separation = 8
+grow_vertical = 2
+theme_override_constants/separation = 1
+alignment = 1
 
-[node name="Btn1" type="Button" parent="MobileWeaponButtons"]
-custom_minimum_size = Vector2(66, 44)
+[node name="Header" type="HBoxContainer" parent="TacticalEquipment/WeaponCardsBar/Card2/VBox"]
+layout_mode = 2
+
+[node name="Badge" type="Label" parent="TacticalEquipment/WeaponCardsBar/Card2/VBox/Header"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.98, 0.82, 0.15, 1)
-theme_override_font_sizes/font_size = 13
-text = "[1] 9MM"
+theme_override_font_sizes/font_size = 10
+text = "[2]"
 
-[node name="Btn2" type="Button" parent="MobileWeaponButtons"]
-custom_minimum_size = Vector2(66, 44)
+[node name="Name" type="Label" parent="TacticalEquipment/WeaponCardsBar/Card2/VBox/Header"]
+layout_mode = 2
+size_flags_horizontal = 10
+theme_override_colors/font_color = Color(0.7, 0.75, 0.8, 1)
+theme_override_font_sizes/font_size = 10
+text = "SHOTGUN"
+
+[node name="Icon" type="TextureRect" parent="TacticalEquipment/WeaponCardsBar/Card2/VBox"]
+custom_minimum_size = Vector2(44, 24)
+layout_mode = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Ammo" type="Label" parent="TacticalEquipment/WeaponCardsBar/Card2/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.9, 0.95, 1)
+theme_override_font_sizes/font_size = 10
+text = "24 / 64"
+horizontal_alignment = 1
+
+[node name="Card3" type="Button" parent="TacticalEquipment/WeaponCardsBar"]
+custom_minimum_size = Vector2(90, 64)
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_card_inactive")
+theme_override_styles/hover = SubResource("StyleBoxFlat_card_inactive")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_card_active")
+
+[node name="VBox" type="VBoxContainer" parent="TacticalEquipment/WeaponCardsBar/Card3"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 4.0
+offset_top = 2.0
+offset_right = -4.0
+offset_bottom = -2.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 1
+alignment = 1
+
+[node name="Header" type="HBoxContainer" parent="TacticalEquipment/WeaponCardsBar/Card3/VBox"]
+layout_mode = 2
+
+[node name="Badge" type="Label" parent="TacticalEquipment/WeaponCardsBar/Card3/VBox/Header"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.98, 0.82, 0.15, 1)
-theme_override_font_sizes/font_size = 13
-text = "[2] SHG"
+theme_override_font_sizes/font_size = 10
+text = "[3]"
 
-[node name="Btn3" type="Button" parent="MobileWeaponButtons"]
-custom_minimum_size = Vector2(66, 44)
+[node name="Name" type="Label" parent="TacticalEquipment/WeaponCardsBar/Card3/VBox/Header"]
+layout_mode = 2
+size_flags_horizontal = 10
+theme_override_colors/font_color = Color(0.7, 0.75, 0.8, 1)
+theme_override_font_sizes/font_size = 10
+text = "AK RIFLE"
+
+[node name="Icon" type="TextureRect" parent="TacticalEquipment/WeaponCardsBar/Card3/VBox"]
+custom_minimum_size = Vector2(44, 24)
+layout_mode = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Ammo" type="Label" parent="TacticalEquipment/WeaponCardsBar/Card3/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.9, 0.95, 1)
+theme_override_font_sizes/font_size = 10
+text = "90 / 240"
+horizontal_alignment = 1
+
+[node name="Card4" type="Button" parent="TacticalEquipment/WeaponCardsBar"]
+custom_minimum_size = Vector2(90, 64)
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_card_inactive")
+theme_override_styles/hover = SubResource("StyleBoxFlat_card_inactive")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_card_active")
+
+[node name="VBox" type="VBoxContainer" parent="TacticalEquipment/WeaponCardsBar/Card4"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 4.0
+offset_top = 2.0
+offset_right = -4.0
+offset_bottom = -2.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 1
+alignment = 1
+
+[node name="Header" type="HBoxContainer" parent="TacticalEquipment/WeaponCardsBar/Card4/VBox"]
+layout_mode = 2
+
+[node name="Badge" type="Label" parent="TacticalEquipment/WeaponCardsBar/Card4/VBox/Header"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.98, 0.82, 0.15, 1)
-theme_override_font_sizes/font_size = 13
-text = "[3] RIFLE"
+theme_override_font_sizes/font_size = 10
+text = "[4]"
 
-[node name="Btn4" type="Button" parent="MobileWeaponButtons"]
-custom_minimum_size = Vector2(66, 44)
+[node name="Name" type="Label" parent="TacticalEquipment/WeaponCardsBar/Card4/VBox/Header"]
+layout_mode = 2
+size_flags_horizontal = 10
+theme_override_colors/font_color = Color(0.7, 0.75, 0.8, 1)
+theme_override_font_sizes/font_size = 10
+text = "FLAME"
+
+[node name="Icon" type="TextureRect" parent="TacticalEquipment/WeaponCardsBar/Card4/VBox"]
+custom_minimum_size = Vector2(44, 24)
+layout_mode = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Ammo" type="Label" parent="TacticalEquipment/WeaponCardsBar/Card4/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.9, 0.95, 1)
+theme_override_font_sizes/font_size = 10
+text = "150 / 300"
+horizontal_alignment = 1
+
+[node name="Card5" type="Button" parent="TacticalEquipment/WeaponCardsBar"]
+custom_minimum_size = Vector2(90, 64)
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_card_inactive")
+theme_override_styles/hover = SubResource("StyleBoxFlat_card_inactive")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_card_active")
+
+[node name="VBox" type="VBoxContainer" parent="TacticalEquipment/WeaponCardsBar/Card5"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 4.0
+offset_top = 2.0
+offset_right = -4.0
+offset_bottom = -2.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 1
+alignment = 1
+
+[node name="Header" type="HBoxContainer" parent="TacticalEquipment/WeaponCardsBar/Card5/VBox"]
+layout_mode = 2
+
+[node name="Badge" type="Label" parent="TacticalEquipment/WeaponCardsBar/Card5/VBox/Header"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.98, 0.82, 0.15, 1)
-theme_override_font_sizes/font_size = 13
-text = "[4] FLM"
+theme_override_font_sizes/font_size = 10
+text = "[5]"
 
-[node name="Btn5" type="Button" parent="MobileWeaponButtons"]
-custom_minimum_size = Vector2(66, 44)
+[node name="Name" type="Label" parent="TacticalEquipment/WeaponCardsBar/Card5/VBox/Header"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.98, 0.82, 0.15, 1)
-theme_override_font_sizes/font_size = 13
-text = "[5] MINI"
+size_flags_horizontal = 10
+theme_override_colors/font_color = Color(0.7, 0.75, 0.8, 1)
+theme_override_font_sizes/font_size = 10
+text = "MINI"
+
+[node name="Icon" type="TextureRect" parent="TacticalEquipment/WeaponCardsBar/Card5/VBox"]
+custom_minimum_size = Vector2(44, 24)
+layout_mode = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Ammo" type="Label" parent="TacticalEquipment/WeaponCardsBar/Card5/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.9, 0.95, 1)
+theme_override_font_sizes/font_size = 10
+text = "300 / 600"
+horizontal_alignment = 1
 
 [node name="WaveBanner" type="PanelContainer" parent="."]
 visible = false
@@ -353,8 +714,11 @@ anchors_preset = 0
 mouse_filter = 2
 script = ExtResource("3_crosshair")
 
-[connection signal="pressed" from="MobileWeaponButtons/Btn1" to="." method="_on_weapon_btn_1_pressed"]
-[connection signal="pressed" from="MobileWeaponButtons/Btn2" to="." method="_on_weapon_btn_2_pressed"]
-[connection signal="pressed" from="MobileWeaponButtons/Btn3" to="." method="_on_weapon_btn_3_pressed"]
-[connection signal="pressed" from="MobileWeaponButtons/Btn4" to="." method="_on_weapon_btn_4_pressed"]
-[connection signal="pressed" from="MobileWeaponButtons/Btn5" to="." method="_on_weapon_btn_5_pressed"]
+[connection signal="pressed" from="TacticalEquipment/DeployablesBar/WireCard" to="." method="_on_wire_card_pressed"]
+[connection signal="pressed" from="TacticalEquipment/DeployablesBar/MineCard" to="." method="_on_mine_card_pressed"]
+[connection signal="pressed" from="TacticalEquipment/DeployablesBar/TurretCard" to="." method="_on_turret_card_pressed"]
+[connection signal="pressed" from="TacticalEquipment/WeaponCardsBar/Card1" to="." method="_on_weapon_btn_1_pressed"]
+[connection signal="pressed" from="TacticalEquipment/WeaponCardsBar/Card2" to="." method="_on_weapon_btn_2_pressed"]
+[connection signal="pressed" from="TacticalEquipment/WeaponCardsBar/Card3" to="." method="_on_weapon_btn_3_pressed"]
+[connection signal="pressed" from="TacticalEquipment/WeaponCardsBar/Card4" to="." method="_on_weapon_btn_4_pressed"]
+[connection signal="pressed" from="TacticalEquipment/WeaponCardsBar/Card5" to="." method="_on_weapon_btn_5_pressed"]

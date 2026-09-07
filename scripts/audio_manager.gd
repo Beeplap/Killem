@@ -332,7 +332,7 @@ func play_footstep(surface_type: String, pos = null) -> void:
 			sound_name = "footstep_concrete"
 	var p = play_sound(sound_name, pos, BUS_FOLEY)
 	if p:
-		p.volume_db = -8.0
+		p.volume_db = -14.0
 
 func stop_all() -> void:
 	for p in _pool_3d:
@@ -358,91 +358,69 @@ func _get_bus_for_sound(sound_name: String) -> String:
 
 func _synthesize_procedural_stream(sound_name: String) -> AudioStreamWAV:
 	var sample_rate: int = 22050
-	var duration: float = 0.12
-	var freq: float = 440.0
+	var duration: float = 0.14
 	
 	match sound_name:
 		"pistol":
-			duration = 0.15
-			freq = 280.0
-		"shotgun":
-			duration = 0.30
-			freq = 55.0
-		"shotgun_pump":
-			duration = 0.20
-			freq = 950.0
-		"rifle":
-			duration = 0.12
-			freq = 380.0
-		"flame", "flame_loop":
-			duration = 0.35
-			freq = 90.0
-		"minigun_spin":
-			duration = 0.30
-			freq = 600.0
-		"minigun_fire":
-			duration = 0.06
-			freq = 180.0
-		"dry_fire", "empty_click":
-			duration = 0.04
-			freq = 1900.0
-		"footstep_concrete":
-			duration = 0.09
-			freq = 110.0
-		"footstep_gravel":
-			duration = 0.12
-			freq = 400.0
-		"footstep_metal":
 			duration = 0.16
-			freq = 650.0
+		"shotgun":
+			duration = 0.35
+		"shotgun_pump":
+			duration = 0.24
+		"rifle":
+			duration = 0.22
+		"flame", "flame_loop", "flame_start":
+			duration = 0.35
+		"minigun_spin":
+			duration = 0.28
+		"minigun_fire":
+			duration = 0.055
+		"dry_fire", "empty_click":
+			duration = 0.05
+		"reload_mag_out":
+			duration = 0.22
+		"reload_mag_in":
+			duration = 0.25
+		"reload_bolt_rack":
+			duration = 0.38
+		"casing_1", "casing_2", "casing_3", "casing_ping":
+			duration = 0.14
+		"aircraft_flyby":
+			duration = 2.0
+		"footstep_concrete", "footstep_gravel", "footstep_metal":
+			duration = 0.08
 		"zombie_idle", "zombie_groan":
 			duration = 0.45
-			freq = 85.0
 		"zombie_aggro":
 			duration = 0.35
-			freq = 160.0
 		"zombie_hurt", "hit":
 			duration = 0.12
-			freq = 140.0
 		"zombie_death":
 			duration = 0.40
-			freq = 100.0
 		"dog_bark":
 			duration = 0.15
-			freq = 420.0
 		"dog_skitter":
 			duration = 0.06
-			freq = 800.0
 		"dog_whoosh", "roll":
 			duration = 0.20
-			freq = 200.0
 		"mutant_step":
 			duration = 0.30
-			freq = 42.0
 		"mutant_roar", "boss_roar":
 			duration = 0.70
-			freq = 58.0
 		"stomp_crash", "boss_slam":
 			duration = 0.45
-			freq = 38.0
 		"pickup_ammo", "pickup":
-			duration = 0.20
-			freq = 1800.0
+			duration = 0.18
 		"pickup_health":
 			duration = 0.22
-			freq = 650.0
 		"keycard_chirp":
 			duration = 0.16
-			freq = 1200.0
 		"explode":
-			duration = 0.45
-			freq = 48.0
+			duration = 0.50
 		"gate_slam":
 			duration = 0.40
-			freq = 95.0
 		_:
 			duration = 0.15
-			freq = 440.0
 	
 	var stream = AudioStreamWAV.new()
 	stream.format = AudioStreamWAV.FORMAT_16_BITS
@@ -458,27 +436,96 @@ func _synthesize_procedural_stream(sound_name: String) -> AudioStreamWAV:
 		var decay = 1.0 - (float(i) / float(frames))
 		var val: float = 0.0
 		
-		if sound_name in ["explode", "hit", "stomp_crash", "boss_slam", "gate_slam", "zombie_hurt"]:
-			var noise = (randf() * 2.0 - 1.0) * pow(decay, 1.6)
-			var shock = (1.0 - t * 35.0) if t < 0.025 else 0.0
-			val = tanh(shock * 1.5 + noise * 1.2) * 0.95
-		elif sound_name in ["pistol", "rifle", "shotgun", "minigun_fire"]:
-			var crack = (randf() * 2.0 - 1.0) * exp(-t * 55.0) * 1.4
-			var thump = (randf() * 2.0 - 1.0) * exp(-t * 28.0) * 0.9
-			val = tanh(crack + thump) * 0.92
-		elif sound_name in ["zombie_idle", "zombie_groan", "mutant_roar", "boss_roar"]:
-			var pulse = 1.0 if fmod(t * 26.0, 1.0) < 0.15 else -0.2
-			var rasp = (randf() * 2.0 - 1.0) * 0.5
-			val = tanh((pulse + rasp) * sin(float(i) / float(frames) * PI) * 1.5) * 0.85
-		elif sound_name in ["dog_bark"]:
-			var snap = (randf() * 2.0 - 1.0) * exp(-t * 22.0)
-			val = tanh(snap * 1.3) * 0.85
-		elif sound_name in ["footstep_concrete", "footstep_gravel", "footstep_metal"]:
-			var scuff = (randf() * 2.0 - 1.0) * exp(-t * 65.0) * 0.5
-			val = scuff
-		else:
-			var noise = (randf() * 2.0 - 1.0) * exp(-t * 40.0) * 0.6
-			val = noise
+		match sound_name:
+			"rifle":
+				# PUBG-Style AK: Piercing Supersonic Transient + 80Hz Chest Thump + Receiver Cycle Tail
+				var crack = (randf() * 2.0 - 1.0) * exp(-t * 90.0) * 1.8
+				var punch_80hz = sin(TAU * (82.0 - t * 45.0) * t) * exp(-t * 22.0) * 1.5
+				var bolt = (sin(TAU * 850.0 * t) + (randf() * 0.8 - 0.4)) * exp(-(t - 0.035) * 45.0) * 0.5 if t >= 0.035 else 0.0
+				val = tanh(crack + punch_80hz + bolt) * 0.95
+			
+			"pistol":
+				# Crisp 9mm Supersonic Snap + Mid Punch + Slide Rack Rattle
+				var crack = (randf() * 2.0 - 1.0) * exp(-t * 130.0) * 1.5
+				var punch = sin(TAU * (115.0 - t * 120.0) * t) * exp(-t * 36.0) * 1.2
+				var slide = sin(TAU * 1600.0 * t) * exp(-(t - 0.03) * 55.0) * 0.4 if t >= 0.03 else 0.0
+				val = tanh(crack + punch + slide) * 0.92
+			
+			"shotgun":
+				# 12-Gauge Massive Blast Wave + Sub-Bass Pressure + Chamber Ring
+				var blast = (randf() * 2.0 - 1.0) * exp(-t * 32.0) * 1.9
+				var sub_boom = sin(TAU * (58.0 - t * 65.0) * t) * exp(-t * 14.0) * 1.7
+				var chamber = sin(TAU * 380.0 * t) * exp(-t * 20.0) * 0.4
+				val = tanh(blast + sub_boom + chamber) * 0.95
+			
+			"minigun_fire":
+				# Rapid-Fire Impulses + 95Hz Punch + Chamber Lock
+				var crack = (randf() * 2.0 - 1.0) * exp(-t * 180.0) * 2.0
+				var thump = sin(TAU * 95.0 * t) * exp(-t * 48.0) * 1.3
+				var cycle = sin(TAU * 2100.0 * t) * exp(-t * 110.0) * 0.5
+				val = tanh(crack + thump + cycle) * 0.92
+			
+			"dry_fire", "empty_click":
+				# Cold Authentic Metallic Double-Click on Empty Chamber
+				var pin = sin(TAU * 2600.0 * t) * exp(-t * 180.0) * 1.3
+				var sear = sin(TAU * 3400.0 * (t - 0.016)) * exp(-(t - 0.016) * 220.0) * 0.9 if t >= 0.016 else 0.0
+				var snap = (randf() * 2.0 - 1.0) * exp(-t * 250.0) * 0.8
+				val = (pin + sear + snap) * 0.75
+			
+			"reload_mag_out":
+				# Latch release ping + mag slide scrape
+				var latch = sin(TAU * 1750.0 * t) * exp(-t * 120.0) * 0.9
+				var slide = (randf() * 2.0 - 1.0) * exp(-(t - 0.03) * 45.0) * 0.4 if t >= 0.03 else 0.0
+				val = latch + slide
+			
+			"reload_mag_in":
+				# Firm insertion slap + latch lock
+				var slap = (randf() * 2.0 - 1.0) * exp(-t * 85.0) * 0.8
+				var lock = (sin(TAU * 520.0 * (t - 0.04)) + (randf() * 0.6 - 0.3)) * exp(-(t - 0.04) * 60.0) * 1.1 if t >= 0.04 else 0.0
+				val = slap + lock
+			
+			"reload_bolt_rack":
+				# Pull charging handle + heavy spring slam into battery
+				var pull = sin(TAU * 650.0 * t) * exp(-t * 28.0) * 0.6
+				var slam = ((randf() * 2.0 - 1.0) * 1.4 + sin(TAU * 440.0 * (t - 0.16)) * 0.9) * exp(-(t - 0.16) * 55.0) if t >= 0.16 else 0.0
+				val = pull + slam
+			
+			"shotgun_pump":
+				# Forend slide back + chamber lock forward
+				var back = sin(TAU * 1350.0 * t) * exp(-t * 65.0) * 0.7
+				var fwd = (sin(TAU * 950.0 * (t - 0.11)) + (randf() * 0.6 - 0.3)) * exp(-(t - 0.11) * 75.0) * 1.0 if t >= 0.11 else 0.0
+				val = back + fwd
+			
+			"casing_1", "casing_2", "casing_3", "casing_ping":
+				var ping = sin(TAU * 3150.0 * t) * exp(-t * 45.0) * 0.6
+				var bounce = sin(TAU * 3450.0 * (t - 0.045)) * exp(-(t - 0.045) * 55.0) * 0.35 if t >= 0.045 else 0.0
+				val = ping + bounce
+			
+			"aircraft_flyby":
+				# Heavy twin-engine military cargo plane Doppler rumble
+				var freq_d = lerpf(86.0, 48.0, t / duration)
+				var drone = sin(TAU * freq_d * t) * 0.55 + sin(TAU * (freq_d * 2.0) * t) * 0.25
+				var wind = (randf() * 2.0 - 1.0) * 0.25
+				var env = sin(t / duration * PI)
+				val = (drone + wind) * env * 0.9
+			
+			"footstep_concrete", "footstep_gravel", "footstep_metal":
+				# Subtle, quiet muffled footsteps
+				val = (randf() * 2.0 - 1.0) * exp(-t * 75.0) * 0.25
+			
+			"explode", "stomp_crash", "boss_slam", "gate_slam":
+				var noise = (randf() * 2.0 - 1.0) * pow(decay, 1.5)
+				var shock = (1.0 - t * 30.0) if t < 0.03 else 0.0
+				val = tanh(shock * 1.6 + noise * 1.3) * 0.95
+			
+			"zombie_idle", "zombie_groan", "mutant_roar", "boss_roar":
+				var pulse = 1.0 if fmod(t * 24.0, 1.0) < 0.16 else -0.2
+				var rasp = (randf() * 2.0 - 1.0) * 0.5
+				val = tanh((pulse + rasp) * sin(float(i) / float(frames) * PI) * 1.5) * 0.85
+			
+			_:
+				var noise = (randf() * 2.0 - 1.0) * exp(-t * 35.0) * 0.6
+				val = noise
 		
 		var sample_16 = int(clampf(val, -1.0, 1.0) * 32767.0)
 		data.encode_s16(i * 2, sample_16)
