@@ -202,3 +202,148 @@ static func add_drop_shadow(parent: Node2D, offset: Vector2 = Vector2(0, 12), sc
 	parent.add_child(shadow)
 	parent.move_child(shadow, 0)
 	return shadow
+
+static var _icon_cache: Dictionary = {}
+
+static func get_weapon_icon(type: int) -> ImageTexture:
+	if _icon_cache.has(type):
+		return _icon_cache[type]
+	
+	var w: int = 64
+	var h: int = 32
+	var img: Image = Image.create(w, h, false, Image.FORMAT_RGBA8)
+	var fill = Color(0.9, 0.92, 0.96, 0.95)
+	var accent = Color(0.98, 0.82, 0.18, 1.0)
+	var dark = Color(0.2, 0.23, 0.28, 0.9)
+	var wood = Color(0.72, 0.45, 0.22, 1.0)
+	var flame_col = Color(1.0, 0.55, 0.12, 1.0)
+	
+	match type:
+		0: # Pistol
+			# Slide & barrel
+			_fill_rect(img, 14, 8, 38, 8, fill)
+			_fill_rect(img, 12, 10, 4, 6, fill)
+			# Grip
+			_fill_rect(img, 16, 16, 11, 13, dark)
+			_fill_rect(img, 13, 24, 15, 4, dark)
+			# Trigger guard & rail light
+			_fill_rect(img, 27, 18, 3, 7, fill)
+			_fill_rect(img, 27, 24, 6, 2, fill)
+			_fill_rect(img, 34, 16, 14, 6, accent)
+		1: # Shotgun
+			# Stock & wrist
+			_fill_rect(img, 4, 14, 12, 10, dark)
+			_fill_rect(img, 2, 16, 4, 9, fill)
+			# Receiver
+			_fill_rect(img, 16, 12, 12, 8, fill)
+			# Dual barrel + tube
+			_fill_rect(img, 28, 12, 32, 4, fill)
+			_fill_rect(img, 28, 16, 28, 3, dark)
+			# Ribbed pump forend
+			_fill_rect(img, 32, 15, 14, 6, dark)
+			_fill_rect(img, 35, 15, 2, 6, accent)
+			_fill_rect(img, 39, 15, 2, 6, accent)
+			_fill_rect(img, 43, 15, 2, 6, accent)
+			# Bead sight
+			_fill_rect(img, 58, 10, 2, 3, accent)
+		2: # AK Assault Rifle
+			# Fixed Stock
+			_fill_rect(img, 4, 12, 12, 8, wood)
+			_fill_rect(img, 2, 13, 3, 8, fill)
+			# Receiver & Dust cover
+			_fill_rect(img, 16, 10, 14, 8, fill)
+			_fill_rect(img, 15, 18, 5, 8, dark)
+			# Curved banana mag
+			_fill_rect(img, 22, 18, 6, 6, dark)
+			_fill_rect(img, 24, 23, 7, 7, dark)
+			# Wood handguards
+			_fill_rect(img, 30, 11, 12, 7, wood)
+			# Barrel, gas tube, front sight, brake
+			_fill_rect(img, 42, 12, 16, 3, fill)
+			_fill_rect(img, 52, 9, 3, 5, fill)
+			_fill_rect(img, 57, 11, 3, 5, fill)
+		3: # Flamethrower
+			# Dual canisters
+			_fill_rect(img, 8, 6, 20, 8, flame_col)
+			_fill_rect(img, 8, 18, 18, 8, flame_col)
+			_fill_rect(img, 12, 4, 12, 24, dark)
+			# Projector nozzle
+			_fill_rect(img, 28, 12, 22, 6, fill)
+			_fill_rect(img, 47, 10, 4, 10, accent)
+			# Pilot flame tip
+			_fill_rect(img, 52, 13, 8, 4, Color(1.0, 0.8, 0.2))
+			_fill_rect(img, 56, 11, 5, 8, flame_col)
+		4: # Rotary Minigun
+			# Motor & housing
+			_fill_rect(img, 8, 8, 16, 14, dark)
+			_fill_rect(img, 12, 5, 8, 4, fill)
+			# Ammo belt
+			_fill_rect(img, 12, 22, 8, 7, accent)
+			# Quad barrels
+			_fill_rect(img, 24, 9, 36, 2, fill)
+			_fill_rect(img, 24, 13, 36, 2, fill)
+			_fill_rect(img, 24, 17, 36, 2, fill)
+			_fill_rect(img, 24, 21, 36, 2, fill)
+			# Spacer rings
+			_fill_rect(img, 38, 8, 3, 16, dark)
+			_fill_rect(img, 54, 8, 3, 16, dark)
+	
+	var tex = ImageTexture.create_from_image(img)
+	_icon_cache[type] = tex
+	return tex
+
+static func get_deployable_icon(type: int) -> ImageTexture:
+	var key = 100 + type
+	if _icon_cache.has(key):
+		return _icon_cache[key]
+	
+	var w: int = 40
+	var h: int = 40
+	var img: Image = Image.create(w, h, false, Image.FORMAT_RGBA8)
+	var col = Color(0.2, 0.95, 0.55, 1.0)
+	var dark = Color(0.12, 0.15, 0.18, 0.95)
+	
+	match type:
+		0: # Barbed Wire
+			# Coiled wire strands & barbs
+			for i in range(32):
+				var x = 4 + i
+				var y1 = int(20 + sin(float(i) * 0.5) * 8.0)
+				var y2 = int(20 - sin(float(i) * 0.5) * 8.0)
+				_fill_rect(img, x, y1, 2, 2, col)
+				_fill_rect(img, x, y2, 2, 2, col)
+			# Cross stakes
+			_fill_rect(img, 8, 6, 3, 28, dark)
+			_fill_rect(img, 29, 6, 3, 28, dark)
+		1: # Claymore Mine
+			# Curved body
+			_fill_rect(img, 8, 12, 24, 16, dark)
+			_fill_rect(img, 10, 14, 20, 12, col)
+			# Front scissors legs
+			_fill_rect(img, 11, 28, 3, 8, dark)
+			_fill_rect(img, 26, 28, 3, 8, dark)
+			# Convex sensor face
+			_fill_rect(img, 13, 8, 14, 5, col)
+		2: # Sentry Turret
+			# Tripod legs
+			_fill_rect(img, 8, 28, 24, 4, dark)
+			_fill_rect(img, 18, 20, 4, 9, dark)
+			# Turret head
+			_fill_rect(img, 12, 10, 16, 10, dark)
+			_fill_rect(img, 14, 12, 12, 6, col)
+			# Dual barrels
+			_fill_rect(img, 26, 11, 10, 3, col)
+			_fill_rect(img, 26, 16, 10, 3, col)
+	
+	var tex = ImageTexture.create_from_image(img)
+	_icon_cache[key] = tex
+	return tex
+
+static func _fill_rect(img: Image, rx: int, ry: int, rw: int, rh: int, c: Color) -> void:
+	var w = img.get_width()
+	var h = img.get_height()
+	for y in range(ry, ry + rh):
+		if y < 0 or y >= h: continue
+		for x in range(rx, rx + rw):
+			if x < 0 or x >= w: continue
+			img.set_pixel(x, y, c)

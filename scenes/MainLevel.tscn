@@ -31,30 +31,6 @@
 [ext_resource type="Shader" path="res://shaders/post_process.gdshader" id="29_post_shader"]
 [ext_resource type="PackedScene" path="res://scenes/PowerTransformer.tscn" id="30_transformer"]
 
-[sub_resource type="CanvasTexture" id="CanvasTexture_dirt"]
-diffuse_texture = ExtResource("9_dirt")
-normal_texture = ExtResource("20_dirt_n")
-specular_color = Color(0.2, 0.22, 0.25, 1)
-specular_shininess = 6.0
-
-[sub_resource type="CanvasTexture" id="CanvasTexture_asphalt"]
-diffuse_texture = ExtResource("10_asphalt")
-normal_texture = ExtResource("21_asphalt_n")
-specular_color = Color(0.38, 0.4, 0.46, 1)
-specular_shininess = 16.0
-
-[sub_resource type="CanvasTexture" id="CanvasTexture_railway"]
-diffuse_texture = ExtResource("11_railway")
-normal_texture = ExtResource("22_railway_n")
-specular_color = Color(0.65, 0.68, 0.75, 1)
-specular_shininess = 28.0
-
-[sub_resource type="CanvasTexture" id="CanvasTexture_hazard"]
-diffuse_texture = ExtResource("12_hazard")
-normal_texture = ExtResource("23_hazard_n")
-specular_color = Color(0.48, 0.5, 0.55, 1)
-specular_shininess = 20.0
-
 [sub_resource type="CanvasTexture" id="CanvasTexture_wall_h"]
 diffuse_texture = ExtResource("16_wall_h")
 normal_texture = ExtResource("24_wall_h_n")
@@ -84,11 +60,6 @@ shader = ExtResource("28_fog_shader")
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_post"]
 shader = ExtResource("29_post_shader")
-
-[sub_resource type="NavigationPolygon" id="NavigationPolygon_1"]
-vertices = PackedVector2Array(-1400, -1400, 1400, -1400, 1400, 1400, -1400, 1400)
-polygons = Array[PackedInt32Array]([PackedInt32Array(0, 1, 2, 3)])
-outlines = Array[PackedVector2Array]([PackedVector2Array(-1400, -1400, 1400, -1400, 1400, 1400, -1400, 1400)])
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_bunker"]
 size = Vector2(380, 140)
@@ -125,99 +96,7 @@ y_sort_enabled = true
 script = ExtResource("1_level")
 
 [node name="AtmosphericLighting" type="CanvasModulate" parent="."]
-color = Color(0.88, 0.90, 0.94, 1)
-
-[node name="GroundLayers" type="Node2D" parent="."]
-z_index = -3
-
-[node name="DirtBackground" type="TextureRect" parent="GroundLayers"]
-offset_left = -1500.0
-offset_top = -1500.0
-offset_right = 1500.0
-offset_bottom = 1500.0
-texture = SubResource("CanvasTexture_dirt")
-stretch_mode = 1
-
-[node name="AsphaltRoad" type="TextureRect" parent="GroundLayers"]
-offset_left = -1600.0
-offset_top = 80.0
-offset_right = 1600.0
-offset_bottom = 360.0
-rotation = 0.22
-texture = SubResource("CanvasTexture_asphalt")
-stretch_mode = 1
-
-[node name="RailwayTracks" type="Node2D" parent="GroundLayers"]
-rotation = 0.56
-
-[node name="Track1" type="Sprite2D" parent="GroundLayers/RailwayTracks"]
-position = Vector2(-700, -400)
-texture = SubResource("CanvasTexture_railway")
-
-[node name="Track2" type="Sprite2D" parent="GroundLayers/RailwayTracks"]
-position = Vector2(-700, -144)
-texture = SubResource("CanvasTexture_railway")
-
-[node name="Track3" type="Sprite2D" parent="GroundLayers/RailwayTracks"]
-position = Vector2(-700, 112)
-texture = SubResource("CanvasTexture_railway")
-
-[node name="Track4" type="Sprite2D" parent="GroundLayers/RailwayTracks"]
-position = Vector2(-700, 368)
-texture = SubResource("CanvasTexture_railway")
-
-[node name="Track5" type="Sprite2D" parent="GroundLayers/RailwayTracks"]
-position = Vector2(-700, 624)
-texture = SubResource("CanvasTexture_railway")
-
-[node name="Track6" type="Sprite2D" parent="GroundLayers/RailwayTracks"]
-position = Vector2(-700, 880)
-texture = SubResource("CanvasTexture_railway")
-
-[node name="Track7" type="Sprite2D" parent="GroundLayers/RailwayTracks"]
-position = Vector2(-700, 1136)
-texture = SubResource("CanvasTexture_railway")
-
-[node name="HazardPlatform" type="Sprite2D" parent="GroundLayers/RailwayTracks"]
-position = Vector2(-700, 368)
-texture = SubResource("CanvasTexture_hazard")
-
-[node name="GrassPatches" type="Node2D" parent="GroundLayers"]
-
-[node name="Grass1" type="Sprite2D" parent="GroundLayers/GrassPatches"]
-position = Vector2(-220, -180)
-texture = ExtResource("13_grass")
-
-[node name="Grass2" type="Sprite2D" parent="GroundLayers/GrassPatches"]
-position = Vector2(-180, -140)
-texture = ExtResource("13_grass")
-
-[node name="Grass3" type="Sprite2D" parent="GroundLayers/GrassPatches"]
-position = Vector2(160, 40)
-texture = ExtResource("13_grass")
-
-[node name="Grass4" type="Sprite2D" parent="GroundLayers/GrassPatches"]
-position = Vector2(240, 120)
-texture = ExtResource("13_grass")
-
-[node name="Grass5" type="Sprite2D" parent="GroundLayers/GrassPatches"]
-position = Vector2(-360, 20)
-texture = ExtResource("13_grass")
-
-[node name="Grass6" type="Sprite2D" parent="GroundLayers/GrassPatches"]
-position = Vector2(380, -180)
-texture = ExtResource("13_grass")
-
-[node name="Grass7" type="Sprite2D" parent="GroundLayers/GrassPatches"]
-position = Vector2(-80, 240)
-texture = ExtResource("13_grass")
-
-[node name="Grass8" type="Sprite2D" parent="GroundLayers/GrassPatches"]
-position = Vector2(80, -260)
-texture = ExtResource("13_grass")
-
-[node name="NavigationRegion2D" type="NavigationRegion2D" parent="."]
-navigation_polygon = SubResource("NavigationPolygon_1")
+color = Color(0.459, 0.49, 0.549, 1)
 
 [node name="BulletPool" type="Node2D" parent="." groups=["bullet_pool"]]
 script = ExtResource("2_pool")
@@ -429,8 +308,8 @@ script = ExtResource("4_spawner")
 [node name="Lighting" type="Node2D" parent="."]
 
 [node name="GlobalSunLight" type="DirectionalLight2D" parent="Lighting"]
-color = Color(1, 0.98, 0.95, 1)
-energy = 0.28
+color = Color(0.72, 0.76, 0.82, 1)
+energy = 0.32
 height = 90.0
 
 [node name="YardFloodlight1" type="PointLight2D" parent="Lighting"]

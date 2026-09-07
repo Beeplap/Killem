@@ -30,6 +30,8 @@ AudioManager="*res://scripts/audio_manager.gd"
 Global="*res://scripts/global.gd"
 CampaignManager="*res://scripts/campaign_manager.gd"
 DecalManager="*res://scripts/decal_manager.gd"
+InfiniteTerrainManager="*res://scripts/map/infinite_terrain_manager.gd"
+
 
 [display]
 
@@ -106,7 +108,5 @@ deploy_item={
 
 [rendering]
 
-renderer/rendering_method="forward_plus"
-renderer/rendering_method.mobile="mobile"
 textures/vram_compression/import_etc2_astc=true
 environment/defaults/default_clear_color=Color(0.690196, 0.709804, 0.741176, 1)

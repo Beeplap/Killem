@@ -9,6 +9,8 @@ extends CharacterBody2D
 @onready var sprite: Sprite2D = $Sprite2D
 @onready var flashlight: PointLight2D = get_node_or_null("Flashlight")
 @onready var muzzle_flash: PointLight2D = get_node_or_null("MuzzleFlash")
+@onready var weapon_mount: PlayerWeapons2D = get_node_or_null("WeaponMount")
+@onready var placement_ghost: PlacementGhost = get_node_or_null("PlacementGhost")
 
 var target_zoom: Vector2 = Vector2(1.15, 1.15)
 var min_zoom: Vector2 = Vector2(0.65, 0.65)
@@ -53,6 +55,10 @@ func _ready() -> void:
 	Global.health_changed.emit(Global.player_health, Global.player_max_health)
 	Global.emit_current_ammo()
 	Global.deployables_updated.emit(Global.deployable_barbed_wire, Global.deployable_claymores, Global.deployable_turrets)
+	Global.active_deployable_changed.connect(func(type: int):
+		active_deployable_type = type
+	)
+	active_deployable_type = Global.active_deployable_type
 	
 	ProceduralTextures.add_drop_shadow(self, Vector2(0, 14), Vector2(0.85, 0.42))
 	
@@ -110,7 +116,7 @@ var footstep_distance_traveled: float = 0.0
 const FOOTSTEP_STRIDE_LENGTH: float = 110.0
 
 func cycle_deployable() -> void:
-	active_deployable_type = (active_deployable_type + 1) % 3
+	Global.set_active_deployable(Global.active_deployable_type + 1)
 	Global.play_sound("hit")
 
 func start_dodge_roll() -> void:
@@ -285,6 +291,13 @@ func _play_surface_footstep() -> void:
 	if audio_mgr and audio_mgr.has_method("play_footstep"):
 		audio_mgr.play_footstep(surface, global_position)
 
+func _get_active_deployable_stock() -> int:
+	match active_deployable_type:
+		0: return Global.deployable_barbed_wire
+		1: return Global.deployable_claymores
+		2: return Global.deployable_turrets
+	return 0
+
 func handle_aiming() -> void:
 	var mouse_pos = get_global_mouse_position()
 	var aim_dir = (mouse_pos - global_position).normalized()
@@ -298,16 +311,31 @@ func handle_aiming() -> void:
 	if sprite:
 		sprite.frame = dir_idx
 	
+	if weapon_mount:
+		weapon_mount.position = Vector2(0, -4)
+		weapon_mount.rotation = angle
+		if aim_dir.x < 0.0:
+			weapon_mount.scale.y = -1.0
+		else:
+			weapon_mount.scale.y = 1.0
+	
 	if flashlight:
 		flashlight.rotation = angle
 		flashlight.position = aim_dir * 16.0 + Vector2(0, -4)
 	
 	if muzzle:
-		muzzle.position = aim_dir * 26.0 + Vector2(0, -4)
+		var custom_muzzle = weapon_mount.get_muzzle_marker() if weapon_mount else null
+		if custom_muzzle:
+			muzzle.global_position = custom_muzzle.global_position
+		else:
+			muzzle.position = aim_dir * 26.0 + Vector2(0, -4)
 		muzzle.rotation = angle
 	
 	if muzzle_flash:
 		muzzle_flash.position = muzzle.position if muzzle else aim_dir * 26.0
+	
+	if placement_ghost:
+		placement_ghost.update_ghost(global_position, mouse_pos, active_deployable_type, _get_active_deployable_stock())
 
 func handle_shooting(delta: float) -> void:
 	if fire_cooldown > 0.0:
@@ -319,10 +347,14 @@ func handle_shooting(delta: float) -> void:
 	if Global.current_weapon == Global.WeaponType.MINIGUN:
 		if is_pressing_fire:
 			minigun_spin_timer += delta
+			if weapon_mount:
+				weapon_mount.update_minigun_spin(delta, true, minigun_spin_timer / MINIGUN_SPINUP_TIME)
 			if minigun_spin_timer < MINIGUN_SPINUP_TIME and fmod(minigun_spin_timer, 0.20) < delta:
 				Global.play_sound("minigun_spin")
 		else:
 			minigun_spin_timer = max(0.0, minigun_spin_timer - delta * 2.5)
+			if weapon_mount:
+				weapon_mount.update_minigun_spin(delta, minigun_spin_timer > 0.05, minigun_spin_timer / MINIGUN_SPINUP_TIME)
 	
 	var wants_to_shoot: bool = false
 	if Global.current_weapon == Global.WeaponType.ASSAULT_RIFLE or Global.current_weapon == Global.WeaponType.FLAMETHROWER:
@@ -349,11 +381,25 @@ func fire_weapon() -> void:
 		_find_dependencies()
 	
 	var base_dir: Vector2 = (get_global_mouse_position() - global_position).normalized()
-	var spawn_pos: Vector2 = global_position + base_dir * 32.0 + Vector2(0, -4)
+	var custom_muzzle = weapon_mount.get_muzzle_marker() if weapon_mount else null
+	var spawn_pos: Vector2 = custom_muzzle.global_position if custom_muzzle else global_position + base_dir * 32.0 + Vector2(0, -4)
+	
+	# Apply visual procedural recoil kick
+	if weapon_mount:
+		var kick_amount = 3.5
+		match Global.current_weapon:
+			Global.WeaponType.PISTOL: kick_amount = 3.0
+			Global.WeaponType.SHOTGUN: kick_amount = 6.0
+			Global.WeaponType.ASSAULT_RIFLE: kick_amount = 3.2
+			Global.WeaponType.FLAMETHROWER: kick_amount = 1.5
+			Global.WeaponType.MINIGUN: kick_amount = 2.0
+		weapon_mount.apply_recoil_kick(kick_amount)
 	
 	# Eject brass casing (except flamethrower)
 	if Global.current_weapon != Global.WeaponType.FLAMETHROWER and casing_pool:
-		casing_pool.spawn_casing(global_position + base_dir * 14.0 + Vector2(0, -2), base_dir)
+		var custom_eject = weapon_mount.get_ejection_marker() if weapon_mount else null
+		var eject_pos = custom_eject.global_position if custom_eject else global_position + base_dir * 14.0 + Vector2(0, -2)
+		casing_pool.spawn_casing(eject_pos, base_dir)
 	
 	if muzzle_flash and Global.current_weapon != Global.WeaponType.FLAMETHROWER:
 		muzzle_flash.enabled = true

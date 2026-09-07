@@ -1,10 +1,12 @@
-[gd_scene load_steps=7 format=3 uid="uid://cplayerscene001"]
+[gd_scene load_steps=9 format=3 uid="uid://cplayerscene001"]
 
 [ext_resource type="Script" path="res://scripts/player.gd" id="1_player"]
 [ext_resource type="Texture2D" path="res://assets/textures/characters/soldier_8dir.png" id="2_soldier"]
 [ext_resource type="Texture2D" path="res://assets/textures/lighting/flashlight_cookie.png" id="3_flashlight"]
 [ext_resource type="Texture2D" path="res://assets/textures/lighting/point_light_cookie.png" id="4_pointlight"]
 [ext_resource type="PackedScene" path="res://scenes/weapons/LaserSight.tscn" id="5_laser"]
+[ext_resource type="PackedScene" path="res://scenes/weapons/PlayerWeapons2D.tscn" id="6_weapons"]
+[ext_resource type="PackedScene" path="res://scenes/mechanics/PlacementGhost.tscn" id="7_ghost"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_1"]
 radius = 12.0
@@ -56,6 +58,9 @@ randomness = 0.6
 visibility_rect = Rect2(-700, -420, 1400, 840)
 process_material = SubResource("ParticleProcessMaterial_dust")
 
+[node name="WeaponMount" parent="." instance=ExtResource("6_weapons")]
+position = Vector2(0, -4)
+
 [node name="Muzzle" type="Marker2D" parent="."]
 position = Vector2(28, -4)
 
@@ -88,3 +93,5 @@ energy = 0.25
 height = 80.0
 texture = ExtResource("4_pointlight")
 texture_scale = 1.2
+
+[node name="PlacementGhost" parent="." instance=ExtResource("7_ghost")]

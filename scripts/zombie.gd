@@ -455,9 +455,10 @@ func spawn_blood_splat(hit_dir: Vector2) -> void:
 
 func roll_loot() -> void:
 	var roll = randf()
-	if roll < 0.40:
+	# Emergency scraps: nerfed to 8% total drop rate (4% health, 4% ammo)
+	if roll < 0.04:
 		spawn_pickup(0) # 0 = Health
-	elif roll < 0.80:
+	elif roll < 0.08:
 		spawn_pickup(1) # 1 = Ammo
 
 func spawn_pickup(pickup_type: int) -> void:

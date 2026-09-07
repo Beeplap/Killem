@@ -156,19 +156,6 @@ func spawn_batch(count: int) -> void:
 		var spawn_dist = randf_range(700.0, 900.0)
 		var spawn_pos = player.global_position + Vector2(cos(angle), sin(angle)) * spawn_dist
 		
-		# Map bounds constraint (-1350 to 1350)
-		spawn_pos.x = clamp(spawn_pos.x, -1350.0, 1350.0)
-		spawn_pos.y = clamp(spawn_pos.y, -1350.0, 1350.0)
-		
-		# Safety guard: ensure enemies never materialize too close to player even after clamp
-		if spawn_pos.distance_to(player.global_position) < 680.0:
-			var inward_dir = (Vector2.ZERO - player.global_position).normalized()
-			if inward_dir == Vector2.ZERO:
-				inward_dir = Vector2.UP
-			spawn_pos = player.global_position + inward_dir * randf_range(720.0, 880.0)
-			spawn_pos.x = clamp(spawn_pos.x, -1350.0, 1350.0)
-			spawn_pos.y = clamp(spawn_pos.y, -1350.0, 1350.0)
-		
 		var zombie_scene = select_zombie_scene()
 		var zombie = zombie_scene.instantiate()
 		zombie.global_position = spawn_pos
@@ -183,8 +170,6 @@ func spawn_boss_zombie() -> void:
 	var spawn_angle = randf() * TAU
 	var spawn_dist = randf_range(750.0, 900.0)
 	var spawn_pos = player.global_position + Vector2(cos(spawn_angle), sin(spawn_angle)) * spawn_dist
-	spawn_pos.x = clamp(spawn_pos.x, -1300.0, 1300.0)
-	spawn_pos.y = clamp(spawn_pos.y, -1300.0, 1300.0)
 	
 	var boss = COLOSSUS_ZOMBIE.instantiate()
 	boss.global_position = spawn_pos
@@ -200,8 +185,6 @@ func spawn_air_drop() -> void:
 	var angle = randf() * TAU
 	var dist = randf_range(200.0, 340.0)
 	var pos = player.global_position + Vector2(cos(angle), sin(angle)) * dist
-	pos.x = clamp(pos.x, -1100.0, 1100.0)
-	pos.y = clamp(pos.y, -1100.0, 1100.0)
 	crate.global_position = pos
 	get_parent().call_deferred("add_child", crate)
 

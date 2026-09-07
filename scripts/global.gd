@@ -16,6 +16,8 @@ signal objective_completed(obj_id: String)
 signal perk_unlocked(perk_name: String, description: String)
 signal roll_cooldown_updated(current: float, max_val: float)
 signal deployables_updated(wires: int, mines: int, turrets: int)
+signal weapon_changed(new_weapon: WeaponType)
+signal active_deployable_changed(deployable_type: int)
 
 # Core State
 var keycards_collected: Array[String] = []
@@ -48,6 +50,7 @@ var perk_armor_plating: bool = false
 var deployable_barbed_wire: int = 2
 var deployable_claymores: int = 2
 var deployable_turrets: int = 1
+var active_deployable_type: int = 0
 
 var hitstop_active: bool = false
 var screenshake_multiplier: float = 1.0
@@ -76,6 +79,7 @@ func reset_state() -> void:
 	deployable_barbed_wire = 2
 	deployable_claymores = 2
 	deployable_turrets = 1
+	active_deployable_type = 0
 	is_game_over = false
 	Engine.time_scale = 1.0
 	hitstop_active = false
@@ -202,6 +206,24 @@ func emit_current_ammo() -> void:
 func set_weapon(type: WeaponType) -> void:
 	current_weapon = type
 	emit_current_ammo()
+	weapon_changed.emit(current_weapon)
+
+func set_active_deployable(type: int) -> void:
+	active_deployable_type = posmod(type, 3)
+	active_deployable_changed.emit(active_deployable_type)
+
+func grant_supply_drop() -> void:
+	heal_player(50.0)
+	shotgun_ammo = min(shotgun_max_ammo, shotgun_ammo + 32)
+	rifle_ammo = min(rifle_max_ammo, rifle_ammo + 120)
+	flamethrower_fuel = min(flamethrower_max_fuel, flamethrower_fuel + 150)
+	minigun_ammo = min(minigun_max_ammo, minigun_ammo + 250)
+	deployable_barbed_wire += 2
+	deployable_claymores += 2
+	deployable_turrets += 1
+	emit_current_ammo()
+	deployables_updated.emit(deployable_barbed_wire, deployable_claymores, deployable_turrets)
+	play_sound("perk")
 
 func play_sound(sound_name: String, pos = null) -> void:
 	var audio_mgr = get_node_or_null("/root/AudioManager")

@@ -1,0 +1,256 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/player_weapons_2d.gd" id="1_script"]
+
+[node name="PlayerWeapons2D" type="Node2D"]
+script = ExtResource("1_script")
+
+[node name="Pistol" type="Node2D" parent="."]
+
+[node name="Grip" type="Polygon2D" parent="Pistol"]
+color = Color(0.12, 0.12, 0.14, 1)
+polygon = PackedVector2Array(4, -3, 10, -3, 8, 5, 3, 4)
+
+[node name="Hands" type="Polygon2D" parent="Pistol"]
+color = Color(0.24, 0.28, 0.25, 1)
+polygon = PackedVector2Array(1, -2, 7, -2, 6, 6, 0, 5)
+
+[node name="Slide" type="Polygon2D" parent="Pistol"]
+color = Color(0.72, 0.76, 0.8, 1)
+polygon = PackedVector2Array(6, -4, 23, -4, 23, -1, 6, -1)
+
+[node name="Serrations" type="Line2D" parent="Pistol"]
+points = PackedVector2Array(8, -4, 8, -1, 10, -4, 10, -1, 12, -4, 12, -1)
+width = 1.0
+default_color = Color(0.3, 0.33, 0.36, 1)
+
+[node name="WeaponLight" type="Polygon2D" parent="Pistol"]
+color = Color(0.1, 0.1, 0.12, 1)
+polygon = PackedVector2Array(14, 0, 21, 0, 21, 3, 14, 3)
+
+[node name="LightLens" type="Polygon2D" parent="Pistol"]
+color = Color(0.4, 0.85, 1, 1)
+polygon = PackedVector2Array(21, 0.5, 22, 0.5, 22, 2.5, 21, 2.5)
+
+[node name="TritiumDot" type="Polygon2D" parent="Pistol"]
+color = Color(0.2, 1, 0.3, 1)
+polygon = PackedVector2Array(21, -4.5, 22, -4.5, 22, -3.5, 21, -3.5)
+
+[node name="Muzzle" type="Marker2D" parent="Pistol"]
+position = Vector2(24, -2.5)
+
+[node name="Ejection" type="Marker2D" parent="Pistol"]
+position = Vector2(10, -4)
+
+[node name="Shotgun" type="Node2D" parent="."]
+visible = false
+
+[node name="Stock" type="Polygon2D" parent="Shotgun"]
+color = Color(0.15, 0.15, 0.17, 1)
+polygon = PackedVector2Array(2, -2, 8, -2, 6, 4, 0, 3)
+
+[node name="Hands" type="Polygon2D" parent="Shotgun"]
+color = Color(0.24, 0.28, 0.25, 1)
+polygon = PackedVector2Array(0, -1, 6, -1, 5, 5, -1, 4)
+
+[node name="Receiver" type="Polygon2D" parent="Shotgun"]
+color = Color(0.18, 0.19, 0.22, 1)
+polygon = PackedVector2Array(8, -4, 16, -4, 16, 0, 8, 0)
+
+[node name="MainBarrel" type="Polygon2D" parent="Shotgun"]
+color = Color(0.22, 0.24, 0.27, 1)
+polygon = PackedVector2Array(16, -4, 35, -4, 35, -2, 16, -2)
+
+[node name="MagTube" type="Polygon2D" parent="Shotgun"]
+color = Color(0.14, 0.15, 0.18, 1)
+polygon = PackedVector2Array(16, -2, 33, -2, 33, 0, 16, 0)
+
+[node name="Clamp" type="Polygon2D" parent="Shotgun"]
+color = Color(0.3, 0.32, 0.35, 1)
+polygon = PackedVector2Array(31, -4.5, 33, -4.5, 33, 0.5, 31, 0.5)
+
+[node name="HeatShield" type="Line2D" parent="Shotgun"]
+points = PackedVector2Array(16, -4.5, 30, -4.5)
+width = 1.0
+default_color = Color(0.35, 0.38, 0.42, 1)
+
+[node name="PumpForend" type="Polygon2D" parent="Shotgun"]
+color = Color(0.08, 0.08, 0.1, 1)
+polygon = PackedVector2Array(18, -2.5, 27, -2.5, 27, 1, 18, 1)
+
+[node name="PumpRibs" type="Line2D" parent="Shotgun"]
+points = PackedVector2Array(20, -2.5, 20, 1, 22, -2.5, 22, 1, 24, -2.5, 24, 1)
+width = 1.0
+default_color = Color(0.2, 0.22, 0.25, 1)
+
+[node name="BeadSight" type="Polygon2D" parent="Shotgun"]
+color = Color(0.9, 0.75, 0.2, 1)
+polygon = PackedVector2Array(34, -5, 35, -5, 35, -4, 34, -4)
+
+[node name="Muzzle" type="Marker2D" parent="Shotgun"]
+position = Vector2(36, -3)
+
+[node name="Ejection" type="Marker2D" parent="Shotgun"]
+position = Vector2(12, -4)
+
+[node name="AK" type="Node2D" parent="."]
+visible = false
+
+[node name="PistolGrip" type="Polygon2D" parent="AK"]
+color = Color(0.14, 0.14, 0.16, 1)
+polygon = PackedVector2Array(4, -2, 8, -2, 6, 5, 2, 4)
+
+[node name="Hands" type="Polygon2D" parent="AK"]
+color = Color(0.24, 0.28, 0.25, 1)
+polygon = PackedVector2Array(0, -1, 6, -1, 5, 5, -1, 4)
+
+[node name="Receiver" type="Polygon2D" parent="AK"]
+color = Color(0.16, 0.17, 0.2, 1)
+polygon = PackedVector2Array(8, -4, 20, -4, 20, 1, 8, 1)
+
+[node name="BananaMag" type="Polygon2D" parent="AK"]
+color = Color(0.12, 0.13, 0.15, 1)
+polygon = PackedVector2Array(15, 1, 19, 1, 22, 8, 18, 9)
+
+[node name="MagRibs" type="Line2D" parent="AK"]
+points = PackedVector2Array(17, 2, 18, 7, 18, 2, 19, 7)
+width = 1.0
+default_color = Color(0.25, 0.27, 0.3, 1)
+
+[node name="WoodHandguard" type="Polygon2D" parent="AK"]
+color = Color(0.48, 0.24, 0.12, 1)
+polygon = PackedVector2Array(20, -3.5, 30, -3.5, 30, 0.5, 20, 0.5)
+
+[node name="GasTube" type="Polygon2D" parent="AK"]
+color = Color(0.2, 0.22, 0.25, 1)
+polygon = PackedVector2Array(20, -4, 28, -4, 28, -2, 20, -2)
+
+[node name="Barrel" type="Polygon2D" parent="AK"]
+color = Color(0.22, 0.24, 0.26, 1)
+polygon = PackedVector2Array(30, -3, 39, -3, 39, -1.5, 30, -1.5)
+
+[node name="FrontSight" type="Polygon2D" parent="AK"]
+color = Color(0.18, 0.19, 0.22, 1)
+polygon = PackedVector2Array(35, -5.5, 37, -5.5, 37, -2.5, 35, -2.5)
+
+[node name="SlantedBrake" type="Polygon2D" parent="AK"]
+color = Color(0.25, 0.27, 0.3, 1)
+polygon = PackedVector2Array(39, -3.5, 41, -2, 41, -1, 39, -1)
+
+[node name="Muzzle" type="Marker2D" parent="AK"]
+position = Vector2(41, -2)
+
+[node name="Ejection" type="Marker2D" parent="AK"]
+position = Vector2(14, -4)
+
+[node name="Flamethrower" type="Node2D" parent="."]
+visible = false
+
+[node name="Hands" type="Polygon2D" parent="Flamethrower"]
+color = Color(0.24, 0.28, 0.25, 1)
+polygon = PackedVector2Array(2, -1, 8, -1, 7, 5, 1, 4)
+
+[node name="UpperCanister" type="Polygon2D" parent="Flamethrower"]
+color = Color(0.85, 0.45, 0.12, 1)
+polygon = PackedVector2Array(6, -6.5, 20, -6.5, 20, -2.5, 6, -2.5)
+
+[node name="CanisterBands" type="Line2D" parent="Flamethrower"]
+points = PackedVector2Array(10, -6.5, 10, -2.5, 16, -6.5, 16, -2.5)
+width = 1.0
+default_color = Color(0.2, 0.22, 0.25, 1)
+
+[node name="LowerCanister" type="Polygon2D" parent="Flamethrower"]
+color = Color(0.75, 0.38, 0.1, 1)
+polygon = PackedVector2Array(6, 1.5, 18, 1.5, 18, 5.5, 6, 5.5)
+
+[node name="NozzleTube" type="Polygon2D" parent="Flamethrower"]
+color = Color(0.25, 0.26, 0.28, 1)
+polygon = PackedVector2Array(18, -3, 33, -3, 33, 0.5, 18, 0.5)
+
+[node name="DiffuserRing" type="Polygon2D" parent="Flamethrower"]
+color = Color(0.8, 0.65, 0.2, 1)
+polygon = PackedVector2Array(31, -4, 33.5, -4, 33.5, 1.5, 31, 1.5)
+
+[node name="PilotFlame" type="CPUParticles2D" parent="Flamethrower"]
+position = Vector2(34, -1.2)
+amount = 8
+lifetime = 0.22
+preprocess = 0.1
+randomness = 0.5
+direction = Vector2(1, 0)
+spread = 20.0
+gravity = Vector2(0, -15)
+initial_velocity_min = 18.0
+initial_velocity_max = 35.0
+scale_amount_min = 1.5
+scale_amount_max = 3.0
+color = Color(1, 0.72, 0.18, 0.9)
+
+[node name="Muzzle" type="Marker2D" parent="Flamethrower"]
+position = Vector2(34, -1.2)
+
+[node name="Ejection" type="Marker2D" parent="Flamethrower"]
+position = Vector2(10, 0)
+
+[node name="Minigun" type="Node2D" parent="."]
+visible = false
+
+[node name="Hands" type="Polygon2D" parent="Minigun"]
+color = Color(0.24, 0.28, 0.25, 1)
+polygon = PackedVector2Array(0, -3, 7, -3, 6, 3, -1, 2)
+
+[node name="Housing" type="Polygon2D" parent="Minigun"]
+color = Color(0.14, 0.15, 0.17, 1)
+polygon = PackedVector2Array(6, -4, 16, -4, 16, 4, 6, 4)
+
+[node name="MotorBlock" type="Polygon2D" parent="Minigun"]
+color = Color(0.22, 0.24, 0.27, 1)
+polygon = PackedVector2Array(8, -6.5, 15, -6.5, 15, -4, 8, -4)
+
+[node name="CarryHandle" type="Line2D" parent="Minigun"]
+points = PackedVector2Array(4, -4, 4, -7, 12, -7, 12, -4)
+width = 1.5
+default_color = Color(0.3, 0.32, 0.35, 1)
+
+[node name="AmmoBelt" type="Line2D" parent="Minigun"]
+points = PackedVector2Array(8, 4, 10, 8, 14, 10)
+width = 2.5
+default_color = Color(0.85, 0.7, 0.2, 1)
+
+[node name="BarrelAssembly" type="Node2D" parent="Minigun"]
+
+[node name="Barrel1" type="Line2D" parent="Minigun/BarrelAssembly"]
+points = PackedVector2Array(16, -2.5, 42, -2.5)
+width = 1.5
+default_color = Color(0.25, 0.27, 0.3, 1)
+
+[node name="Barrel2" type="Line2D" parent="Minigun/BarrelAssembly"]
+points = PackedVector2Array(16, -0.8, 42, -0.8)
+width = 1.5
+default_color = Color(0.2, 0.22, 0.24, 1)
+
+[node name="Barrel3" type="Line2D" parent="Minigun/BarrelAssembly"]
+points = PackedVector2Array(16, 0.8, 42, 0.8)
+width = 1.5
+default_color = Color(0.25, 0.27, 0.3, 1)
+
+[node name="Barrel4" type="Line2D" parent="Minigun/BarrelAssembly"]
+points = PackedVector2Array(16, 2.5, 42, 2.5)
+width = 1.5
+default_color = Color(0.2, 0.22, 0.24, 1)
+
+[node name="SpacerRing1" type="Line2D" parent="Minigun/BarrelAssembly"]
+points = PackedVector2Array(28, -3, 28, 3)
+width = 1.5
+default_color = Color(0.35, 0.38, 0.42, 1)
+
+[node name="SpacerRing2" type="Line2D" parent="Minigun/BarrelAssembly"]
+points = PackedVector2Array(40, -3, 40, 3)
+width = 1.5
+default_color = Color(0.35, 0.38, 0.42, 1)
+
+[node name="Muzzle" type="Marker2D" parent="Minigun"]
+position = Vector2(42, 0)
+
+[node name="Ejection" type="Marker2D" parent="Minigun"]
+position = Vector2(12, 6)
