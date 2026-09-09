@@ -12,10 +12,16 @@ class_name TacticalMinimap
 var sweep_angle: float = 0.0
 var player_ref: Node = null
 var is_3d: bool = false
+var is_radar_jammed: bool = false
+var radar_static_intensity: float = 0.0
 
 func _ready() -> void:
+	add_to_group("minimap")
 	custom_minimum_size = Vector2(radar_radius * 2 + 16, radar_radius * 2 + 16)
 	_find_player()
+
+func set_jammed(jammed: bool) -> void:
+	is_radar_jammed = jammed
 
 func _find_player() -> void:
 	var p = get_tree().get_first_node_in_group("player")
@@ -25,6 +31,11 @@ func _find_player() -> void:
 
 func _process(delta: float) -> void:
 	sweep_angle = fmod(sweep_angle + sweep_speed * delta, TAU)
+	
+	if is_radar_jammed:
+		radar_static_intensity = move_toward(radar_static_intensity, 1.0, delta * 3.5)
+	else:
+		radar_static_intensity = move_toward(radar_static_intensity, 0.0, delta * 2.0)
 	
 	if not player_ref or not is_instance_valid(player_ref):
 		_find_player()
@@ -130,19 +141,42 @@ func _draw() -> void:
 		var radar_dist = (dist / effective_range) * radar_radius
 		var blip_pos = center + offset.normalized() * radar_dist
 		
-		var is_boss = enemy.is_in_group("boss") or enemy.get("max_health") != null and enemy.max_health > 400.0
-		var is_elite = enemy.get("zombie_type") != null and (enemy.zombie_type == 2 or enemy.zombie_type == 5)
+		var is_alpha = enemy.get("is_alpha_target") == true
+		var is_boss = enemy.is_in_group("boss") or (enemy.get("max_health") != null and enemy.max_health > 400.0)
+		var is_mutator = (enemy.get("mutation_affix") != null and enemy.mutation_affix != 0) or enemy.is_in_group("elite_mutator")
+		var is_elite = is_boss or is_mutator or (enemy.get("zombie_type") != null and (enemy.zombie_type == 2 or enemy.zombie_type == 5))
 		
-		if is_boss or is_elite:
-			# Pulsing elite diamond / skull marker
+		# Radar Jamming / Static Jitter
+		if radar_static_intensity > 0.0:
+			var jitter = Vector2(randf_range(-6.5, 6.5), randf_range(-6.5, 6.5)) * radar_static_intensity
+			blip_pos += jitter
+		
+		if is_alpha:
+			# High-priority Orange Skull / Star Target Marker
+			var pulse = sin(Time.get_ticks_msec() * 0.016) * 0.5 + 0.5
+			var size_a = 6.5 + pulse * 2.2
+			draw_circle(blip_pos, size_a, Color(1.0, 0.45, 0.1, 1.0))
+			draw_circle(blip_pos, size_a * 0.55, Color(1.0, 0.9, 0.25, 1.0))
+			draw_arc(blip_pos, size_a + 3.0, 0, TAU, 16, Color(1.0, 0.5, 0.1, 0.8), 1.2)
+		elif is_elite:
+			# Pulsing elite diamond / circle marker
 			var pulse = sin(Time.get_ticks_msec() * 0.012) * 0.5 + 0.5
 			var size_e = 5.0 + pulse * 1.8
-			var col = Color(1.0, 0.35, 0.1, 1.0) if is_elite else Color(1.0, 0.15, 0.15, 1.0)
+			var col = Color(0.2, 0.95, 0.4, 1.0) if (enemy.get("mutation_affix") == 1) else (Color(0.9, 0.2, 0.2, 1.0) if enemy.get("mutation_affix") == 3 else Color(1.0, 0.55, 0.15, 1.0))
 			draw_circle(blip_pos, size_e, col)
 			draw_circle(blip_pos, size_e * 0.5, Color(1, 1, 0.4, 1.0))
 		else:
 			# Regular zombie dot
-			draw_circle(blip_pos, 2.4, Color(1.0, 0.25, 0.25, 0.85))
+			var dot_alpha = 0.85 if radar_static_intensity <= 0.0 else (0.85 - randf() * 0.5 * radar_static_intensity)
+			draw_circle(blip_pos, 2.4, Color(1.0, 0.25, 0.25, dot_alpha))
+	
+	# Radar Jamming: Atmospheric Fog Static scanlines
+	if radar_static_intensity > 0.05:
+		for s in range(6):
+			var sy = randf_range(-radar_radius * 0.85, radar_radius * 0.85)
+			var sx = sqrt(max(0.0, radar_radius * radar_radius - sy * sy))
+			var line_col = Color(0.18, 0.95, 0.55, randf_range(0.15, 0.42) * radar_static_intensity)
+			draw_line(center + Vector2(-sx, sy), center + Vector2(sx, sy), line_col, randf_range(1.0, 2.2))
 	
 	# 8. Player Center Marker (Green Chevron pointing in aim/facing direction)
 	var chevron_size = 6.5

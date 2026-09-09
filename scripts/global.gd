@@ -24,6 +24,10 @@ signal boss_defeated(boss_node: Node2D)
 signal camera_trauma_requested(amount: float)
 signal enemy_hit(enemy: Node2D, amount: float, is_crit: bool, is_fatal: bool, hit_dir: Vector2)
 signal deployable_warning_triggered(message: String)
+signal scrap_changed(current_scrap: int)
+signal military_alert_triggered(title: String, subtitle: String, color: Color)
+signal horde_event_started(event_name: String)
+signal horde_event_ended(event_name: String)
 
 # Core State
 var keycards_collected: Array[String] = []
@@ -51,6 +55,19 @@ var minigun_max_ammo: int = 600
 var perk_full_auto: bool = false
 var perk_extended_mags: bool = false
 var perk_armor_plating: bool = false
+
+# Armory Weapon Modifications (Per-Run Buffs)
+var player_scrap: int = 0
+var mod_match_grade_barrel: bool = false
+var mod_extended_drum: bool = false
+var mod_hollow_point: bool = false
+var mod_high_voltage_wire: bool = false
+
+func get_damage_multiplier() -> float:
+	return 1.20 if mod_match_grade_barrel else 1.0
+
+func get_bullet_speed_multiplier() -> float:
+	return 1.10 if mod_match_grade_barrel else 1.0
 
 # Deployables inventory (Slot 0: Grenade, Slot 1: Barbwire, Slot 2: Turret)
 var deployable_grenades: int = 3
@@ -91,6 +108,12 @@ func reset_state() -> void:
 	perk_full_auto = false
 	perk_extended_mags = false
 	perk_armor_plating = false
+	player_scrap = 0
+	mod_match_grade_barrel = false
+	mod_extended_drum = false
+	mod_hollow_point = false
+	mod_high_voltage_wire = false
+	scrap_changed.emit(player_scrap)
 	deployable_grenades = 3
 	deployable_barbwire = 2
 	deployable_claymores = 2
@@ -103,6 +126,20 @@ func reset_state() -> void:
 
 func show_notification(title: String, subtitle: String = "", color: Color = Color(0.98, 0.85, 0.18)) -> void:
 	notification_displayed.emit(title, subtitle, color)
+
+func show_military_alert(title: String, subtitle: String = "", color: Color = Color(1.0, 0.25, 0.2)) -> void:
+	military_alert_triggered.emit(title, subtitle, color)
+	notification_displayed.emit(title, subtitle, color)
+	play_sound("klaxon")
+	get_tree().create_timer(0.28).timeout.connect(func(): play_sound("radio_chatter"))
+
+func add_scrap(amount: int) -> void:
+	player_scrap += amount
+	var econ = get_node_or_null("/root/EconomyManager")
+	if econ and econ.has_method("add_scrap"):
+		econ.add_scrap(amount)
+	elif has_signal("scrap_changed"):
+		scrap_changed.emit(player_scrap)
 
 func unlock_perk(perk_id: String) -> void:
 	match perk_id:
@@ -285,6 +322,9 @@ func play_sound(sound_name: String, pos = null) -> void:
 		"pickup", "pickup_ammo", "pickup_health":
 			duration = 0.15
 			freq = 660.0
+		"scrap_pickup":
+			duration = 0.10
+			freq = 960.0
 		"keycard_chirp":
 			duration = 0.22
 			freq = 1400.0

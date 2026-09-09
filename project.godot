@@ -28,6 +28,7 @@ busses/default_bus_layout="res://default_bus_layout.tres"
 
 AudioManager="*res://scripts/audio_manager.gd"
 Global="*res://scripts/global.gd"
+EconomyManager="*res://scripts/economy_manager.gd"
 CampaignManager="*res://scripts/campaign_manager.gd"
 DecalManager="*res://scripts/decal_manager.gd"
 InfiniteTerrainManager="*res://scripts/map/infinite_terrain_manager.gd"

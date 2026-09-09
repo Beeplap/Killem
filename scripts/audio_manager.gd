@@ -78,6 +78,7 @@ const SOUND_BUS_MAP = {
 	"pickup": BUS_PICKUPS,
 	"pickup_ammo": BUS_PICKUPS,
 	"pickup_health": BUS_PICKUPS,
+	"scrap_pickup": BUS_PICKUPS,
 	"keycard_chirp": BUS_PICKUPS,
 	"perk": BUS_PICKUPS,
 	"wave_clear": BUS_PICKUPS,
@@ -88,7 +89,9 @@ const SOUND_BUS_MAP = {
 	"explode": BUS_SFX,
 	"gate_slam": BUS_SFX,
 	"electric_zap": BUS_SFX,
-	"aircraft_flyby": BUS_SFX
+	"aircraft_flyby": BUS_SFX,
+	"radio_chatter": BUS_PICKUPS,
+	"klaxon": BUS_SFX
 }
 
 # Ducking variables
@@ -419,6 +422,10 @@ func _synthesize_procedural_stream(sound_name: String) -> AudioStreamWAV:
 			duration = 0.50
 		"gate_slam":
 			duration = 0.40
+		"klaxon":
+			duration = 0.75
+		"radio_chatter":
+			duration = 0.55
 		_:
 			duration = 0.15
 	
@@ -522,6 +529,20 @@ func _synthesize_procedural_stream(sound_name: String) -> AudioStreamWAV:
 				var pulse = 1.0 if fmod(t * 24.0, 1.0) < 0.16 else -0.2
 				var rasp = (randf() * 2.0 - 1.0) * 0.5
 				val = tanh((pulse + rasp) * sin(float(i) / float(frames) * PI) * 1.5) * 0.85
+			
+			"klaxon":
+				# Low-frequency dual-tone military alert klaxon
+				var tone1 = sin(TAU * 135.0 * t)
+				var tone2 = sin(TAU * 180.0 * t) * 0.75
+				var warble = (sin(TAU * 5.0 * t) * 0.5 + 0.5)
+				val = tanh((tone1 + tone2) * (0.4 + warble * 0.8) * exp(-t * 1.5)) * 0.95
+			
+			"radio_chatter":
+				# Radio squelch burst + military comms static chirp
+				var squelch = (randf() * 2.0 - 1.0) * exp(-t * 60.0) * 1.4
+				var chirp = sin(TAU * (920.0 + sin(t * 35.0) * 220.0) * t) * exp(-t * 12.0) * 0.5
+				var stat = (randf() * 2.0 - 1.0) * 0.28 * decay
+				val = tanh(squelch + chirp + stat) * 0.88
 			
 			_:
 				var noise = (randf() * 2.0 - 1.0) * exp(-t * 35.0) * 0.6

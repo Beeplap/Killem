@@ -1,0 +1,435 @@
+[gd_scene load_steps=8 format=3 uid="uid://barmorymenu001"]
+
+[ext_resource type="Script" path="res://scripts/ui/armory_menu.gd" id="1_armory"]
+[ext_resource type="Texture2D" uid="uid://chagwm8wbo35m" path="res://assets/textures/ui/scrap_icon.png" id="2_scrap_icon"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_backdrop"]
+bg_color = Color(0.04, 0.05, 0.07, 0.78)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel"]
+content_margin_left = 24.0
+content_margin_top = 18.0
+content_margin_right = 24.0
+content_margin_bottom = 18.0
+bg_color = Color(0.08, 0.1, 0.13, 0.96)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.2, 0.75, 0.85, 0.9)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+shadow_color = Color(0.15, 0.7, 0.85, 0.25)
+shadow_size = 12
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_card"]
+content_margin_left = 14.0
+content_margin_top = 10.0
+content_margin_right = 14.0
+content_margin_bottom = 10.0
+bg_color = Color(0.12, 0.15, 0.19, 0.88)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.25, 0.32, 0.4, 0.8)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn_buy"]
+content_margin_left = 12.0
+content_margin_top = 6.0
+content_margin_right = 12.0
+content_margin_bottom = 6.0
+bg_color = Color(0.12, 0.45, 0.35, 0.95)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.25, 0.9, 0.6, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn_close"]
+content_margin_left = 20.0
+content_margin_top = 8.0
+content_margin_right = 20.0
+content_margin_bottom = 8.0
+bg_color = Color(0.18, 0.22, 0.28, 0.9)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.4, 0.5, 0.65, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[node name="ArmoryMenu" type="CanvasLayer"]
+process_mode = 3
+layer = 95
+script = ExtResource("1_armory")
+
+[node name="MenuRoot" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Backdrop" type="Panel" parent="MenuRoot"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_backdrop")
+
+[node name="Panel" type="PanelContainer" parent="MenuRoot"]
+custom_minimum_size = Vector2(860, 560)
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -430.0
+offset_top = -280.0
+offset_right = 430.0
+offset_bottom = 280.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
+
+[node name="VBox" type="VBoxContainer" parent="MenuRoot/Panel"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="Header" type="HBoxContainer" parent="MenuRoot/Panel/VBox"]
+layout_mode = 2
+
+[node name="Title" type="Label" parent="MenuRoot/Panel/VBox/Header"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.98, 0.82, 0.15, 1)
+theme_override_font_sizes/font_size = 18
+text = "TACTICAL FIELD ARMORY // SECTOR OUTPOST"
+
+[node name="ScrapBox" type="HBoxContainer" parent="MenuRoot/Panel/VBox/Header"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="ScrapIcon" type="TextureRect" parent="MenuRoot/Panel/VBox/Header/ScrapBox"]
+custom_minimum_size = Vector2(22, 22)
+layout_mode = 2
+texture = ExtResource("2_scrap_icon")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="ScrapLabel" type="Label" parent="MenuRoot/Panel/VBox/Header/ScrapBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.85, 0.25, 1)
+theme_override_font_sizes/font_size = 16
+text = "SCRAP: 000"
+
+[node name="HSeparator" type="HSeparator" parent="MenuRoot/Panel/VBox"]
+layout_mode = 2
+
+[node name="ContentHBox" type="HBoxContainer" parent="MenuRoot/Panel/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 18
+
+[node name="RestockCol" type="VBoxContainer" parent="MenuRoot/Panel/VBox/ContentHBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 10
+
+[node name="ColTitle" type="Label" parent="MenuRoot/Panel/VBox/ContentHBox/RestockCol"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.25, 0.9, 0.75, 1)
+theme_override_font_sizes/font_size = 14
+text = "DEFENSIVE RESTOCK"
+
+[node name="GrenadeCard" type="PanelContainer" parent="MenuRoot/Panel/VBox/ContentHBox/RestockCol"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_card")
+
+[node name="HBox" type="HBoxContainer" parent="MenuRoot/Panel/VBox/ContentHBox/RestockCol/GrenadeCard"]
+layout_mode = 2
+
+[node name="VBox" type="VBoxContainer" parent="MenuRoot/Panel/VBox/ContentHBox/RestockCol/GrenadeCard/HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 2
+
+[node name="Name" type="Label" parent="MenuRoot/Panel/VBox/ContentHBox/RestockCol/GrenadeCard/HBox/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.95, 0.95, 0.95, 1)
+theme_override_font_sizes/font_size = 13
+text = "M67 FRAG GRENADE"
+
+[node name="Desc" type="Label" parent="MenuRoot/Panel/VBox/ContentHBox/RestockCol/GrenadeCard/HBox/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.65, 0.72, 0.8, 1)
+theme_override_font_sizes/font_size = 11
+text = "+1 Throwable Frag Grenade (140 Dmg)"
+
+[node name="StockLabel" type="Label" parent="MenuRoot/Panel/VBox/ContentHBox/RestockCol/GrenadeCard"]
+layout_mode = 2
+size_flags_horizontal = 8
+size_flags_vertical = 0
+theme_override_colors/font_color = Color(0.3, 0.85, 0.6, 1)
+theme_override_font_sizes/font_size = 10
+text = "IN STOCK: x3"
+
+[node name="Button" type="Button" parent="MenuRoot/Panel/VBox/ContentHBox/RestockCol/GrenadeCard"]
+layout_mode = 2
+size_flags_horizontal = 8
+size_flags_vertical = 8
+theme_override_font_sizes/font_size = 11
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn_buy")
+text = "[25 SCRAP] REFILL"
+
+[node name="BarbwireCard" type="PanelContainer" parent="MenuRoot/Panel/VBox/ContentHBox/RestockCol"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_card")
+
+[node name="HBox" type="HBoxContainer" parent="MenuRoot/Panel/VBox/ContentHBox/RestockCol/BarbwireCard"]
+layout_mode = 2
+
+[node name="VBox" type="VBoxContainer" parent="MenuRoot/Panel/VBox/ContentHBox/RestockCol/BarbwireCard/HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 2
+
+[node name="Name" type="Label" parent="MenuRoot/Panel/VBox/ContentHBox/RestockCol/BarbwireCard/HBox/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.95, 0.95, 0.95, 1)
+theme_override_font_sizes/font_size = 13
+text = "CONCERTINA BARBWIRE"
+
+[node name="Desc" type="Label" parent="MenuRoot/Panel/VBox/ContentHBox/RestockCol/BarbwireCard/HBox/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.65, 0.72, 0.8, 1)
+theme_override_font_sizes/font_size = 11
+text = "+1 Deployable Wire Kit (70% Slow, 250 HP)"
+
+[node name="StockLabel" type="Label" parent="MenuRoot/Panel/VBox/ContentHBox/RestockCol/BarbwireCard"]
+layout_mode = 2
+size_flags_horizontal = 8
+size_flags_vertical = 0
+theme_override_colors/font_color = Color(0.3, 0.85, 0.6, 1)
+theme_override_font_sizes/font_size = 10
+text = "IN STOCK: x2"
+
+[node name="Button" type="Button" parent="MenuRoot/Panel/VBox/ContentHBox/RestockCol/BarbwireCard"]
+layout_mode = 2
+size_flags_horizontal = 8
+size_flags_vertical = 8
+theme_override_font_sizes/font_size = 11
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn_buy")
+text = "[40 SCRAP] REFILL"
+
+[node name="TurretCard" type="PanelContainer" parent="MenuRoot/Panel/VBox/ContentHBox/RestockCol"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_card")
+
+[node name="HBox" type="HBoxContainer" parent="MenuRoot/Panel/VBox/ContentHBox/RestockCol/TurretCard"]
+layout_mode = 2
+
+[node name="VBox" type="VBoxContainer" parent="MenuRoot/Panel/VBox/ContentHBox/RestockCol/TurretCard/HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 2
+
+[node name="Name" type="Label" parent="MenuRoot/Panel/VBox/ContentHBox/RestockCol/TurretCard/HBox/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.95, 0.95, 0.95, 1)
+theme_override_font_sizes/font_size = 13
+text = "AUTOMATED SENTRY TURRET"
+
+[node name="Desc" type="Label" parent="MenuRoot/Panel/VBox/ContentHBox/RestockCol/TurretCard/HBox/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.65, 0.72, 0.8, 1)
+theme_override_font_sizes/font_size = 11
+text = "+1 Deployable 360° Swivel Turret (100 Rds)"
+
+[node name="StockLabel" type="Label" parent="MenuRoot/Panel/VBox/ContentHBox/RestockCol/TurretCard"]
+layout_mode = 2
+size_flags_horizontal = 8
+size_flags_vertical = 0
+theme_override_colors/font_color = Color(0.3, 0.85, 0.6, 1)
+theme_override_font_sizes/font_size = 10
+text = "IN STOCK: x1"
+
+[node name="Button" type="Button" parent="MenuRoot/Panel/VBox/ContentHBox/RestockCol/TurretCard"]
+layout_mode = 2
+size_flags_horizontal = 8
+size_flags_vertical = 8
+theme_override_font_sizes/font_size = 11
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn_buy")
+text = "[100 SCRAP] REFILL"
+
+[node name="VSeparator" type="VSeparator" parent="MenuRoot/Panel/VBox/ContentHBox"]
+layout_mode = 2
+
+[node name="UpgradeCol" type="VBoxContainer" parent="MenuRoot/Panel/VBox/ContentHBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 8
+
+[node name="ColTitle" type="Label" parent="MenuRoot/Panel/VBox/ContentHBox/UpgradeCol"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.75, 0.2, 1)
+theme_override_font_sizes/font_size = 14
+text = "WEAPON MODIFICATIONS (PER-RUN BUFFS)"
+
+[node name="BarrelCard" type="PanelContainer" parent="MenuRoot/Panel/VBox/ContentHBox/UpgradeCol"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_card")
+
+[node name="HBox" type="HBoxContainer" parent="MenuRoot/Panel/VBox/ContentHBox/UpgradeCol/BarrelCard"]
+layout_mode = 2
+
+[node name="VBox" type="VBoxContainer" parent="MenuRoot/Panel/VBox/ContentHBox/UpgradeCol/BarrelCard/HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 2
+
+[node name="Name" type="Label" parent="MenuRoot/Panel/VBox/ContentHBox/UpgradeCol/BarrelCard/HBox/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.95, 0.95, 0.95, 1)
+theme_override_font_sizes/font_size = 12
+text = "MATCH-GRADE BARREL"
+
+[node name="Desc" type="Label" parent="MenuRoot/Panel/VBox/ContentHBox/UpgradeCol/BarrelCard/HBox/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.65, 0.72, 0.8, 1)
+theme_override_font_sizes/font_size = 10
+text = "+20% Weapon Damage, +10% Bullet Velocity"
+
+[node name="Button" type="Button" parent="MenuRoot/Panel/VBox/ContentHBox/UpgradeCol/BarrelCard"]
+layout_mode = 2
+size_flags_horizontal = 8
+size_flags_vertical = 4
+theme_override_font_sizes/font_size = 11
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn_buy")
+text = "[75 SCRAP] PURCHASE"
+
+[node name="DrumCard" type="PanelContainer" parent="MenuRoot/Panel/VBox/ContentHBox/UpgradeCol"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_card")
+
+[node name="HBox" type="HBoxContainer" parent="MenuRoot/Panel/VBox/ContentHBox/UpgradeCol/DrumCard"]
+layout_mode = 2
+
+[node name="VBox" type="VBoxContainer" parent="MenuRoot/Panel/VBox/ContentHBox/UpgradeCol/DrumCard/HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 2
+
+[node name="Name" type="Label" parent="MenuRoot/Panel/VBox/ContentHBox/UpgradeCol/DrumCard/HBox/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.95, 0.95, 0.95, 1)
+theme_override_font_sizes/font_size = 12
+text = "EXTENDED DRUM"
+
+[node name="Desc" type="Label" parent="MenuRoot/Panel/VBox/ContentHBox/UpgradeCol/DrumCard/HBox/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.65, 0.72, 0.8, 1)
+theme_override_font_sizes/font_size = 10
+text = "+50% Magazine Capacity Across All Firearms"
+
+[node name="Button" type="Button" parent="MenuRoot/Panel/VBox/ContentHBox/UpgradeCol/DrumCard"]
+layout_mode = 2
+size_flags_horizontal = 8
+size_flags_vertical = 4
+theme_override_font_sizes/font_size = 11
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn_buy")
+text = "[90 SCRAP] PURCHASE"
+
+[node name="HollowPointCard" type="PanelContainer" parent="MenuRoot/Panel/VBox/ContentHBox/UpgradeCol"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_card")
+
+[node name="HBox" type="HBoxContainer" parent="MenuRoot/Panel/VBox/ContentHBox/UpgradeCol/HollowPointCard"]
+layout_mode = 2
+
+[node name="VBox" type="VBoxContainer" parent="MenuRoot/Panel/VBox/ContentHBox/UpgradeCol/HollowPointCard/HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 2
+
+[node name="Name" type="Label" parent="MenuRoot/Panel/VBox/ContentHBox/UpgradeCol/HollowPointCard/HBox/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.95, 0.95, 0.95, 1)
+theme_override_font_sizes/font_size = 12
+text = "HOLLOW-POINT ROUNDS"
+
+[node name="Desc" type="Label" parent="MenuRoot/Panel/VBox/ContentHBox/UpgradeCol/HollowPointCard/HBox/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.65, 0.72, 0.8, 1)
+theme_override_font_sizes/font_size = 10
+text = "Applies 2-Second Bleeding Damage-Over-Time"
+
+[node name="Button" type="Button" parent="MenuRoot/Panel/VBox/ContentHBox/UpgradeCol/HollowPointCard"]
+layout_mode = 2
+size_flags_horizontal = 8
+size_flags_vertical = 4
+theme_override_font_sizes/font_size = 11
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn_buy")
+text = "[120 SCRAP] PURCHASE"
+
+[node name="VoltageCard" type="PanelContainer" parent="MenuRoot/Panel/VBox/ContentHBox/UpgradeCol"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_card")
+
+[node name="HBox" type="HBoxContainer" parent="MenuRoot/Panel/VBox/ContentHBox/UpgradeCol/VoltageCard"]
+layout_mode = 2
+
+[node name="VBox" type="VBoxContainer" parent="MenuRoot/Panel/VBox/ContentHBox/UpgradeCol/VoltageCard/HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 2
+
+[node name="Name" type="Label" parent="MenuRoot/Panel/VBox/ContentHBox/UpgradeCol/VoltageCard/HBox/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.95, 0.95, 0.95, 1)
+theme_override_font_sizes/font_size = 12
+text = "HIGH-VOLTAGE WIRE"
+
+[node name="Desc" type="Label" parent="MenuRoot/Panel/VBox/ContentHBox/UpgradeCol/VoltageCard/HBox/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.65, 0.72, 0.8, 1)
+theme_override_font_sizes/font_size = 10
+text = "Barbwire Electrocutes & Chain-Stuns 3 Targets"
+
+[node name="Button" type="Button" parent="MenuRoot/Panel/VBox/ContentHBox/UpgradeCol/VoltageCard"]
+layout_mode = 2
+size_flags_horizontal = 8
+size_flags_vertical = 4
+theme_override_font_sizes/font_size = 11
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn_buy")
+text = "[140 SCRAP] PURCHASE"
+
+[node name="Footer" type="HBoxContainer" parent="MenuRoot/Panel/VBox"]
+layout_mode = 2
+alignment = 1
+
+[node name="CloseButton" type="Button" parent="MenuRoot/Panel/VBox/Footer"]
+custom_minimum_size = Vector2(260, 36)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.95, 1, 1)
+theme_override_font_sizes/font_size = 13
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn_close")
+text = "[ESC] OR [E] CLOSE ARMORY"

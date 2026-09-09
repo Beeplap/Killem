@@ -76,6 +76,10 @@ func process_zombie_damage() -> void:
 			var dir = (zombie.global_position - global_position).normalized()
 			zombie.take_damage(tick_damage, dir)
 		
+		# High-Voltage Wire: Electrocute and chain stun up to 3 nearby enemies
+		if Global.mod_high_voltage_wire:
+			chain_electrocute(zombie)
+		
 		# Structural wear from zombies forcing through
 		current_durability -= 6.0
 		
@@ -92,6 +96,78 @@ func process_zombie_damage() -> void:
 	
 	if sprite:
 		sprite.position = Vector2.ZERO
+
+func chain_electrocute(origin_enemy: Node2D) -> void:
+	var enemies = get_tree().get_nodes_in_group("enemies")
+	var shocked_count = 0
+	
+	# Shock the origin enemy with stun
+	if origin_enemy.has_method("stagger"):
+		origin_enemy.stagger(1.2)
+	elif origin_enemy.has_method("apply_slow"):
+		origin_enemy.apply_slow(0.05, 1.2)
+	
+	spawn_electric_spark(origin_enemy.global_position)
+	
+	# Chain to up to 3 nearby enemies within 160px
+	for enemy in enemies:
+		if is_instance_valid(enemy) and enemy != origin_enemy and not (enemy.has_method("is_dead") and enemy.is_dead()):
+			if origin_enemy.global_position.distance_to(enemy.global_position) <= 160.0:
+				shocked_count += 1
+				if enemy.has_method("take_damage"):
+					var dir = (enemy.global_position - origin_enemy.global_position).normalized()
+					enemy.take_damage(14.0, dir)
+				if enemy.has_method("stagger"):
+					enemy.stagger(1.2)
+				elif enemy.has_method("apply_slow"):
+					enemy.apply_slow(0.05, 1.2)
+				
+				spawn_lightning_arc(origin_enemy.global_position, enemy.global_position)
+				spawn_electric_spark(enemy.global_position)
+				
+				if shocked_count >= 3:
+					break
+
+func spawn_lightning_arc(from_pos: Vector2, to_pos: Vector2) -> void:
+	var level = get_tree().current_scene
+	if not level:
+		return
+	var line = Line2D.new()
+	line.width = 2.4
+	line.default_color = Color(0.35, 0.9, 1.0, 0.95)
+	var pts = PackedVector2Array()
+	var segments = 5
+	for i in range(segments + 1):
+		var t = float(i) / float(segments)
+		var p = from_pos.lerp(to_pos, t)
+		if i > 0 and i < segments:
+			p += Vector2(randf_range(-7.0, 7.0), randf_range(-7.0, 7.0))
+		pts.append(p)
+	line.points = pts
+	level.add_child(line)
+	var tween = level.create_tween()
+	tween.tween_property(line, "modulate:a", 0.0, 0.16)
+	tween.tween_callback(line.queue_free)
+
+func spawn_electric_spark(pos: Vector2) -> void:
+	var level = get_tree().current_scene
+	if not level:
+		return
+	var sparks = CPUParticles2D.new()
+	sparks.emitting = true
+	sparks.one_shot = true
+	sparks.explosiveness = 0.95
+	sparks.amount = 8
+	sparks.lifetime = 0.22
+	sparks.spread = 180.0
+	sparks.initial_velocity_min = 60.0
+	sparks.initial_velocity_max = 140.0
+	sparks.scale_amount_min = 1.5
+	sparks.scale_amount_max = 3.5
+	sparks.color = Color(0.3, 0.9, 1.0, 1.0)
+	sparks.global_position = pos
+	sparks.finished.connect(sparks.queue_free)
+	level.add_child(sparks)
 
 # Service Protocol
 func needs_service() -> bool:

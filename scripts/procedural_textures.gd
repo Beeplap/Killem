@@ -341,6 +341,40 @@ static func get_deployable_icon(type: int) -> ImageTexture:
 	_icon_cache[key] = tex
 	return tex
 
+static func get_orange_skull_icon() -> ImageTexture:
+	var key = 999
+	if _icon_cache.has(key):
+		return _icon_cache[key]
+	
+	var w: int = 32
+	var h: int = 32
+	var img: Image = Image.create(w, h, false, Image.FORMAT_RGBA8)
+	var col_orange = Color(1.0, 0.48, 0.12, 1.0)
+	var col_yellow = Color(1.0, 0.88, 0.25, 1.0)
+	var dark = Color(0.1, 0.05, 0.02, 0.98)
+	
+	# Skull Cranium (rounded top)
+	_fill_rect(img, 9, 6, 14, 13, col_orange)
+	_fill_rect(img, 11, 4, 10, 3, col_orange)
+	_fill_rect(img, 11, 7, 10, 10, col_yellow)
+	
+	# Jaw / Teeth
+	_fill_rect(img, 12, 19, 8, 7, col_orange)
+	_fill_rect(img, 13, 20, 6, 5, col_yellow)
+	_fill_rect(img, 14, 21, 1, 4, dark)
+	_fill_rect(img, 17, 21, 1, 4, dark)
+	
+	# Eye Sockets
+	_fill_rect(img, 11, 11, 3, 4, dark)
+	_fill_rect(img, 18, 11, 3, 4, dark)
+	
+	# Nose cavity
+	_fill_rect(img, 15, 16, 2, 2, dark)
+	
+	var tex = ImageTexture.create_from_image(img)
+	_icon_cache[key] = tex
+	return tex
+
 static func _fill_rect(img: Image, rx: int, ry: int, rw: int, rh: int, c: Color) -> void:
 	var w = img.get_width()
 	var h = img.get_height()

@@ -9,6 +9,7 @@ extends CanvasLayer
 @onready var ammo_label: Label = $WeaponContainer/VBox/AmmoLabel
 @onready var score_label: Label = $ScoreContainer/VBox/ScoreLabel
 @onready var kills_label: Label = $ScoreContainer/VBox/KillsLabel
+@onready var scrap_label: Label = get_node_or_null("ScoreContainer/VBox/ScrapLabel")
 @onready var wave_label: Label = $WaveContainer/WaveLabel
 @onready var game_over_panel: Control = $GameOverPanel
 
@@ -69,6 +70,7 @@ func _ready() -> void:
 	Global.weapon_changed.connect(_on_weapon_changed)
 	Global.active_deployable_changed.connect(_on_active_deployable_changed)
 	Global.notification_displayed.connect(_on_notification_displayed)
+	Global.scrap_changed.connect(_on_scrap_changed)
 	if Global.has_signal("deployable_warning_triggered"):
 		Global.deployable_warning_triggered.connect(func(msg: String): _on_notification_displayed(msg, "", Color(1.0, 0.35, 0.25)))
 	
@@ -90,6 +92,7 @@ func _ready() -> void:
 	_on_health_changed(Global.player_health, Global.player_max_health)
 	Global.emit_current_ammo()
 	_on_score_changed(Global.score, Global.kills)
+	_on_scrap_changed(Global.player_scrap)
 	_on_wave_changed(Global.current_wave)
 	_on_roll_cooldown_updated(100.0, 100.0)
 	_on_deployables_updated(Global.deployable_grenades, Global.deployable_barbwire, Global.deployable_turrets)
@@ -281,6 +284,10 @@ func _on_score_changed(score: int, kills: int) -> void:
 		score_label.text = "SCORE: %06d" % score
 	if kills_label:
 		kills_label.text = "KILLS: %d" % kills
+
+func _on_scrap_changed(amount: int) -> void:
+	if scrap_label:
+		scrap_label.text = "SCRAP: %d" % amount
 
 func _on_wave_changed(wave: int) -> void:
 	if wave_label:

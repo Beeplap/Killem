@@ -1,0 +1,112 @@
+[gd_scene load_steps=7 format=3 uid="uid://barmorypod001"]
+
+[ext_resource type="Script" path="res://scripts/armory_pod.gd" id="1_armory"]
+[ext_resource type="Texture2D" uid="uid://dbtf300teo8wc" path="res://assets/textures/props/armory_pod.png" id="2_pod"]
+[ext_resource type="Texture2D" uid="uid://brd6rqbmehjnl" path="res://assets/textures/lighting/point_light_cookie.png" id="3_light"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_trigger"]
+radius = 70.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_progress_bg"]
+bg_color = Color(0.08, 0.1, 0.14, 0.85)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.25, 0.3, 0.38, 0.9)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_progress_fill"]
+bg_color = Color(0.98, 0.75, 0.15, 1)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+
+[node name="ArmoryPod" type="Area2D"]
+collision_layer = 0
+script = ExtResource("1_armory")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_trigger")
+
+[node name="GroundShadow" type="Sprite2D" parent="."]
+modulate = Color(0, 0, 0, 0.6)
+scale = Vector2(1, 0.45)
+texture = ExtResource("3_light")
+
+[node name="Visual" type="Node2D" parent="."]
+
+[node name="PodSprite" type="Sprite2D" parent="Visual"]
+texture = ExtResource("2_pod")
+
+[node name="BeaconLight" type="PointLight2D" parent="Visual"]
+position = Vector2(0, -22)
+color = Color(1, 0.7, 0.12, 1)
+energy = 1.8
+texture = ExtResource("3_light")
+texture_scale = 1.8
+
+[node name="SteamVent" type="CPUParticles2D" parent="Visual"]
+position = Vector2(0, -10)
+emitting = false
+amount = 20
+lifetime = 0.55
+one_shot = true
+explosiveness = 0.9
+direction = Vector2(0, -1)
+spread = 60.0
+gravity = Vector2(0, -30)
+initial_velocity_min = 40.0
+initial_velocity_max = 90.0
+scale_amount_min = 3.0
+scale_amount_max = 7.0
+color = Color(0.9, 0.95, 1, 0.75)
+
+[node name="PromptContainer" type="Control" parent="."]
+visible = false
+layout_mode = 3
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -110.0
+offset_top = -78.0
+offset_right = 110.0
+offset_bottom = -38.0
+grow_horizontal = 2
+grow_vertical = 2
+pivot_offset = Vector2(110, 20)
+
+[node name="VBox" type="VBoxContainer" parent="PromptContainer"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 4
+alignment = 1
+
+[node name="PromptLabel" type="Label" parent="PromptContainer/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.98, 0.82, 0.15, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.85)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 13
+text = "[HOLD E] OPEN FIELD ARMORY"
+horizontal_alignment = 1
+
+[node name="ProgressBar" type="ProgressBar" parent="PromptContainer/VBox"]
+custom_minimum_size = Vector2(140, 6)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_styles/background = SubResource("StyleBoxFlat_progress_bg")
+theme_override_styles/fill = SubResource("StyleBoxFlat_progress_fill")
+max_value = 0.45
+show_percentage = false

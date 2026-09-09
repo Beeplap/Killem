@@ -182,7 +182,18 @@ func _unhandled_input(event: InputEvent) -> void:
 				(detector.get("nearby_serviceables") and not detector.nearby_serviceables.is_empty()) or
 				(detector.get("candidates") and not detector.candidates.is_empty())
 			)
-			if not has_serviceable and deployable_mode:
+			var near_interactable = false
+			for pod in get_tree().get_nodes_in_group("armory_pods"):
+				if is_instance_valid(pod) and pod.get("player_in_range"):
+					near_interactable = true
+					break
+			if not near_interactable:
+				for drop in get_tree().get_nodes_in_group("supply_drops"):
+					if is_instance_valid(drop) and drop.get("player_in_range"):
+						near_interactable = true
+						break
+			
+			if not has_serviceable and not near_interactable and deployable_mode:
 				deploy_current_item()
 		elif event.keycode == KEY_Q:
 			cycle_deployable()
@@ -541,11 +552,14 @@ func fire_weapon() -> void:
 	if laser and laser.has_method("add_recoil_scatter"):
 		laser.add_recoil_scatter(0.04)
 	
+	var dmg_mult: float = Global.get_damage_multiplier()
+	var spd_mult: float = Global.get_bullet_speed_multiplier()
+	
 	match Global.current_weapon:
 		Global.WeaponType.PISTOL:
 			Global.consume_ammo(Global.WeaponType.PISTOL)
 			if bullet_pool:
-				bullet_pool.spawn_bullet(spawn_pos, base_dir, 38.0, 950.0, 1.8)
+				bullet_pool.spawn_bullet(spawn_pos, base_dir, 38.0 * dmg_mult, 950.0 * spd_mult, 1.8)
 			fire_cooldown = 0.12 if Global.perk_full_auto else 0.20
 			add_trauma(0.14)
 			if tactical_crosshair:
@@ -560,7 +574,7 @@ func fire_weapon() -> void:
 				var angle_offset: float = randf_range(-spread_angle * 0.5, spread_angle * 0.5)
 				var pellet_dir: Vector2 = base_dir.rotated(angle_offset)
 				if bullet_pool:
-					bullet_pool.spawn_bullet(spawn_pos, pellet_dir, 24.0, 800.0, 0.75)
+					bullet_pool.spawn_bullet(spawn_pos, pellet_dir, 24.0 * dmg_mult, 800.0 * spd_mult, 0.75)
 			fire_cooldown = 0.70
 			add_trauma(0.44)
 			if tactical_crosshair:
@@ -571,7 +585,7 @@ func fire_weapon() -> void:
 			Global.consume_ammo(Global.WeaponType.ASSAULT_RIFLE)
 			var spread: float = randf_range(-0.06, 0.06)
 			if bullet_pool:
-				bullet_pool.spawn_bullet(spawn_pos, base_dir.rotated(spread), 32.0, 1050.0, 1.8)
+				bullet_pool.spawn_bullet(spawn_pos, base_dir.rotated(spread), 32.0 * dmg_mult, 1050.0 * spd_mult, 1.8)
 			fire_cooldown = 0.095
 			# Screen shake removed completely for Assault Rifle / AK
 			if tactical_crosshair:
@@ -591,7 +605,7 @@ func fire_weapon() -> void:
 			Global.consume_ammo(Global.WeaponType.MINIGUN)
 			var spread: float = randf_range(-0.11, 0.11)
 			if bullet_pool:
-				bullet_pool.spawn_bullet(spawn_pos, base_dir.rotated(spread), 28.0, 1150.0, 1.6)
+				bullet_pool.spawn_bullet(spawn_pos, base_dir.rotated(spread), 28.0 * dmg_mult, 1150.0 * spd_mult, 1.6)
 			fire_cooldown = 0.05 # 20 rounds / sec
 			add_trauma(0.12)
 			if tactical_crosshair:
@@ -634,7 +648,7 @@ func process_flame_cone(base_dir: Vector2, spawn_pos: Vector2) -> void:
 				var dir = diff.normalized()
 				if base_dir.dot(dir) >= flame_cos:
 					if enemy.has_method("take_damage"):
-						enemy.take_damage(16.0, dir)
+						enemy.take_damage(16.0 * Global.get_damage_multiplier(), dir)
 					if enemy.has_method("ignite"):
 						enemy.ignite(4.0, 32.0)
 	
