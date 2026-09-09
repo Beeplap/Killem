@@ -1,4 +1,4 @@
-[gd_scene load_steps=43 format=3 uid="uid://cmainlevelscene001"]
+[gd_scene load_steps=44 format=3 uid="uid://cmainlevelscene001"]
 
 [ext_resource type="Script" path="res://scripts/main_level.gd" id="1_level"]
 [ext_resource type="Script" path="res://scripts/bullet_pool.gd" id="2_pool"]
@@ -32,6 +32,7 @@
 [ext_resource type="PackedScene" path="res://scenes/PowerTransformer.tscn" id="30_transformer"]
 [ext_resource type="PackedScene" path="res://scenes/CameraController.tscn" id="31_camera"]
 [ext_resource type="Script" path="res://scripts/ui/damage_text_manager.gd" id="32_damagetext"]
+[ext_resource type="Script" path="res://scripts/horde_director.gd" id="33_horde_dir"]
 
 [sub_resource type="CanvasTexture" id="CanvasTexture_wall_h"]
 diffuse_texture = ExtResource("16_wall_h")
@@ -309,6 +310,9 @@ position = Vector2(0, 0)
 
 [node name="ZombieSpawner" type="Node2D" parent="."]
 script = ExtResource("4_spawner")
+
+[node name="HordeDirector" type="Node2D" parent="." groups=["horde_director"]]
+script = ExtResource("33_horde_dir")
 
 [node name="HUD" parent="." instance=ExtResource("5_hud")]
 

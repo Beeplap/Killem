@@ -655,6 +655,9 @@ func explode_volatile() -> void:
 	Global.play_sound("explode")
 	Global.explosion_occurred.emit()
 	
+	if player == null or not is_instance_valid(player):
+		_find_player()
+	
 	if player and is_instance_valid(player) and player.has_method("trigger_shake"):
 		player.trigger_shake(12.0, 0.25)
 	

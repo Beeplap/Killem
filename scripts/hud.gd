@@ -70,6 +70,7 @@ func _ready() -> void:
 	Global.weapon_changed.connect(_on_weapon_changed)
 	Global.active_deployable_changed.connect(_on_active_deployable_changed)
 	Global.notification_displayed.connect(_on_notification_displayed)
+	Global.military_alert_triggered.connect(_on_military_alert_triggered)
 	Global.scrap_changed.connect(_on_scrap_changed)
 	if Global.has_signal("deployable_warning_triggered"):
 		Global.deployable_warning_triggered.connect(func(msg: String): _on_notification_displayed(msg, "", Color(1.0, 0.35, 0.25)))
@@ -335,6 +336,28 @@ func _on_notification_displayed(title: String, subtitle: String = "", color: Col
 		banner_hide_timer = t
 		await t.timeout
 		if banner_hide_timer == t and wave_banner.visible and banner_title.text == title:
+			wave_banner.visible = false
+
+func _on_military_alert_triggered(title: String, subtitle: String = "", color: Color = Color(1.0, 0.25, 0.2)) -> void:
+	if wave_banner and banner_title and banner_subtitle:
+		banner_title.text = "[ " + title + " ]"
+		banner_title.modulate = color
+		if subtitle != "":
+			banner_subtitle.text = subtitle
+			banner_subtitle.modulate = Color(1.0, 0.95, 0.85, 1.0)
+			banner_subtitle.visible = true
+		else:
+			banner_subtitle.visible = false
+		wave_banner.visible = true
+		
+		var tween = create_tween()
+		wave_banner.scale = Vector2(1.10, 1.10)
+		tween.tween_property(wave_banner, "scale", Vector2.ONE, 0.25).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+		
+		var t = get_tree().create_timer(4.2)
+		banner_hide_timer = t
+		await t.timeout
+		if banner_hide_timer == t and wave_banner.visible and banner_title.text == "[ " + title + " ]":
 			wave_banner.visible = false
 
 func _on_player_died() -> void:

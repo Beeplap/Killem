@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://btestdirector001"]
+
+[ext_resource type="Script" path="res://tests/test_horde_director_mutators.gd" id="1_test"]
+
+[node name="TestHordeDirector" type="Node"]
+script = ExtResource("1_test")

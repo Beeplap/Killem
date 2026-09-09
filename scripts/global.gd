@@ -129,7 +129,6 @@ func show_notification(title: String, subtitle: String = "", color: Color = Colo
 
 func show_military_alert(title: String, subtitle: String = "", color: Color = Color(1.0, 0.25, 0.2)) -> void:
 	military_alert_triggered.emit(title, subtitle, color)
-	notification_displayed.emit(title, subtitle, color)
 	play_sound("klaxon")
 	get_tree().create_timer(0.28).timeout.connect(func(): play_sound("radio_chatter"))
 
