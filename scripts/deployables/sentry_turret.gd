@@ -22,9 +22,9 @@ var flash_timer: float = 0.0
 @onready var head_sprite: Sprite2D = $TurretHead/HeadSprite
 @onready var muzzle: Marker2D = $TurretHead/Muzzle
 @onready var muzzle_light: PointLight2D = $TurretHead/MuzzleLight
-@onready var needs_ammo_indicator: Node2D = $NeedsAmmoIndicator
-@onready var ammo_label: Label = $NeedsAmmoIndicator/Label
-@onready var ammo_icon: Sprite2D = $NeedsAmmoIndicator/Icon
+@onready var needs_ammo_indicator: Node2D = get_node_or_null("NeedsAmmoIndicator")
+@onready var ammo_label: Label = get_node_or_null("NeedsAmmoIndicator/Label")
+@onready var ammo_icon: Sprite2D = get_node_or_null("NeedsAmmoIndicator/Icon")
 
 var bullet_pool: Node2D = null
 

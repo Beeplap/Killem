@@ -1,4 +1,4 @@
-[gd_scene load_steps=4 format=3 uid="uid://interactiondet01"]
+[gd_scene format=3 uid="uid://ceuwad46o7nsq"]
 
 [ext_resource type="Script" path="res://scripts/interaction_detector.gd" id="1_interact"]
 

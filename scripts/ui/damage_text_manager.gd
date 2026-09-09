@@ -29,9 +29,8 @@ func _initialize_pool() -> void:
 		var lbl = Label.new()
 		lbl.visible = false
 		lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		lbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-		lbl.theme_override_constants/outline_size = 3
-		lbl.theme_override_colors/font_outline_color = Color(0.04, 0.05, 0.08, 0.95)
+		lbl.add_theme_constant_override("outline_size", 3)
+		lbl.add_theme_color_override("font_outline_color", Color(0.04, 0.05, 0.08, 0.95))
 		add_child(lbl)
 		
 		var item = TextItem.new()
@@ -75,14 +74,14 @@ func spawn_damage_text(world_pos: Vector2, amount: float, is_crit: bool = false)
 	if is_crit:
 		# Bold yellow/red critical text (24pt)
 		item.label.text = "CRIT! %d" % int(amount)
-		item.label.theme_override_font_sizes/font_size = 24
-		item.label.theme_override_colors/font_color = Color(1.0, 0.28, 0.22, 1.0)
+		item.label.add_theme_font_size_override("font_size", 24)
+		item.label.add_theme_color_override("font_color", Color(1.0, 0.28, 0.22, 1.0))
 		item.label.scale = Vector2(1.2, 1.2)
 	else:
 		# Standard crisp white/light-yellow text (18pt)
 		item.label.text = "%d" % int(amount)
-		item.label.theme_override_font_sizes/font_size = 18
-		item.label.theme_override_colors/font_color = Color(1.0, 0.96, 0.78, 1.0)
+		item.label.add_theme_font_size_override("font_size", 18)
+		item.label.add_theme_color_override("font_color", Color(1.0, 0.96, 0.78, 1.0))
 		item.label.scale = Vector2(1.0, 1.0)
 	
 	item.label.reset_size()

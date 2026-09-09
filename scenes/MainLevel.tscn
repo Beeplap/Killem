@@ -1,4 +1,4 @@
-[gd_scene load_steps=42 format=3 uid="uid://cmainlevelscene001"]
+[gd_scene load_steps=43 format=3 uid="uid://cmainlevelscene001"]
 
 [ext_resource type="Script" path="res://scripts/main_level.gd" id="1_level"]
 [ext_resource type="Script" path="res://scripts/bullet_pool.gd" id="2_pool"]
@@ -31,6 +31,7 @@
 [ext_resource type="Shader" path="res://shaders/post_process.gdshader" id="29_post_shader"]
 [ext_resource type="PackedScene" path="res://scenes/PowerTransformer.tscn" id="30_transformer"]
 [ext_resource type="PackedScene" path="res://scenes/CameraController.tscn" id="31_camera"]
+[ext_resource type="Script" path="res://scripts/ui/damage_text_manager.gd" id="32_damagetext"]
 
 [sub_resource type="CanvasTexture" id="CanvasTexture_wall_h"]
 diffuse_texture = ExtResource("16_wall_h")
@@ -101,6 +102,9 @@ color = Color(0.459, 0.49, 0.549, 1)
 
 [node name="BulletPool" type="Node2D" parent="." groups=["bullet_pool"]]
 script = ExtResource("2_pool")
+
+[node name="DamageTextManager" type="Node2D" parent="." groups=["damage_text_manager"]]
+script = ExtResource("32_damagetext")
 
 [node name="EnvironmentObjects" type="Node2D" parent="."]
 y_sort_enabled = true

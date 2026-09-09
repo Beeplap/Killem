@@ -76,6 +76,17 @@ func _ready() -> void:
 		wave_banner.visible = false
 	game_over_panel.visible = false
 	
+	if get_node_or_null("Hitmarker") == null:
+		var hitmarker_scene = preload("res://scenes/ui/Hitmarker.tscn")
+		var hitmarker = hitmarker_scene.instantiate()
+		hitmarker.name = "Hitmarker"
+		add_child(hitmarker)
+	
+	if get_node_or_null("LowHealthSensoryFeedback") == null:
+		var sensory = LowHealthSensoryFeedback.new()
+		sensory.name = "LowHealthSensoryFeedback"
+		add_child(sensory)
+	
 	_on_health_changed(Global.player_health, Global.player_max_health)
 	Global.emit_current_ammo()
 	_on_score_changed(Global.score, Global.kills)

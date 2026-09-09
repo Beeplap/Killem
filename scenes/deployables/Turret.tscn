@@ -1,9 +1,10 @@
-[gd_scene load_steps=6 format=3 uid="uid://turret01"]
+[gd_scene format=3 uid="uid://turret01"]
 
 [ext_resource type="Script" path="res://scripts/deployables/sentry_turret.gd" id="1_turret"]
 [ext_resource type="Texture2D" path="res://assets/textures/deployables/sentry_turret_base.png" id="2_base"]
 [ext_resource type="Texture2D" path="res://assets/textures/deployables/sentry_turret_head.png" id="3_head"]
 [ext_resource type="Texture2D" path="res://assets/textures/lighting/point_light_cookie.png" id="4_light"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/needs_ammo_icon.png" id="5_needsammo"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_turret"]
 radius = 20.0
@@ -39,21 +40,20 @@ shape = SubResource("CircleShape2D_turret")
 visible = false
 position = Vector2(0, -32)
 
+[node name="Icon" type="Sprite2D" parent="NeedsAmmoIndicator"]
+position = Vector2(-46, 0)
+scale = Vector2(0.7, 0.7)
+texture = ExtResource("5_needsammo")
+
 [node name="Label" type="Label" parent="NeedsAmmoIndicator"]
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -46.0
-offset_top = -10.0
-offset_right = 46.0
-offset_bottom = 10.0
-grow_horizontal = 2
-grow_vertical = 2
+offset_left = -34.0
+offset_top = -9.0
+offset_right = 52.0
+offset_bottom = 11.0
 theme_override_colors/font_color = Color(1, 0.75, 0.2, 1)
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.9)
-theme_override_constants/shadow_outline_size = 2
+theme_override_colors/font_outline_color = Color(0.1, 0.08, 0.05, 0.95)
+theme_override_constants/outline_size = 3
 theme_override_font_sizes/font_size = 10
 text = "[NEEDS AMMO]"
-horizontal_alignment = 1
+vertical_alignment = 1
+

@@ -718,6 +718,8 @@ script = ExtResource("3_crosshair")
 
 [node name="MobileControls" parent="." instance=ExtResource("6_mobile")]
 
+[node name="Hitmarker" parent="." instance=ExtResource("7_hitmarker")]
+
 [connection signal="pressed" from="TacticalEquipment/DeployablesBar/WireCard" to="." method="_on_wire_card_pressed"]
 [connection signal="pressed" from="TacticalEquipment/DeployablesBar/MineCard" to="." method="_on_mine_card_pressed"]
 [connection signal="pressed" from="TacticalEquipment/DeployablesBar/TurretCard" to="." method="_on_turret_card_pressed"]

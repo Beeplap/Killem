@@ -1,4 +1,4 @@
-[gd_scene load_steps=4 format=3 uid="uid://grenadeweapon01"]
+[gd_scene format=3 uid="uid://bcsm14lb8ec4o"]
 
 [ext_resource type="Script" path="res://scripts/weapons/grenade.gd" id="1_grenade"]
 [ext_resource type="Texture2D" path="res://assets/textures/deployables/grenade.png" id="2_grenadetex"]

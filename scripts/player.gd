@@ -99,6 +99,15 @@ func _find_dependencies() -> void:
 			casing_pool.name = "CasingPool"
 			casing_pool.add_to_group("casing_pool")
 			level.add_child(casing_pool)
+	
+	var damage_text_mgr = get_tree().get_first_node_in_group("damage_text_manager")
+	if damage_text_mgr == null:
+		var level = get_tree().current_scene
+		if level:
+			var dtm = DamageTextManager.new()
+			dtm.name = "DamageTextManager"
+			dtm.add_to_group("damage_text_manager")
+			level.add_child(dtm)
 
 func _unhandled_input(event: InputEvent) -> void:
 	if Global.is_game_over:
