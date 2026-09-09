@@ -304,7 +304,18 @@ static func get_deployable_icon(type: int) -> ImageTexture:
 	var dark = Color(0.12, 0.15, 0.18, 0.95)
 	
 	match type:
-		0: # Barbed Wire
+		0: # Frag Grenade
+			# Fuse & spoon at top
+			_fill_rect(img, 18, 4, 4, 6, dark)
+			_fill_rect(img, 14, 6, 4, 3, col)
+			# Oval grenade body
+			_fill_rect(img, 12, 10, 16, 20, dark)
+			_fill_rect(img, 14, 12, 12, 16, col)
+			# Grid fragmentation grooves
+			_fill_rect(img, 13, 17, 14, 2, dark)
+			_fill_rect(img, 13, 22, 14, 2, dark)
+			_fill_rect(img, 19, 11, 2, 18, dark)
+		1: # Barbwire
 			# Coiled wire strands & barbs
 			for i in range(32):
 				var x = 4 + i
@@ -315,15 +326,6 @@ static func get_deployable_icon(type: int) -> ImageTexture:
 			# Cross stakes
 			_fill_rect(img, 8, 6, 3, 28, dark)
 			_fill_rect(img, 29, 6, 3, 28, dark)
-		1: # Claymore Mine
-			# Curved body
-			_fill_rect(img, 8, 12, 24, 16, dark)
-			_fill_rect(img, 10, 14, 20, 12, col)
-			# Front scissors legs
-			_fill_rect(img, 11, 28, 3, 8, dark)
-			_fill_rect(img, 26, 28, 3, 8, dark)
-			# Convex sensor face
-			_fill_rect(img, 13, 8, 14, 5, col)
 		2: # Sentry Turret
 			# Tripod legs
 			_fill_rect(img, 8, 28, 24, 4, dark)

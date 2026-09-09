@@ -21,13 +21,22 @@ extends CanvasLayer
 @onready var mine_card: Button = get_node_or_null("TacticalEquipment/DeployablesBar/MineCard")
 @onready var turret_card: Button = get_node_or_null("TacticalEquipment/DeployablesBar/TurretCard")
 
+@onready var grenade_card: Button = wire_card
+@onready var barbwire_card: Button = mine_card
+
 @onready var wire_stock: Label = get_node_or_null("TacticalEquipment/DeployablesBar/WireCard/HBox/Stock")
 @onready var mine_stock: Label = get_node_or_null("TacticalEquipment/DeployablesBar/MineCard/HBox/Stock")
 @onready var turret_stock: Label = get_node_or_null("TacticalEquipment/DeployablesBar/TurretCard/HBox/Stock")
 
+@onready var grenade_stock: Label = wire_stock
+@onready var barbwire_stock: Label = mine_stock
+
 @onready var wire_icon: TextureRect = get_node_or_null("TacticalEquipment/DeployablesBar/WireCard/HBox/Icon")
 @onready var mine_icon: TextureRect = get_node_or_null("TacticalEquipment/DeployablesBar/MineCard/HBox/Icon")
 @onready var turret_icon: TextureRect = get_node_or_null("TacticalEquipment/DeployablesBar/TurretCard/HBox/Icon")
+
+@onready var grenade_icon: TextureRect = wire_icon
+@onready var barbwire_icon: TextureRect = mine_icon
 
 var weapon_cards: Array[Button] = []
 var weapon_ammo_labels: Array[Label] = []
@@ -59,6 +68,9 @@ func _ready() -> void:
 	Global.perk_unlocked.connect(_on_perk_unlocked)
 	Global.weapon_changed.connect(_on_weapon_changed)
 	Global.active_deployable_changed.connect(_on_active_deployable_changed)
+	Global.notification_displayed.connect(_on_notification_displayed)
+	if Global.has_signal("deployable_warning_triggered"):
+		Global.deployable_warning_triggered.connect(func(msg: String): _on_notification_displayed(msg, "", Color(1.0, 0.35, 0.25)))
 	
 	if wave_banner:
 		wave_banner.visible = false
@@ -68,8 +80,8 @@ func _ready() -> void:
 	Global.emit_current_ammo()
 	_on_score_changed(Global.score, Global.kills)
 	_on_wave_changed(Global.current_wave)
-	_on_roll_cooldown_updated(1.5, 1.5)
-	_on_deployables_updated(Global.deployable_barbed_wire, Global.deployable_claymores, Global.deployable_turrets)
+	_on_roll_cooldown_updated(100.0, 100.0)
+	_on_deployables_updated(Global.deployable_grenades, Global.deployable_barbwire, Global.deployable_turrets)
 	_on_weapon_changed(Global.current_weapon)
 	_on_active_deployable_changed(Global.active_deployable_type)
 	_update_all_weapon_ammo()
@@ -127,13 +139,22 @@ func _setup_card_icons() -> void:
 		if is_instance_valid(weapon_icons[i]):
 			weapon_icons[i].texture = ProceduralTextures.get_weapon_icon(i)
 	
-	# Populate procedural deployable icons
+	# Populate deployable icons (Slot 0: Frag Grenade, Slot 1: Barbwire, Slot 2: Sentry Turret)
 	if wire_icon:
-		wire_icon.texture = ProceduralTextures.get_deployable_icon(0)
+		if ResourceLoader.exists("res://assets/textures/deployables/frag_grenade.png"):
+			wire_icon.texture = load("res://assets/textures/deployables/frag_grenade.png")
+		else:
+			wire_icon.texture = ProceduralTextures.get_deployable_icon(0)
 	if mine_icon:
-		mine_icon.texture = ProceduralTextures.get_deployable_icon(1)
+		if ResourceLoader.exists("res://assets/textures/deployables/barbwire.png"):
+			mine_icon.texture = load("res://assets/textures/deployables/barbwire.png")
+		else:
+			mine_icon.texture = ProceduralTextures.get_deployable_icon(1)
 	if turret_icon:
-		turret_icon.texture = ProceduralTextures.get_deployable_icon(2)
+		if ResourceLoader.exists("res://assets/textures/deployables/sentry_turret_head.png"):
+			turret_icon.texture = load("res://assets/textures/deployables/sentry_turret_head.png")
+		else:
+			turret_icon.texture = ProceduralTextures.get_deployable_icon(2)
 
 func _unhandled_input(event: InputEvent) -> void:
 	if Global.is_game_over:
@@ -154,20 +175,24 @@ func _on_roll_cooldown_updated(current: float, max_val: float) -> void:
 		roll_bar.max_value = max_val
 		roll_bar.value = current
 	if roll_label:
-		if current >= max_val:
-			roll_label.text = "DODGE ROLL [SPACE]: READY"
+		if current >= 100.0:
+			roll_label.text = "PHASING DASH [SPACE]: READY (x2)"
 			roll_label.modulate = Color(0.3, 0.9, 1.0, 1.0)
+		elif current >= 50.0:
+			roll_label.text = "PHASING DASH [SPACE]: READY (x1)"
+			roll_label.modulate = Color(0.4, 0.85, 0.98, 1.0)
 		else:
-			roll_label.text = "DODGE ROLL [SPACE]: %.1fs" % (max_val - current)
+			var pct = int(clampf((current / 50.0) * 100.0, 0.0, 99.0))
+			roll_label.text = "PHASING DASH [SPACE]: RECHARGING (%d%%)" % pct
 			roll_label.modulate = Color(0.7, 0.75, 0.8, 0.8)
 
-func _on_deployables_updated(wires: int, mines: int, turrets: int) -> void:
+func _on_deployables_updated(grenades: int, barbwires: int, turrets: int) -> void:
 	if wire_stock:
-		wire_stock.text = "x%d" % wires
-		wire_stock.modulate = Color(0.2, 0.95, 0.55) if wires > 0 else Color(0.95, 0.3, 0.3)
+		wire_stock.text = "x%d" % grenades
+		wire_stock.modulate = Color(0.2, 0.95, 0.55) if grenades > 0 else Color(0.95, 0.3, 0.3)
 	if mine_stock:
-		mine_stock.text = "x%d" % mines
-		mine_stock.modulate = Color(0.2, 0.95, 0.55) if mines > 0 else Color(0.95, 0.3, 0.3)
+		mine_stock.text = "x%d" % barbwires
+		mine_stock.modulate = Color(0.2, 0.95, 0.55) if barbwires > 0 else Color(0.95, 0.3, 0.3)
 	if turret_stock:
 		turret_stock.text = "x%d" % turrets
 		turret_stock.modulate = Color(0.2, 0.95, 0.55) if turrets > 0 else Color(0.95, 0.3, 0.3)
@@ -276,6 +301,24 @@ func _on_wave_started(wave_num: int) -> void:
 		if banner_hide_timer == t and wave_banner.visible and banner_title.text.begins_with("WAVE %d INCOMING!" % wave_num):
 			wave_banner.visible = false
 
+func _on_notification_displayed(title: String, subtitle: String = "", color: Color = Color(0.98, 0.85, 0.18)) -> void:
+	if wave_banner and banner_title and banner_subtitle:
+		banner_title.text = title
+		banner_title.modulate = color
+		if subtitle != "":
+			banner_subtitle.text = subtitle
+			banner_subtitle.modulate = Color(0.9, 0.9, 0.95, 0.9)
+			banner_subtitle.visible = true
+		else:
+			banner_subtitle.visible = false
+		wave_banner.visible = true
+		
+		var t = get_tree().create_timer(2.8)
+		banner_hide_timer = t
+		await t.timeout
+		if banner_hide_timer == t and wave_banner.visible and banner_title.text == title:
+			wave_banner.visible = false
+
 func _on_player_died() -> void:
 	if game_over_panel:
 		game_over_panel.visible = true
@@ -286,14 +329,20 @@ func restart_game() -> void:
 	Global.reset_state()
 	get_tree().reload_current_scene()
 
-func _on_wire_card_pressed() -> void:
+func _on_grenade_card_pressed() -> void:
 	Global.set_active_deployable(0)
 
-func _on_mine_card_pressed() -> void:
+func _on_barbwire_card_pressed() -> void:
 	Global.set_active_deployable(1)
 
 func _on_turret_card_pressed() -> void:
 	Global.set_active_deployable(2)
+
+func _on_wire_card_pressed() -> void:
+	_on_grenade_card_pressed()
+
+func _on_mine_card_pressed() -> void:
+	_on_barbwire_card_pressed()
 
 func _on_weapon_btn_1_pressed() -> void:
 	Global.set_weapon(Global.WeaponType.PISTOL)

@@ -360,6 +360,7 @@ func take_damage(amount: float, hit_direction: Vector2 = Vector2.ZERO) -> void:
 		return
 	
 	var effective_damage = amount
+	var remaining_before = current_health
 	
 	# Armored Riot Zombie frontal riot shield deflecting 80% direct bullet damage
 	if zombie_type == ZombieType.ARMORED:
@@ -377,25 +378,30 @@ func take_damage(amount: float, hit_direction: Vector2 = Vector2.ZERO) -> void:
 			effective_damage = amount * 0.50
 	
 	current_health -= effective_damage
-	hit_flash_timer = 0.08
+	
+	# Active white flash shader across sprite for 0.06s
+	hit_flash_timer = 0.06
 	if sprite and sprite.material:
 		sprite.material.set_shader_parameter("flash_amount", 1.0)
 	elif sprite:
-		sprite.modulate = Color(1.8, 0.4, 0.4, 1.0)
+		sprite.modulate = Color(2.5, 2.5, 2.5, 1.0)
 	
-	# Knockback resistance
-	var knockback_scale = 180.0
-	if zombie_type == ZombieType.HEAVY:
-		knockback_scale = 40.0
-	elif zombie_type == ZombieType.ARMORED:
-		knockback_scale = 90.0
-	elif zombie_type == ZombieType.COLOSSUS:
-		knockback_scale = 15.0
+	# Physical directional knockback scaled inversely to enemy max HP
+	var weapon_stagger_force = 2400.0
+	var knockback_scale = clampf(weapon_stagger_force / max_health, 15.0, 190.0)
+	if hit_direction != Vector2.ZERO:
+		knockback_velocity += hit_direction.normalized() * knockback_scale
 	
-	knockback_velocity += hit_direction.normalized() * knockback_scale
+	var is_crit = (hit_direction != Vector2.ZERO and (randf() < 0.18 or amount >= 45.0))
+	var is_fatal = (current_health <= 0.0)
+	
+	if Global.has_signal("enemy_hit"):
+		Global.enemy_hit.emit(self, effective_damage, is_crit, is_fatal, hit_direction)
 	
 	if current_health <= 0.0:
-		die(hit_direction)
+		var overkill_amount = effective_damage - remaining_before
+		var is_overkill = (overkill_amount >= 25.0 or amount >= 55.0)
+		die(hit_direction, is_overkill)
 
 func spawn_shield_ricochet(hit_dir: Vector2) -> void:
 	var level = get_tree().current_scene
@@ -417,9 +423,13 @@ func spawn_shield_ricochet(hit_dir: Vector2) -> void:
 		sparks.finished.connect(sparks.queue_free)
 		level.add_child(sparks)
 
-func die(hit_direction: Vector2) -> void:
+func die(hit_direction: Vector2, is_overkill: bool = false) -> void:
 	Global.add_kill(score_value)
-	spawn_blood_splat(hit_direction)
+	
+	if is_overkill:
+		spawn_overkill_gibs(hit_direction)
+	else:
+		spawn_blood_splat(hit_direction)
 	
 	# Toxic Bloater / Acid Spitter leaves a 6-second glowing green acid pool
 	if zombie_type == ZombieType.SPITTER:
@@ -448,6 +458,31 @@ func die(hit_direction: Vector2) -> void:
 		roll_loot()
 		
 	queue_free()
+
+func spawn_overkill_gibs(hit_dir: Vector2) -> void:
+	var level = get_tree().current_scene
+	if level:
+		var gibs = CPUParticles2D.new()
+		gibs.emitting = true
+		gibs.one_shot = true
+		gibs.explosiveness = 0.95
+		gibs.amount = 20
+		gibs.lifetime = 0.55
+		gibs.direction = hit_dir if hit_dir != Vector2.ZERO else Vector2.UP
+		gibs.spread = 140.0
+		gibs.initial_velocity_min = 90.0
+		gibs.initial_velocity_max = 240.0
+		gibs.scale_amount_min = 2.5
+		gibs.scale_amount_max = 6.0
+		gibs.color = Color(0.65, 0.08, 0.08, 1.0) # Visceral flesh & arterial blood
+		gibs.global_position = global_position
+		gibs.finished.connect(gibs.queue_free)
+		level.add_child(gibs)
+	
+	# Convert into permanent flat decals via DecalManager
+	if DecalManager and DecalManager.has_method("spawn_blood_splat"):
+		DecalManager.spawn_blood_splat(global_position, hit_dir, 1.6)
+		DecalManager.spawn_blood_splat(global_position + Vector2(randf_range(-16, 16), randf_range(-16, 16)), hit_dir, 1.2)
 
 func spawn_blood_splat(hit_dir: Vector2) -> void:
 	var level = get_tree().current_scene

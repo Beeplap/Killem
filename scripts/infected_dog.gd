@@ -216,6 +216,6 @@ func _check_player_leap_intersection() -> bool:
 	
 	return false
 
-func die(hit_direction: Vector2) -> void:
+func die(hit_direction: Vector2, is_headshot: bool = false) -> void:
 	scale = normal_scale
-	super.die(hit_direction)
+	super.die(hit_direction, is_headshot)

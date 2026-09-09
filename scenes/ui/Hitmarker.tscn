@@ -1,0 +1,9 @@
+[gd_scene load_steps=2 format=3 uid="uid://hitmarkerui01"]
+
+[ext_resource type="Script" path="res://scripts/ui/hitmarker.gd" id="1_hit"]
+
+[node name="Hitmarker" type="Control" groups=["hitmarker"]]
+layout_mode = 3
+anchors_preset = 0
+mouse_filter = 2
+script = ExtResource("1_hit")

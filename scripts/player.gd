@@ -20,22 +20,32 @@ var fire_cooldown: float = 0.0
 var invulnerability_timer: float = 0.0
 var muzzle_flash_timer: float = 0.0
 
-# Dodge Roll State
+# Phasing Dodge Roll & Stamina State
 var is_rolling: bool = false
 var roll_timer: float = 0.0
 var roll_dir: Vector2 = Vector2.ZERO
-var roll_cooldown_timer: float = 0.0
 var ghost_trail_timer: float = 0.0
-const ROLL_COOLDOWN: float = 1.5
 const ROLL_DURATION: float = 0.25
 const ROLL_SPEED_MULT: float = 2.5
+
+var stamina: float = 100.0
+const MAX_STAMINA: float = 100.0
+const DASH_STAMINA_COST: float = 50.0
+const STAMINA_REGEN_RATE: float = 15.0 # 15.0/sec
+const STAMINA_REGEN_DELAY: float = 0.8 # 0.8s delay after expenditure
+var stamina_regen_delay_timer: float = 0.0
+
+# Out-of-Combat Passive Health Regeneration
+var time_since_last_damage: float = 0.0
+
+# Deployable Mode [G] & Blueprint Placement
+var deployable_mode: bool = false
+var blueprint_rotation: float = 0.0
+var active_deployable_type: int = 0 # 0: Grenade, 1: Barbwire, 2: Turret
 
 # Minigun State
 var minigun_spin_timer: float = 0.0
 const MINIGUN_SPINUP_TIME: float = 0.40
-
-# Deployables selection
-var active_deployable_type: int = 0 # 0: Wire, 1: Claymore, 2: Turret
 
 const CASING_POOL_SCRIPT = preload("res://scripts/casing_pool.gd")
 
@@ -54,11 +64,21 @@ func _ready() -> void:
 	add_to_group("player")
 	Global.health_changed.emit(Global.player_health, Global.player_max_health)
 	Global.emit_current_ammo()
-	Global.deployables_updated.emit(Global.deployable_barbed_wire, Global.deployable_claymores, Global.deployable_turrets)
+	Global.deployables_updated.emit(Global.deployable_grenades, Global.deployable_barbwire, Global.deployable_turrets)
+	Global.roll_cooldown_updated.emit(stamina, MAX_STAMINA)
 	Global.active_deployable_changed.connect(func(type: int):
 		active_deployable_type = type
 	)
 	active_deployable_type = Global.active_deployable_type
+	
+	if placement_ghost:
+		placement_ghost.set_armed(false)
+	
+	var detector = get_node_or_null("InteractionDetector")
+	if detector == null:
+		var detector_scene = preload("res://scenes/mechanics/InteractionDetector.tscn")
+		detector = detector_scene.instantiate()
+		add_child(detector)
 	
 	ProceduralTextures.add_drop_shadow(self, Vector2(0, 14), Vector2(0.85, 0.42))
 	
@@ -84,33 +104,89 @@ func _unhandled_input(event: InputEvent) -> void:
 	if Global.is_game_over:
 		return
 	
-	# Camera zoom
+	# Mouse Wheel: Blueprint Rotation (in deployable mode) OR Camera Zoom (in weapon mode)
 	if event is InputEventMouseButton and event.pressed:
-		if event.button_index == MOUSE_BUTTON_WHEEL_UP:
-			target_zoom = (target_zoom + Vector2(0.12, 0.12)).clamp(min_zoom, max_zoom)
-		elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
-			target_zoom = (target_zoom - Vector2(0.12, 0.12)).clamp(min_zoom, max_zoom)
+		if deployable_mode and placement_ghost and placement_ghost.is_armed:
+			if event.button_index == MOUSE_BUTTON_WHEEL_UP:
+				blueprint_rotation = fposmod(blueprint_rotation + deg_to_rad(15.0), TAU)
+				placement_ghost.rotate_blueprint(deg_to_rad(15.0))
+				get_viewport().set_input_as_handled()
+				return
+			elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
+				blueprint_rotation = fposmod(blueprint_rotation - deg_to_rad(15.0), TAU)
+				placement_ghost.rotate_blueprint(-deg_to_rad(15.0))
+				get_viewport().set_input_as_handled()
+				return
+		else:
+			if event.button_index == MOUSE_BUTTON_WHEEL_UP:
+				target_zoom = (target_zoom + Vector2(0.12, 0.12)).clamp(min_zoom, max_zoom)
+			elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
+				target_zoom = (target_zoom - Vector2(0.12, 0.12)).clamp(min_zoom, max_zoom)
 	
-	# Weapon Switching [1, 2, 3, 4, 5]
 	if event is InputEventKey and event.pressed:
-		if event.keycode == KEY_1:
-			Global.set_weapon(Global.WeaponType.PISTOL)
-		elif event.keycode == KEY_2:
-			Global.set_weapon(Global.WeaponType.SHOTGUN)
-		elif event.keycode == KEY_3:
-			Global.set_weapon(Global.WeaponType.ASSAULT_RIFLE)
-		elif event.keycode == KEY_4:
-			Global.set_weapon(Global.WeaponType.FLAMETHROWER)
-		elif event.keycode == KEY_5:
-			Global.set_weapon(Global.WeaponType.MINIGUN)
-		elif event.keycode == KEY_R:
+		# [G] Toggle Throwable/Deployable Mode on/off
+		if event.keycode == KEY_G:
+			toggle_deployable_mode()
+			get_viewport().set_input_as_handled()
+			return
+		
+		# Slot Selection [1], [2], [3] in Deployable Mode OR Weapons [1]-[5] in Normal Mode
+		if deployable_mode:
+			if event.keycode == KEY_1:
+				active_deployable_type = 0
+				Global.set_active_deployable(0)
+				Global.play_sound("hit")
+				get_viewport().set_input_as_handled()
+				return
+			elif event.keycode == KEY_2:
+				active_deployable_type = 1
+				Global.set_active_deployable(1)
+				Global.play_sound("hit")
+				get_viewport().set_input_as_handled()
+				return
+			elif event.keycode == KEY_3:
+				active_deployable_type = 2
+				Global.set_active_deployable(2)
+				Global.play_sound("hit")
+				get_viewport().set_input_as_handled()
+				return
+		else:
+			if event.keycode == KEY_1:
+				Global.set_weapon(Global.WeaponType.PISTOL)
+			elif event.keycode == KEY_2:
+				Global.set_weapon(Global.WeaponType.SHOTGUN)
+			elif event.keycode == KEY_3:
+				Global.set_weapon(Global.WeaponType.ASSAULT_RIFLE)
+			elif event.keycode == KEY_4:
+				Global.set_weapon(Global.WeaponType.FLAMETHROWER)
+			elif event.keycode == KEY_5:
+				Global.set_weapon(Global.WeaponType.MINIGUN)
+		
+		if event.keycode == KEY_R:
 			PlayerShooting.play_reload_sequence(get_tree(), global_position)
 		elif event.keycode == KEY_SPACE:
 			start_dodge_roll()
 		elif event.keycode == KEY_E:
-			deploy_current_item()
+			# If near a serviceable deployable, let InteractionDetector handle holding [E]
+			var detector = get_node_or_null("InteractionDetector")
+			var has_serviceable = detector and (
+				(detector.get("nearby_serviceables") and not detector.nearby_serviceables.is_empty()) or
+				(detector.get("candidates") and not detector.candidates.is_empty())
+			)
+			if not has_serviceable and deployable_mode:
+				deploy_current_item()
 		elif event.keycode == KEY_Q:
 			cycle_deployable()
+
+func toggle_deployable_mode() -> void:
+	deployable_mode = not deployable_mode
+	if placement_ghost:
+		placement_ghost.set_armed(deployable_mode)
+	if deployable_mode:
+		Global.show_notification("DEPLOYABLE MODE: ARMED", "[1] Grenade • [2] Barbwire • [3] Turret • Wheel: Rotate • [E] Deploy", Color(0.2, 0.95, 0.55))
+	else:
+		Global.show_notification("WEAPON MODE: ACTIVE", "Standard Combat Firearms Enabled", Color(0.98, 0.82, 0.15))
+	Global.play_sound("hit")
 
 var footstep_distance_traveled: float = 0.0
 const FOOTSTEP_STRIDE_LENGTH: float = 110.0
@@ -120,8 +196,12 @@ func cycle_deployable() -> void:
 	Global.play_sound("hit")
 
 func start_dodge_roll() -> void:
-	if is_rolling or roll_cooldown_timer > 0.0 or Global.is_game_over:
+	if is_rolling or stamina < DASH_STAMINA_COST or Global.is_game_over:
 		return
+	
+	stamina -= DASH_STAMINA_COST
+	stamina_regen_delay_timer = STAMINA_REGEN_DELAY
+	Global.roll_cooldown_updated.emit(stamina, MAX_STAMINA)
 	
 	var input_dir: Vector2 = Input.get_vector("move_left", "move_right", "move_up", "move_down")
 	if input_dir == Vector2.ZERO:
@@ -137,8 +217,11 @@ func start_dodge_roll() -> void:
 	
 	is_rolling = true
 	roll_timer = ROLL_DURATION
-	roll_cooldown_timer = ROLL_COOLDOWN
-	invulnerability_timer = max(invulnerability_timer, ROLL_DURATION + 0.05) # Full i-frames during roll
+	invulnerability_timer = max(invulnerability_timer, ROLL_DURATION + 0.05) # Full i-frames
+	
+	# Phasing: Disable enemy collision (Layer 2) while keeping obstacle collision (Layer 3) active
+	set_collision_mask_value(2, false)
+	
 	velocity = roll_dir * (move_speed * ROLL_SPEED_MULT)
 	ghost_trail_timer = 0.0
 	spawn_ghost_trail()
@@ -165,51 +248,71 @@ func spawn_ghost_trail() -> void:
 		tween.tween_callback(ghost.queue_free)
 
 func deploy_current_item() -> void:
-	var mouse_pos = get_global_mouse_position()
-	var to_mouse = mouse_pos - global_position
-	var deploy_pos = global_position + to_mouse.limit_length(110.0)
 	var level = get_tree().current_scene
 	if not level:
 		return
 	
-	# Auto switch to available item if current type has 0
-	if active_deployable_type == 0 and Global.deployable_barbed_wire <= 0:
-		if Global.deployable_claymores > 0: active_deployable_type = 1
-		elif Global.deployable_turrets > 0: active_deployable_type = 2
-	elif active_deployable_type == 1 and Global.deployable_claymores <= 0:
-		if Global.deployable_turrets > 0: active_deployable_type = 2
-		elif Global.deployable_barbed_wire > 0: active_deployable_type = 0
-	elif active_deployable_type == 2 and Global.deployable_turrets <= 0:
-		if Global.deployable_barbed_wire > 0: active_deployable_type = 0
-		elif Global.deployable_claymores > 0: active_deployable_type = 1
+	var mouse_pos = get_global_mouse_position()
+	var to_mouse = mouse_pos - global_position
+	var target_deploy_pos = global_position + to_mouse.limit_length(180.0)
+	if placement_ghost:
+		target_deploy_pos = placement_ghost.global_position
+		if not placement_ghost.is_valid_placement and active_deployable_type != 0:
+			Global.play_sound("empty_click")
+			return
+	
+	var place_rot = placement_ghost.blueprint_rotation if placement_ghost else to_mouse.angle()
 	
 	match active_deployable_type:
 		0:
-			if Global.deployable_barbed_wire > 0:
-				Global.deployable_barbed_wire -= 1
-				var wire = preload("res://scenes/deployables/BarbedWire.tscn").instantiate()
-				wire.global_position = deploy_pos
-				wire.rotation = to_mouse.angle()
+			# Slot 1: Frag Grenade Throwable
+			if Global.deployable_grenades > 0:
+				Global.deployable_grenades -= 1
+				var grenade_scene = preload("res://scenes/weapons/Grenade.tscn")
+				var g = grenade_scene.instantiate()
+				level.add_child(g)
+				g.launch(global_position, target_deploy_pos)
+				Global.play_sound("hit")
+				Global.deployables_updated.emit(Global.deployable_grenades, Global.deployable_barbwire, Global.deployable_turrets)
+			else:
+				Global.show_notification("OUT OF GRENADES", "Replenish via tactical supply drop", Color(0.95, 0.3, 0.2))
+				Global.play_sound("empty_click")
+		1:
+			# Slot 2: Barbwire Deployable
+			if Global.deployable_barbwire > 0:
+				Global.deployable_barbwire -= 1
+				var wire_scene = preload("res://scenes/deployables/Barbwire.tscn")
+				var wire = wire_scene.instantiate()
+				wire.global_position = target_deploy_pos
+				wire.rotation = place_rot
 				level.add_child(wire)
 				Global.play_sound("hit")
-				Global.deployables_updated.emit(Global.deployable_barbed_wire, Global.deployable_claymores, Global.deployable_turrets)
-		1:
-			if Global.deployable_claymores > 0:
-				Global.deployable_claymores -= 1
-				var mine = preload("res://scenes/deployables/ClaymoreMine.tscn").instantiate()
-				mine.global_position = deploy_pos
-				mine.set_facing(to_mouse.normalized())
-				level.add_child(mine)
-				Global.play_sound("hit")
-				Global.deployables_updated.emit(Global.deployable_barbed_wire, Global.deployable_claymores, Global.deployable_turrets)
+				Global.deployables_updated.emit(Global.deployable_grenades, Global.deployable_barbwire, Global.deployable_turrets)
+			else:
+				Global.show_notification("OUT OF BARBWIRE", "Replenish via tactical supply drop", Color(0.95, 0.3, 0.2))
+				Global.play_sound("empty_click")
 		2:
+			# Slot 3: Sentry Turret Deployable (Enforce 5 active turrets cap)
+			var active_turrets = get_tree().get_nodes_in_group("turrets")
+			if active_turrets.size() >= 5:
+				Global.show_notification("TURRET LIMIT REACHED (5/5)", "Maximum map deployment capacity reached", Color(1.0, 0.3, 0.2))
+				Global.deployable_warning_triggered.emit("TURRET LIMIT REACHED (5/5)")
+				Global.play_sound("empty_click")
+				return
+			
 			if Global.deployable_turrets > 0:
 				Global.deployable_turrets -= 1
-				var turret = preload("res://scenes/deployables/SentryTurret.tscn").instantiate()
-				turret.global_position = deploy_pos
+				var turret_scene = preload("res://scenes/deployables/Turret.tscn")
+				var turret = turret_scene.instantiate()
+				turret.global_position = target_deploy_pos
+				if turret.has_method("setup_placement"):
+					turret.setup_placement(place_rot)
 				level.add_child(turret)
 				Global.play_sound("hit")
-				Global.deployables_updated.emit(Global.deployable_barbed_wire, Global.deployable_claymores, Global.deployable_turrets)
+				Global.deployables_updated.emit(Global.deployable_grenades, Global.deployable_barbwire, Global.deployable_turrets)
+			else:
+				Global.show_notification("OUT OF TURRETS", "Replenish via tactical supply drop", Color(0.95, 0.3, 0.2))
+				Global.play_sound("empty_click")
 
 func _physics_process(delta: float) -> void:
 	if Global.is_game_over:
@@ -217,10 +320,18 @@ func _physics_process(delta: float) -> void:
 		move_and_slide()
 		return
 	
-	# Roll cooldown timer
-	if roll_cooldown_timer > 0.0:
-		roll_cooldown_timer -= delta
-		Global.roll_cooldown_updated.emit(max(0.0, ROLL_COOLDOWN - roll_cooldown_timer), ROLL_COOLDOWN)
+	# Stamina regeneration: 15.0/sec with 0.8s delay after expenditure
+	if stamina_regen_delay_timer > 0.0:
+		stamina_regen_delay_timer -= delta
+	elif stamina < MAX_STAMINA:
+		stamina = min(MAX_STAMINA, stamina + STAMINA_REGEN_RATE * delta)
+		Global.roll_cooldown_updated.emit(stamina, MAX_STAMINA)
+	
+	# Out-of-Combat Passive Health Regeneration (3.0s after damage, 0.8% max HP/sec)
+	time_since_last_damage += delta
+	if time_since_last_damage >= 3.0 and Global.player_health < Global.player_max_health and not Global.is_game_over:
+		Global.player_health = min(Global.player_max_health, Global.player_health + Global.player_max_health * 0.008 * delta)
+		Global.health_changed.emit(Global.player_health, Global.player_max_health)
 	
 	# Active Dodge Roll burst
 	if is_rolling:
@@ -235,6 +346,8 @@ func _physics_process(delta: float) -> void:
 		
 		if roll_timer <= 0.0:
 			is_rolling = false
+			# Restore collision against Layer 2 zombies after phasing
+			set_collision_mask_value(2, true)
 		
 		handle_camera_and_shake(delta)
 		return
@@ -293,8 +406,8 @@ func _play_surface_footstep() -> void:
 
 func _get_active_deployable_stock() -> int:
 	match active_deployable_type:
-		0: return Global.deployable_barbed_wire
-		1: return Global.deployable_claymores
+		0: return Global.deployable_grenades
+		1: return Global.deployable_barbwire
 		2: return Global.deployable_turrets
 	return 0
 
@@ -337,8 +450,13 @@ func handle_aiming() -> void:
 	if muzzle_flash:
 		muzzle_flash.position = muzzle.position if muzzle else aim_dir * 26.0
 	
+	# Blueprint Hologram: only active and visible when Deployable Mode [G] is armed
 	if placement_ghost:
-		placement_ghost.update_ghost(global_position, mouse_pos, active_deployable_type, _get_active_deployable_stock())
+		if deployable_mode:
+			var turret_capped = (get_tree().get_nodes_in_group("turrets").size() >= 5)
+			placement_ghost.update_ghost(global_position, mouse_pos, active_deployable_type, _get_active_deployable_stock(), turret_capped)
+		else:
+			placement_ghost.visible = false
 
 func handle_shooting(delta: float) -> void:
 	if fire_cooldown > 0.0:
@@ -548,6 +666,7 @@ func take_damage(amount: float, knockback_dir: Vector2 = Vector2.ZERO) -> void:
 	if invulnerability_timer > 0.0 or Global.is_game_over:
 		return
 	
+	time_since_last_damage = 0.0
 	Global.take_player_damage(amount)
 	invulnerability_timer = 0.40
 	if sprite:

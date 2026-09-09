@@ -1,4 +1,4 @@
-[gd_scene load_steps=4 format=3 uid="uid://bwiredeployable01"]
+[gd_scene load_steps=4 format=3 uid="uid://barbwire01"]
 
 [ext_resource type="Script" path="res://scripts/deployables/barbwire.gd" id="1_wire"]
 [ext_resource type="Texture2D" path="res://assets/textures/deployables/barbwire.png" id="2_wiretex"]
@@ -6,7 +6,7 @@
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_wire"]
 size = Vector2(72, 28)
 
-[node name="BarbedWire" type="Area2D" groups=["deployables", "serviceable"]]
+[node name="Barbwire" type="Area2D" groups=["deployables", "serviceable"]]
 z_index = -1
 z_as_relative = false
 collision_layer = 0

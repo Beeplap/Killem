@@ -1,0 +1,73 @@
+[gd_scene load_steps=4 format=3 uid="uid://interactiondet01"]
+
+[ext_resource type="Script" path="res://scripts/interaction_detector.gd" id="1_interact"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel"]
+bg_color = Color(0.06, 0.08, 0.12, 0.92)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.2, 0.75, 0.95, 0.85)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+content_margin_left = 8.0
+content_margin_top = 4.0
+content_margin_right = 8.0
+content_margin_bottom = 4.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_progress"]
+bg_color = Color(0.2, 0.85, 1, 1)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+
+[node name="InteractionDetector" type="Node2D"]
+z_index = 25
+script = ExtResource("1_interact")
+
+[node name="PromptPanel" type="PanelContainer" parent="."]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -160.0
+offset_top = -65.0
+offset_right = 160.0
+offset_bottom = -25.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
+
+[node name="VBox" type="VBoxContainer" parent="PromptPanel"]
+layout_mode = 2
+theme_override_constants/separation = 3
+alignment = 1
+
+[node name="PromptLabel" type="Label" parent="PromptPanel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.95, 0.95, 1, 1)
+theme_override_colors/font_outline_color = Color(0.05, 0.08, 0.12, 0.95)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 11
+text = "[HOLD E] Service Target (3.0s)"
+horizontal_alignment = 1
+
+[node name="ProgressBar" type="ProgressBar" parent="PromptPanel/VBox"]
+custom_minimum_size = Vector2(0, 6)
+layout_mode = 2
+max_value = 3.0
+show_percentage = false
+
+# Internal compatibility alias
+[node name="PromptLabel" type="Label" parent="PromptPanel"]
+visible = false
+layout_mode = 2
+
+[node name="ProgressBar" type="ProgressBar" parent="PromptPanel"]
+visible = false
+layout_mode = 2

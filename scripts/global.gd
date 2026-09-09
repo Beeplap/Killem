@@ -18,9 +18,12 @@ signal roll_cooldown_updated(current: float, max_val: float)
 signal deployables_updated(wires: int, mines: int, turrets: int)
 signal weapon_changed(new_weapon: WeaponType)
 signal active_deployable_changed(deployable_type: int)
+signal notification_displayed(title: String, subtitle: String, color: Color)
 signal boss_spawned(boss_node: Node2D)
 signal boss_defeated(boss_node: Node2D)
 signal camera_trauma_requested(amount: float)
+signal enemy_hit(enemy: Node2D, amount: float, is_crit: bool, is_fatal: bool, hit_dir: Vector2)
+signal deployable_warning_triggered(message: String)
 
 # Core State
 var keycards_collected: Array[String] = []
@@ -49,8 +52,12 @@ var perk_full_auto: bool = false
 var perk_extended_mags: bool = false
 var perk_armor_plating: bool = false
 
-# Deployables inventory
-var deployable_barbed_wire: int = 2
+# Deployables inventory (Slot 0: Grenade, Slot 1: Barbwire, Slot 2: Turret)
+var deployable_grenades: int = 3
+var deployable_barbwire: int = 2
+var deployable_barbed_wire: int:
+	get: return deployable_barbwire
+	set(v): deployable_barbwire = v
 var deployable_claymores: int = 2
 var deployable_turrets: int = 1
 var active_deployable_type: int = 0
@@ -84,7 +91,8 @@ func reset_state() -> void:
 	perk_full_auto = false
 	perk_extended_mags = false
 	perk_armor_plating = false
-	deployable_barbed_wire = 2
+	deployable_grenades = 3
+	deployable_barbwire = 2
 	deployable_claymores = 2
 	deployable_turrets = 1
 	active_deployable_type = 0
@@ -92,6 +100,9 @@ func reset_state() -> void:
 	Engine.time_scale = 1.0
 	hitstop_active = false
 	keycards_collected.clear()
+
+func show_notification(title: String, subtitle: String = "", color: Color = Color(0.98, 0.85, 0.18)) -> void:
+	notification_displayed.emit(title, subtitle, color)
 
 func unlock_perk(perk_id: String) -> void:
 	match perk_id:
@@ -226,11 +237,11 @@ func grant_supply_drop() -> void:
 	rifle_ammo = min(rifle_max_ammo, rifle_ammo + 120)
 	flamethrower_fuel = min(flamethrower_max_fuel, flamethrower_fuel + 150)
 	minigun_ammo = min(minigun_max_ammo, minigun_ammo + 250)
-	deployable_barbed_wire += 2
-	deployable_claymores += 2
+	deployable_grenades += 2
+	deployable_barbwire += 2
 	deployable_turrets += 1
 	emit_current_ammo()
-	deployables_updated.emit(deployable_barbed_wire, deployable_claymores, deployable_turrets)
+	deployables_updated.emit(deployable_grenades, deployable_barbwire, deployable_turrets)
 	play_sound("perk")
 
 func play_sound(sound_name: String, pos = null) -> void:

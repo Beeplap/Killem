@@ -1,4 +1,4 @@
-[gd_scene load_steps=16 format=3 uid="uid://chudscene001"]
+[gd_scene load_steps=17 format=3 uid="uid://chudscene001"]
 
 [ext_resource type="Script" path="res://scripts/hud.gd" id="1_hud"]
 [ext_resource type="Shader" path="res://shaders/post_process.gdshader" id="2_postprocess"]
@@ -6,6 +6,7 @@
 [ext_resource type="PackedScene" path="res://scenes/ui/Minimap.tscn" id="4_minimap"]
 [ext_resource type="PackedScene" path="res://scenes/ui/PauseMenu.tscn" id="5_pause"]
 [ext_resource type="PackedScene" path="res://scenes/ui/MobileControls.tscn" id="6_mobile"]
+[ext_resource type="PackedScene" path="res://scenes/ui/Hitmarker.tscn" id="7_hitmarker"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_postprocess"]
 shader = ExtResource("2_postprocess")
@@ -187,15 +188,15 @@ show_percentage = false
 layout_mode = 2
 theme_override_colors/font_color = Color(0.3, 0.85, 1, 1)
 theme_override_font_sizes/font_size = 12
-text = "DODGE ROLL [SPACE]: READY"
+text = "PHASING DASH [SPACE]: READY (x2)"
 
 [node name="RollBar" type="ProgressBar" parent="VitalsContainer/VBox"]
 custom_minimum_size = Vector2(0, 10)
 layout_mode = 2
 theme_override_styles/background = SubResource("StyleBoxFlat_health_bg")
 theme_override_styles/fill = SubResource("StyleBoxFlat_roll_fill")
-max_value = 1.5
-value = 1.5
+max_value = 100.0
+value = 100.0
 show_percentage = false
 
 [node name="WeaponContainer" type="PanelContainer" parent="."]
@@ -280,14 +281,14 @@ stretch_mode = 5
 layout_mode = 2
 theme_override_colors/font_color = Color(0.9, 0.92, 0.95, 1)
 theme_override_font_sizes/font_size = 11
-text = "[Q] WIRE"
+text = "[1] GRENADE"
 
 [node name="Stock" type="Label" parent="TacticalEquipment/DeployablesBar/WireCard/HBox"]
 layout_mode = 2
 size_flags_horizontal = 10
 theme_override_colors/font_color = Color(0.2, 0.95, 0.55, 1)
 theme_override_font_sizes/font_size = 12
-text = "x2"
+text = "x3"
 
 [node name="MineCard" type="Button" parent="TacticalEquipment/DeployablesBar"]
 custom_minimum_size = Vector2(152, 34)
@@ -319,7 +320,7 @@ stretch_mode = 5
 layout_mode = 2
 theme_override_colors/font_color = Color(0.9, 0.92, 0.95, 1)
 theme_override_font_sizes/font_size = 11
-text = "[Q] MINE"
+text = "[2] BARBWIRE"
 
 [node name="Stock" type="Label" parent="TacticalEquipment/DeployablesBar/MineCard/HBox"]
 layout_mode = 2
@@ -358,7 +359,7 @@ stretch_mode = 5
 layout_mode = 2
 theme_override_colors/font_color = Color(0.9, 0.92, 0.95, 1)
 theme_override_font_sizes/font_size = 11
-text = "[Q] TURRET"
+text = "[3] TURRET"
 
 [node name="Stock" type="Label" parent="TacticalEquipment/DeployablesBar/TurretCard/HBox"]
 layout_mode = 2
