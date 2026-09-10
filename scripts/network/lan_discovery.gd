@@ -1,4 +1,4 @@
-﻿class_name LanDiscovery
+class_name LanDiscovery
 extends Node
 
 ## Automated UDP LAN Discovery System for KillEm Co-op Multiplayer

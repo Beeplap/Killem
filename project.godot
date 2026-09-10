@@ -28,7 +28,7 @@ busses/default_bus_layout="res://default_bus_layout.tres"
 
 AudioManager="*res://scripts/audio_manager.gd"
 Global="*res://scripts/global.gd"
-GameManager="*res://scripts/network/game_manager_alias.gd"
+GameManager="*res://scripts/game_manager.gd"
 NetworkManager="*res://scripts/network/network_manager.gd"
 EconomyManager="*res://scripts/economy_manager.gd"
 CampaignManager="*res://scripts/campaign_manager.gd"

@@ -1,4 +1,4 @@
-﻿extends Node
+extends Node
 
 ## GameManager Compatibility Proxy
 ## Bridges Global and EconomyManager to satisfy the unified GameManager API.
