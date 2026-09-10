@@ -48,6 +48,18 @@ const HIBERNATION_DISTANCE: float = 1400.0
 
 var player: Node2D = null
 
+# Procedural Walk Animation State
+var walk_cycle_time: float = 0.0
+var sprite_base_offset: Vector2 = Vector2.ZERO
+var is_moving: bool = false
+var anim_bob_height: float = 3.5        # Vertical bounce amplitude (px)
+var anim_bob_frequency: float = 8.0     # Steps per second
+var anim_lean_max: float = 0.06         # Max rotation lean (radians)
+var anim_squash_intensity: float = 0.04 # Squash-stretch scale variation
+var anim_idle_breathe: float = 0.015    # Idle breathing scale pulse
+var anim_gallop_asymmetry: float = 0.0  # >0 for dog gallop (asymmetric bob)
+var death_anim_progress: float = -1.0   # -1 = not dying, 0..1 = death anim
+
 @onready var nav_agent: NavigationAgent2D = $NavigationAgent2D
 @onready var collision_shape: CollisionShape2D = $CollisionShape2D
 @onready var sprite: Sprite2D = $Sprite2D
@@ -85,6 +97,11 @@ func _ready() -> void:
 	elif zombie_type == ZombieType.INFECTED_DOG:
 		shadow_scale = Vector2(0.75, 0.35)
 	ProceduralTextures.add_drop_shadow(self, Vector2(0, 14), shadow_scale)
+	
+	# Cache sprite resting offset and randomize walk cycle phase so zombies don't bob in sync
+	if sprite:
+		sprite_base_offset = sprite.offset
+	walk_cycle_time = randf() * TAU
 	
 	_setup_network_synchronizer()
 	call_deferred("_find_player")
@@ -233,6 +250,58 @@ func configure_type() -> void:
 	var wave_growth = 1.0 + min((wave_number - 1) * 0.045, 0.40)
 	var final_scale = base_scale * wave_growth
 	scale = Vector2(final_scale, final_scale)
+	
+	# Per-type procedural walk animation parameters
+	match zombie_type:
+		ZombieType.REGULAR:
+			# Shambling, uneven zombie walk
+			anim_bob_height = 3.2
+			anim_bob_frequency = 7.5
+			anim_lean_max = 0.07
+			anim_squash_intensity = 0.04
+			anim_gallop_asymmetry = 0.0
+		ZombieType.INFECTED_DOG:
+			# Fast quadruped gallop with pronounced vertical bounce
+			anim_bob_height = 4.5
+			anim_bob_frequency = 14.0
+			anim_lean_max = 0.10
+			anim_squash_intensity = 0.08
+			anim_gallop_asymmetry = 0.35  # Asymmetric gallop cycle
+		ZombieType.HEAVY:
+			# Slow, heavy lumbering steps with ground-shaking weight
+			anim_bob_height = 2.5
+			anim_bob_frequency = 4.5
+			anim_lean_max = 0.04
+			anim_squash_intensity = 0.06
+			anim_gallop_asymmetry = 0.0
+		ZombieType.SPITTER:
+			# Twitchy, hunched movement
+			anim_bob_height = 2.8
+			anim_bob_frequency = 9.0
+			anim_lean_max = 0.08
+			anim_squash_intensity = 0.035
+			anim_gallop_asymmetry = 0.0
+		ZombieType.ARMORED:
+			# Stiff, mechanical march
+			anim_bob_height = 2.0
+			anim_bob_frequency = 6.0
+			anim_lean_max = 0.03
+			anim_squash_intensity = 0.025
+			anim_gallop_asymmetry = 0.0
+		ZombieType.COLOSSUS:
+			# Massive, earth-shaking strides
+			anim_bob_height = 4.0
+			anim_bob_frequency = 3.0
+			anim_lean_max = 0.035
+			anim_squash_intensity = 0.07
+			anim_gallop_asymmetry = 0.0
+		ZombieType.SCREAMER:
+			# Nervous, jittery movement
+			anim_bob_height = 3.0
+			anim_bob_frequency = 10.0
+			anim_lean_max = 0.09
+			anim_squash_intensity = 0.05
+			anim_gallop_asymmetry = 0.0
 
 func ignite(duration: float, dps: float) -> void:
 	burning_timer = max(burning_timer, duration)
@@ -250,6 +319,9 @@ func stagger(duration: float) -> void:
 
 func _physics_process(delta: float) -> void:
 	if current_health <= 0.0:
+		# Still run death fall animation if active
+		if death_anim_progress >= 0.0:
+			_animate_walk_cycle(delta)
 		return
 	
 	# Host CPU Ownership: All pathfinding, state machines, and damage evaluations run strictly on the host
@@ -261,6 +333,7 @@ func _physics_process(delta: float) -> void:
 		if knockback_velocity.length_squared() > 1.0:
 			knockback_velocity = knockback_velocity.move_toward(Vector2.ZERO, 900.0 * delta)
 		move_and_slide()
+		_animate_walk_cycle(delta)  # Clients still need visual walk animation
 		return
 	
 	target_recheck_timer -= delta
@@ -412,6 +485,9 @@ func _physics_process(delta: float) -> void:
 			perform_attack()
 	
 	move_and_slide()
+	
+	# Procedural walk / idle animation
+	_animate_walk_cycle(delta)
 
 func screech_and_buff() -> void:
 	stagger(0.65)
@@ -452,6 +528,68 @@ func update_facing(face_dir: Vector2) -> void:
 		dir_idx += 8
 	if sprite:
 		sprite.frame = dir_idx % 8
+
+func _animate_walk_cycle(delta: float) -> void:
+	if not sprite:
+		return
+	
+	# Death fall animation
+	if death_anim_progress >= 0.0:
+		death_anim_progress = min(death_anim_progress + delta * 3.5, 1.0)
+		var t = death_anim_progress
+		var ease_t = 1.0 - pow(1.0 - t, 3.0)  # Ease-out cubic
+		sprite.rotation = lerp(0.0, PI * 0.45, ease_t) * sign(current_facing_dir.x + 0.001)
+		sprite.offset = sprite_base_offset + Vector2(0, ease_t * 8.0)
+		sprite.scale = Vector2(
+			lerp(1.0, 0.92, ease_t),
+			lerp(1.0, 0.85, ease_t)
+		)
+		modulate.a = lerp(1.0, 0.6, ease_t)
+		return
+	
+	var spd = velocity.length()
+	is_moving = spd > 15.0
+	
+	if is_moving:
+		# Advance walk cycle based on actual movement speed
+		var speed_ratio = clamp(spd / max(speed, 1.0), 0.3, 1.8)
+		walk_cycle_time += delta * anim_bob_frequency * speed_ratio
+		
+		# --- Vertical Bob (footstep simulation) ---
+		var bob_wave: float
+		if anim_gallop_asymmetry > 0.0:
+			# Quadruped gallop: front legs hit, brief air, back legs hit
+			var phase = fmod(walk_cycle_time, TAU)
+			bob_wave = abs(sin(phase)) + anim_gallop_asymmetry * sin(phase * 2.0)
+			bob_wave = bob_wave * 0.7  # Normalize
+		else:
+			# Bipedal walk: simple sinusoidal step cycle
+			bob_wave = abs(sin(walk_cycle_time))
+		
+		var bob_offset = -bob_wave * anim_bob_height * speed_ratio
+		sprite.offset = sprite_base_offset + Vector2(0, bob_offset)
+		
+		# --- Lean (rotation toward movement direction) ---
+		var lean_target = current_facing_dir.x * anim_lean_max * speed_ratio
+		sprite.rotation = lerp(sprite.rotation, lean_target, delta * 12.0)
+		
+		# --- Squash & Stretch ---
+		# On "landing" (bob at peak), squash horizontally and stretch vertically
+		# On "lift" (bob at trough), stretch horizontally and compress vertically
+		var squash_phase = cos(walk_cycle_time * 2.0)  # Double frequency for step
+		var sx = 1.0 + squash_phase * anim_squash_intensity * speed_ratio
+		var sy = 1.0 - squash_phase * anim_squash_intensity * speed_ratio * 0.7
+		sprite.scale = Vector2(sx, sy)
+		
+	else:
+		# --- Idle Breathing ---
+		walk_cycle_time += delta * 2.0  # Slow idle pulse
+		var breathe = sin(walk_cycle_time) * anim_idle_breathe
+		sprite.scale = Vector2(1.0 + breathe, 1.0 - breathe * 0.5)
+		
+		# Smoothly return to neutral
+		sprite.offset = sprite.offset.lerp(sprite_base_offset, delta * 8.0)
+		sprite.rotation = lerp(sprite.rotation, 0.0, delta * 6.0)
 
 func perform_attack() -> void:
 	if player and is_instance_valid(player) and player.has_method("take_damage"):
@@ -628,8 +766,17 @@ func _execute_die(hit_direction: Vector2, is_overkill: bool = false) -> void:
 	
 	spawn_scrap_drop()
 	
+	# Start death fall animation and delay queue_free
+	death_anim_progress = 0.0
+	current_health = 0.0
+	if collision_shape:
+		collision_shape.set_deferred("disabled", true)
+	
 	if not NetworkManager.is_network_active() or multiplayer.is_server():
-		queue_free()
+		get_tree().create_timer(0.4).timeout.connect(func():
+			if is_instance_valid(self):
+				queue_free()
+		)
 
 func apply_slow(factor: float, duration: float) -> void:
 	# Frenzied bloodhounds are immune to barbwire slow effects

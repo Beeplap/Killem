@@ -30,6 +30,9 @@ func _ready() -> void:
 
 func _physics_process(delta: float) -> void:
 	if current_health <= 0.0:
+		# Still run death fall animation if active
+		if death_anim_progress >= 0.0:
+			_animate_walk_cycle(delta)
 		return
 	
 	if player == null or not is_instance_valid(player):
@@ -122,6 +125,9 @@ func _process_chase(delta: float, target_pos: Vector2, dist_to_player: float) ->
 			perform_attack()
 	
 	move_and_slide()
+	
+	# Procedural gallop animation during chase
+	_animate_walk_cycle(delta)
 
 func enter_prepare_leap(target_pos: Vector2) -> void:
 	dog_state = DogState.PREPARE_LEAP
@@ -142,6 +148,12 @@ func _process_prepare_leap(delta: float, target_pos: Vector2) -> void:
 	
 	velocity = knockback_velocity
 	move_and_slide()
+	
+	# Crouching animation — compress sprite downward
+	if sprite:
+		var crouch_t = 1.0 - (state_timer / prepare_leap_duration)
+		sprite.offset = sprite_base_offset + Vector2(0, crouch_t * 3.0)
+		sprite.scale = Vector2(1.0 + crouch_t * 0.1, 1.0 - crouch_t * 0.15)
 	
 	state_timer -= delta
 	if state_timer <= 0.0:
@@ -167,6 +179,15 @@ func _process_leaping(delta: float) -> void:
 	velocity = (leap_direction * leap_speed) + knockback_velocity
 	move_and_slide()
 	
+	# Airborne stretch animation — elongate in movement direction
+	if sprite:
+		var leap_progress = 1.0 - (state_timer / leap_duration)
+		# Arc motion: rise then fall
+		var arc_height = sin(leap_progress * PI) * 6.0
+		sprite.offset = sprite_base_offset + Vector2(0, -arc_height)
+		sprite.scale = Vector2(0.88, 1.12)
+		sprite.rotation = leap_direction.angle() * 0.15
+	
 	# Deal damage if it intersects the player during LEAPING
 	if not has_damaged_during_leap and _check_player_leap_intersection():
 		has_damaged_during_leap = true
@@ -187,11 +208,26 @@ func enter_cooldown() -> void:
 	# Restore normal scale upon landing
 	scale = normal_scale
 	velocity = Vector2.ZERO
+	
+	# Landing impact squash
+	if sprite:
+		sprite.scale = Vector2(1.15, 0.85)
+		sprite.offset = sprite_base_offset + Vector2(0, 3.0)
 
 func _process_cooldown(delta: float) -> void:
 	# Pause movement for 0.4s upon landing
 	velocity = knockback_velocity
 	move_and_slide()
+	
+	# Recover from landing squash to normal
+	if sprite:
+		var recover_t = 1.0 - (state_timer / leap_landing_duration)
+		sprite.scale = Vector2(
+			lerp(1.15, 1.0, recover_t),
+			lerp(0.85, 1.0, recover_t)
+		)
+		sprite.offset = sprite_base_offset + Vector2(0, lerp(3.0, 0.0, recover_t))
+		sprite.rotation = lerp(sprite.rotation, 0.0, delta * 8.0)
 	
 	state_timer -= delta
 	if state_timer <= 0.0:
