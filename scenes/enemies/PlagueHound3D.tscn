@@ -23,8 +23,8 @@ normal_enabled = true
 normal_texture = ExtResource("5_flesh_norm")
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_bone"]
-albedo_color = Color(0.85, 0.82, 0.74, 1)
-roughness = 0.55
+albedo_color = Color(0.38, 0.26, 0.22, 1)
+roughness = 0.75
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_eye_cataract"]
 shading_mode = 0
@@ -50,8 +50,8 @@ size = Vector3(0.06, 0.08, 0.8)
 
 [sub_resource type="TorusMesh" id="TorusMesh_rib"]
 material = SubResource("StandardMaterial3D_bone")
-inner_radius = 0.15
-outer_radius = 0.19
+inner_radius = 0.12
+outer_radius = 0.165
 
 [sub_resource type="BoxMesh" id="BoxMesh_skull"]
 material = SubResource("StandardMaterial3D_hide")

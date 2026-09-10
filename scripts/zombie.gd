@@ -247,7 +247,7 @@ func _setup_3d_viewport() -> void:
 	
 	var cam = Camera3D.new()
 	cam.projection = Camera3D.PROJECTION_ORTHOGONAL
-	cam.rotation_degrees = Vector3(-36.0, 0, 0)
+	cam.rotation_degrees = Vector3(-48.0, 0, 0)
 	
 	var light = DirectionalLight3D.new()
 	light.rotation_degrees = Vector3(-55.0, 35.0, 0)
@@ -263,26 +263,31 @@ func _setup_3d_viewport() -> void:
 	sub_viewport.add_child(w_env)
 	
 	var model_scene_path: String = ""
-	var cam_size: float = 2.6
-	var cam_pos: Vector3 = Vector3(0, 1.25, 1.7)
+	var cam_size: float = 2.45
+	var cam_pos: Vector3 = Vector3(0, 3.23, 2.14)
+	var spr_offset_y: float = -18.0
 	
 	match zombie_type:
 		ZombieType.REGULAR, ZombieType.ARMORED:
 			model_scene_path = "res://scenes/enemies/ShamblerZombie3D.tscn"
-			cam_size = 2.6
-			cam_pos = Vector3(0, 1.25, 1.7)
+			cam_size = 2.45
+			cam_pos = Vector3(0, 3.23, 2.14)
+			spr_offset_y = -18.0
 		ZombieType.INFECTED_DOG:
 			model_scene_path = "res://scenes/enemies/PlagueHound3D.tscn"
-			cam_size = 2.2
-			cam_pos = Vector3(0, 0.65, 1.35)
+			cam_size = 2.1
+			cam_pos = Vector3(0, 2.61, 2.0)
+			spr_offset_y = -4.0
 		ZombieType.HEAVY, ZombieType.COLOSSUS:
 			model_scene_path = "res://scenes/enemies/SuperMutant3D.tscn"
 			cam_size = 4.2
-			cam_pos = Vector3(0, 2.2, 3.0)
+			cam_pos = Vector3(0, 5.09, 3.0)
+			spr_offset_y = -26.0
 		ZombieType.SPITTER, ZombieType.SCREAMER:
 			model_scene_path = "res://scenes/enemies/ToxicSpitter3D.tscn"
-			cam_size = 2.7
-			cam_pos = Vector3(0, 1.25, 1.7)
+			cam_size = 2.5
+			cam_pos = Vector3(0, 3.28, 2.14)
+			spr_offset_y = -18.0
 	
 	cam.size = cam_size
 	cam.position = cam_pos
@@ -343,7 +348,8 @@ func _setup_3d_viewport() -> void:
 		sprite.hframes = 1
 		sprite.vframes = 1
 		sprite.frame = 0
-		sprite.offset = Vector2(0, -6)
+		sprite.offset = Vector2(0, spr_offset_y)
+		sprite_base_offset = sprite.offset
 
 
 func ignite(duration: float, dps: float) -> void:
