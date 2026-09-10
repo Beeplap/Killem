@@ -72,7 +72,7 @@ func _process(delta: float) -> void:
 	# Find candidate alive teammates inside area
 	var candidates: Array[Node2D] = []
 	for body in get_overlapping_bodies():
-		if is_instance_valid(body) and body != parent_player and body.is_in_group("player"):
+		if is_instance_valid(body) and not body.is_queued_for_deletion() and body != parent_player and body.is_in_group("player"):
 			var b_hp = body.get("current_health") if "current_health" in body else (body.get("health") if "health" in body else 100.0)
 			if not body.get("is_downed") and (b_hp == null or b_hp > 0.0):
 				candidates.append(body)

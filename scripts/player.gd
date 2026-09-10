@@ -968,7 +968,7 @@ func get_alive_teammates_count() -> int:
 	var count = 0
 	var players = get_tree().get_nodes_in_group("player")
 	for p in players:
-		if p != self and is_instance_valid(p):
+		if p != self and is_instance_valid(p) and not p.is_queued_for_deletion():
 			var p_hp = p.get("current_health") if "current_health" in p else (p.get("health") if "health" in p else 100.0)
 			if not p.get("is_downed") and (p_hp == null or p_hp > 0.0):
 				count += 1
@@ -1081,7 +1081,7 @@ func die() -> void:
 	else:
 		var any_alive = false
 		for p in get_tree().get_nodes_in_group("player"):
-			if is_instance_valid(p) and not p.get("is_downed"):
+			if is_instance_valid(p) and not p.is_queued_for_deletion() and not p.get("is_downed"):
 				var p_hp = p.get("current_health") if "current_health" in p else (p.get("health") if "health" in p else 100.0)
 				if p_hp == null or p_hp > 0.0:
 					any_alive = true
@@ -1097,7 +1097,7 @@ func check_all_players_downed() -> void:
 		return
 	var any_alive = false
 	for p in players:
-		if is_instance_valid(p) and not p.get("is_downed"):
+		if is_instance_valid(p) and not p.is_queued_for_deletion() and not p.get("is_downed"):
 			var p_hp = p.get("current_health") if "current_health" in p else (p.get("health") if "health" in p else 100.0)
 			if p_hp == null or p_hp > 0.0:
 				any_alive = true
