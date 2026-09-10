@@ -404,6 +404,7 @@ func take_damage(amount: float, hit_direction: Vector2 = Vector2.ZERO) -> void:
 	
 	var effective_damage = amount
 	var remaining_before = current_health
+	var is_shield_deflected: bool = false
 	
 	# Armored Riot Zombie frontal riot shield deflecting 80% direct bullet damage
 	if zombie_type == ZombieType.ARMORED:
@@ -413,7 +414,7 @@ func take_damage(amount: float, hit_direction: Vector2 = Vector2.ZERO) -> void:
 			if hit_direction.normalized().dot(current_facing_dir) < -0.2:
 				effective_damage = amount * 0.20 # 80% deflected!
 				spawn_shield_ricochet(hit_direction)
-				Global.play_sound("hit")
+				is_shield_deflected = true
 				# Stagger if hit by heavy blast (e.g. shotgun or explosive)
 				if amount >= 35.0:
 					stagger(0.45)
@@ -426,7 +427,7 @@ func take_damage(amount: float, hit_direction: Vector2 = Vector2.ZERO) -> void:
 			if hit_direction.normalized().dot(current_facing_dir) < -0.15:
 				effective_damage = amount * 0.30 # 70% deflected from front!
 				spawn_shield_ricochet(hit_direction)
-				Global.play_sound("hit")
+				is_shield_deflected = true
 				if amount >= 40.0:
 					stagger(0.40)
 		else:
@@ -449,6 +450,13 @@ func take_damage(amount: float, hit_direction: Vector2 = Vector2.ZERO) -> void:
 	
 	var is_crit = (hit_direction != Vector2.ZERO and (randf() < 0.18 or amount >= 45.0))
 	var is_fatal = (current_health <= 0.0)
+	
+	# Ballistic flesh impact or armor deflection sound
+	var audio_mgr = get_node_or_null("/root/AudioManager")
+	if audio_mgr and audio_mgr.has_method("play_bullet_impact"):
+		audio_mgr.play_bullet_impact(is_shield_deflected, global_position, is_crit)
+	else:
+		Global.play_sound("hit")
 	
 	# Hollow-Point Rounds: apply 2-second bleeding damage-over-time status
 	if Global.mod_hollow_point and not is_fatal and hit_direction != Vector2.ZERO:
@@ -484,6 +492,12 @@ func spawn_shield_ricochet(hit_dir: Vector2) -> void:
 
 func die(hit_direction: Vector2, is_overkill: bool = false) -> void:
 	Global.add_kill(score_value)
+	
+	var audio_mgr = get_node_or_null("/root/AudioManager")
+	if audio_mgr and audio_mgr.has_method("play_zombie_death"):
+		audio_mgr.play_zombie_death(global_position)
+	else:
+		Global.play_sound("zombie_death")
 	
 	if is_alpha_target:
 		var horde_dir = get_tree().get_first_node_in_group("horde_director")

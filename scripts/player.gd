@@ -208,8 +208,9 @@ func toggle_deployable_mode() -> void:
 		Global.show_notification("WEAPON MODE: ACTIVE", "Standard Combat Firearms Enabled", Color(0.98, 0.82, 0.15))
 	Global.play_sound("hit")
 
-var footstep_distance_traveled: float = 0.0
-const FOOTSTEP_STRIDE_LENGTH: float = 110.0
+var step_accumulator: float = 0.0
+const STEP_THRESHOLD_WALK: float = 42.0
+const STEP_THRESHOLD_DASH: float = 28.0
 
 func cycle_deployable() -> void:
 	Global.set_active_deployable(Global.active_deployable_type + 1)
@@ -245,7 +246,12 @@ func start_dodge_roll() -> void:
 	velocity = roll_dir * (move_speed * ROLL_SPEED_MULT)
 	ghost_trail_timer = 0.0
 	spawn_ghost_trail()
-	Global.play_sound("roll")
+	
+	var audio_mgr = get_node_or_null("/root/AudioManager")
+	if audio_mgr and audio_mgr.has_method("play_boot_skid"):
+		audio_mgr.play_boot_skid(global_position)
+	else:
+		Global.play_sound("roll")
 
 func spawn_ghost_trail() -> void:
 	if sprite == null:
@@ -364,10 +370,18 @@ func _physics_process(delta: float) -> void:
 		velocity = roll_dir * (move_speed * ROLL_SPEED_MULT)
 		move_and_slide()
 		
+		step_accumulator += velocity.length() * delta
+		if step_accumulator >= STEP_THRESHOLD_DASH:
+			step_accumulator = 0.0
+			_play_surface_footstep()
+		
 		if roll_timer <= 0.0:
 			is_rolling = false
 			# Restore collision against Layer 2 zombies after phasing
 			set_collision_mask_value(2, true)
+			var audio_mgr = get_node_or_null("/root/AudioManager")
+			if audio_mgr and audio_mgr.has_method("play_boot_skid"):
+				audio_mgr.play_boot_skid(global_position)
 		
 		handle_camera_and_shake(delta)
 		return
@@ -408,9 +422,9 @@ func handle_movement(delta: float) -> void:
 	move_and_slide()
 	
 	if velocity.length_squared() > 100.0:
-		footstep_distance_traveled += velocity.length() * delta
-		if footstep_distance_traveled >= FOOTSTEP_STRIDE_LENGTH:
-			footstep_distance_traveled = 0.0
+		step_accumulator += velocity.length() * delta
+		if step_accumulator >= STEP_THRESHOLD_WALK:
+			step_accumulator = 0.0
 			_play_surface_footstep()
 
 func _play_surface_footstep() -> void:

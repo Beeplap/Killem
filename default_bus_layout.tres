@@ -19,6 +19,10 @@ hipass = 0.15
 dry = 0.88
 wet = 0.12
 
+[sub_resource type="AudioEffectLowPassFilter" id="AudioEffectLowPassFilter_zombies"]
+resource_name = "ZombiesLPF"
+cutoff_hz = 2800.0
+
 [sub_resource type="AudioEffectEQ6" id="AudioEffectEQ6_pickups"]
 resource_name = "PickupsEQ"
 band_db/32_hz = -3.0
@@ -58,11 +62,13 @@ bus/4/volume_db = 0.0
 bus/4/send = &"SFX"
 bus/4/effect/0/effect = SubResource("AudioEffectReverb_zombies")
 bus/4/effect/0/enabled = true
+bus/4/effect/1/effect = SubResource("AudioEffectLowPassFilter_zombies")
+bus/4/effect/1/enabled = true
 bus/5/name = &"Foley"
 bus/5/solo = false
 bus/5/mute = false
 bus/5/bypass_fx = false
-bus/5/volume_db = -12.0
+bus/5/volume_db = -3.0
 bus/5/send = &"SFX"
 bus/6/name = &"Pickups_UI"
 bus/6/solo = false
