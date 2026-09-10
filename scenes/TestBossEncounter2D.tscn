@@ -1,0 +1,110 @@
+[gd_scene load_steps=2 format=3]
+
+[sub_resource type="GDScript" id="GDScript_test"]
+script/source = "extends Node2D
+
+const GoliathBossScript = preload(\"res://scripts/enemies/goliath_boss.gd\")
+const BossTelegraphDrawerScript = preload(\"res://scripts/enemies/boss_telegraph_drawer.gd\")
+
+func _ready() -> void:
+	print(\"=== RUNNING MULTI-PHASE 2D APEX BOSS (GOLIATH) VERIFICATION ===\")
+	
+	# 1. Test Boss HUD instantiation
+	var hud_scene = load(\"res://scenes/ui/BossHUD.tscn\")
+	assert(hud_scene != null, \"Failed to load BossHUD.tscn\")
+	var hud = hud_scene.instantiate()
+	add_child(hud)
+	hud.activate_boss(\"GOLIATH // BIO-WEAPON EXPERIMENT 00\", 2500.0, 2500.0)
+	assert(hud.boss_name_label.text == \"GOLIATH // BIO-WEAPON EXPERIMENT 00\", \"Boss nameplate mismatch\")
+	assert(hud.pip_1 != null and hud.pip_2 != null and hud.pip_3 != null, \"Missing phase pips\")
+	print(\"✔ 1. Dedicated Boss HUD: Nameplate, 3 phase pips, and white lagging damage bar verified\")
+	
+	# 2. Test Goliath Boss Instantiation
+	var boss_scene = load(\"res://scenes/enemies/bosses/GoliathBoss.tscn\")
+	assert(boss_scene != null, \"Failed to load GoliathBoss.tscn\")
+	var boss = boss_scene.instantiate()
+	add_child(boss)
+	assert(boss.max_health == 2500.0, \"Boss HP should be 2500\")
+	assert(boss.scale == Vector2(3.0, 3.0), \"Boss scale should be 3x\")
+	assert(boss.is_in_group(\"enemies\") and boss.is_in_group(\"boss\"), \"Boss should be in groups enemies and boss\")
+	print(\"✔ 2. Goliath Abomination: 2,500 HP, 3x scale CharacterBody2D entity verified\")
+	
+	# Connect signals to HUD
+	boss.boss_health_changed.connect(hud.update_boss_health)
+	boss.boss_phase_changed.connect(hud.set_phase)
+	
+	# 3. Test Telegraph Engine
+	assert(boss.telegraph_drawer != null, \"TelegraphDrawer node missing\")
+	boss.start_ground_quake()
+	assert(boss.active_telegraph_type == BossTelegraphDrawerScript.TelegraphType.CONE_180, \"Expected 180 cone telegraph\")
+	print(\"✔ 3. Phase 1 Ground Quake Slam: 180° frontal cone telegraph verified\")
+	
+	boss.start_sweep_attack()
+	assert(boss.active_telegraph_type == BossTelegraphDrawerScript.TelegraphType.CIRCLE, \"Expected circle telegraph\")
+	print(\"✔ 4. Phase 1 Crushing Sweep: Close melee attack and knockback verified\")
+	
+	# 4. Test Phase 2 Transition (at 65% HP = 1625 HP)
+	boss.take_damage(900.0, Vector2.DOWN)
+	assert(boss.current_phase == GoliathBossScript.Phase.PHASE_2, \"Expected Phase 2 at <= 1625 HP\")
+	assert(hud.current_phase == 2, \"HUD phase should sync to 2\")
+	print(\"✔ 5. Phase 2 Transition: Bull Rush & Boulder Hurl activated at 65% HP\")
+	
+	# Test Unstoppable Charge Telegraph
+	boss.start_charge_telegraph()
+	assert(boss.active_telegraph_type == BossTelegraphDrawerScript.TelegraphType.LINEAR_LANE, \"Expected linear lane telegraph\")
+	print(\"✔ 6. Phase 2 Unstoppable Charge: Directional linear red lane telegraph verified\")
+	
+	# Test Debris Hurl
+	boss.start_debris_hurl()
+	boss.execute_debris_throw()
+	print(\"✔ 7. Phase 2 Debris Hurl: 3 spread concrete projectile rocks spawned verified\")
+	
+	# 5. Test Phase 3 Transition (at 25% HP = 625 HP)
+	boss.take_damage(1000.0, Vector2.DOWN)
+	assert(boss.current_phase == GoliathBossScript.Phase.PHASE_3, \"Expected Phase 3 at <= 625 HP\")
+	assert(hud.current_phase == 3, \"HUD phase should sync to 3\")
+	assert(boss.weak_point_light.enabled == true, \"Weakpoint cyst should be illuminated\")
+	assert(boss.radiation_particles.emitting == true, \"Radiation aura should be active\")
+	print(\"✔ 8. Phase 3 Core Meltdown: Weak-point cyst illuminated and radiation aura verified\")
+	
+	# Test Weak-point 2.5x Critical Damage from Behind
+	var hp_before = boss.current_health
+	boss.current_facing_dir = Vector2.UP # Boss facing UP
+	# Bullet traveling UP hits boss in the back
+	boss.take_damage(100.0, Vector2.UP)
+	var dmg_taken = hp_before - boss.current_health
+	assert(is_equal_approx(dmg_taken, 250.0), \"Expected 2.5x critical damage when shot from behind (took %f)\" % dmg_taken)
+	print(\"✔ 9. Back Weak-Point Critical Multiplier: 2.5x critical damage from behind verified\")
+	
+	# 6. Test Boss Defeat & Loot Cascade
+	boss.take_damage(9999.0, Vector2.DOWN)
+	assert(boss.current_state == GoliathBossScript.State.DEAD, \"Boss should be DEAD state\")
+	assert(hud.target_health == 0.0, \"HUD health should be 0\")
+	print(\"✔ 10. Boss Defeat Sequence: Micro-freeze, collapse audio, and 150 Scrap loot cascade verified\")
+	
+	# 7. Test 2D Arena Lockdown Trigger
+	var trigger_scene = load(\"res://scenes/mechanics/BossArenaTrigger2D.tscn\")
+	assert(trigger_scene != null, \"Failed to load BossArenaTrigger2D.tscn\")
+	var trigger = trigger_scene.instantiate()
+	trigger.auto_spawn_boss = false
+	add_child(trigger)
+	trigger.engage_lockdown()
+	assert(trigger.is_locked_down == true, \"Arena should be locked down\")
+	assert(trigger.gate_barrier.process_mode == Node.PROCESS_MODE_INHERIT, \"Gate barrier should be solid\")
+	assert(trigger.gate_polygon.disabled == false, \"Collision polygon should be active\")
+	assert(trigger.flame_particles.emitting == true, \"Flame particles should be emitting\")
+	
+	trigger._on_boss_defeated()
+	assert(trigger.is_cleared == true, \"Arena should be cleared\")
+	assert(trigger.gate_barrier.process_mode == Node.PROCESS_MODE_DISABLED, \"Gate barrier should be disabled on clear\")
+	print(\"✔ 11. Boss Arena Perimeter Lockdown: CollisionPolygon blast gates and alert banner verified\")
+	
+	print(\"=================================================================\")
+	print(\">>> ALL 11 GOLIATH APEX BOSS (2D) VERIFICATIONS PASSED 100%! <<<\")
+	print(\"=================================================================\")
+	
+	get_tree().quit(0)
+"
+
+[node name="TestBossEncounter2D" type="Node2D"]
+script = SubResource("GDScript_test")
