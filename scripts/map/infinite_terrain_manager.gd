@@ -133,19 +133,28 @@ func _load_resources() -> void:
 	barrel_scene = load("res://scenes/OilBarrel.tscn")
 	crate_scene = load("res://scenes/DestructibleCrate.tscn")
 
+func _cleanup_stale_chunks() -> void:
+	_active_chunks.clear()
+	_chunk_pool.clear()
+	_last_player_chunk = Vector2i(-999999, -999999)
+
 func _setup_container() -> void:
 	var current_scene = get_tree().current_scene
 	if current_scene:
 		var existing = current_scene.get_node_or_null("ChunkContainer")
 		if existing:
+			if chunk_container != existing:
+				_cleanup_stale_chunks()
 			chunk_container = existing
 		else:
+			_cleanup_stale_chunks()
 			chunk_container = Node2D.new()
 			chunk_container.name = "ChunkContainer"
 			chunk_container.z_index = -3
 			current_scene.add_child(chunk_container)
 	else:
 		if chunk_container == null:
+			_cleanup_stale_chunks()
 			chunk_container = Node2D.new()
 			chunk_container.name = "ChunkContainer"
 			add_child(chunk_container)
@@ -203,34 +212,44 @@ func update_chunks(player_chunk: Vector2i) -> void:
 	# Despawn and pool chunks outside active radius
 	var to_despawn: Array[Vector2i] = []
 	for c in _active_chunks.keys():
-		if not needed_coords.has(c):
+		if not needed_coords.has(c) or not is_instance_valid(_active_chunks[c]):
 			to_despawn.append(c)
 	
 	for c in to_despawn:
 		_despawn_chunk(c)
 
 func _spawn_chunk(c: Vector2i) -> void:
-	var chunk: TerrainChunk
-	if _chunk_pool.size() > 0:
-		chunk = _chunk_pool.pop_back()
-	else:
+	var chunk: TerrainChunk = null
+	while _chunk_pool.size() > 0:
+		var candidate = _chunk_pool.pop_back()
+		if is_instance_valid(candidate):
+			chunk = candidate
+			break
+	if chunk == null:
 		chunk = TerrainChunk.new()
 	
 	chunk.setup_chunk(c, self)
-	if chunk.get_parent() == null and chunk_container:
-		chunk_container.add_child(chunk)
+	if is_instance_valid(chunk_container):
+		if chunk.get_parent() == null:
+			chunk_container.add_child(chunk)
+		elif chunk.get_parent() != chunk_container:
+			if chunk.get_parent():
+				chunk.get_parent().remove_child(chunk)
+			chunk_container.add_child(chunk)
 	chunk.visible = true
 	_active_chunks[c] = chunk
 
 func _despawn_chunk(c: Vector2i) -> void:
 	if not _active_chunks.has(c):
 		return
-	var chunk: TerrainChunk = _active_chunks[c]
+	var chunk = _active_chunks[c]
 	_active_chunks.erase(c)
+	if not is_instance_valid(chunk):
+		return
 	
 	chunk.recycle()
 	chunk.visible = false
-	if chunk.get_parent():
+	if is_instance_valid(chunk_container) and chunk.get_parent() == chunk_container:
 		chunk_container.remove_child(chunk)
 	_chunk_pool.append(chunk)
 
@@ -243,13 +262,15 @@ func force_update_chunks() -> void:
 func clear_all_chunks() -> void:
 	for c in _active_chunks.keys():
 		var chunk = _active_chunks[c]
-		chunk.recycle()
-		if chunk.get_parent():
-			chunk.get_parent().remove_child(chunk)
-		chunk.queue_free()
+		if is_instance_valid(chunk):
+			chunk.recycle()
+			if chunk.get_parent():
+				chunk.get_parent().remove_child(chunk)
+			chunk.queue_free()
 	_active_chunks.clear()
 	
 	for chunk in _chunk_pool:
-		chunk.queue_free()
+		if is_instance_valid(chunk):
+			chunk.queue_free()
 	_chunk_pool.clear()
 	_last_player_chunk = Vector2i(-999999, -999999)

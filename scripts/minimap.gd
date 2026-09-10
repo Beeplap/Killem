@@ -89,8 +89,8 @@ func _draw() -> void:
 			var evac_pos = _get_entity_pos(evac)
 			var offset = evac_pos - p_pos
 			var dist = offset.length()
-			var effective_range = world_detection_radius if not is_3d else 50.0
-			var radar_dist = (dist / effective_range) * radar_radius
+			var evac_range = world_detection_radius if not is_3d else 50.0
+			var radar_dist = (dist / evac_range) * radar_radius
 			var is_clamped = radar_dist > radar_radius - 6.0
 			radar_dist = min(radar_dist, radar_radius - 6.0)
 			
@@ -117,15 +117,15 @@ func _draw() -> void:
 			var obj_pos = _get_entity_pos(obj)
 			var offset = obj_pos - p_pos
 			var dist = offset.length()
-			var effective_range = world_detection_radius if not is_3d else 45.0
-			if dist <= effective_range * 1.5:
-				var radar_dist = min((dist / effective_range) * radar_radius, radar_radius - 5.0)
+			var obj_range = world_detection_radius if not is_3d else 45.0
+			if dist <= obj_range * 1.5:
+				var radar_dist = min((dist / obj_range) * radar_radius, radar_radius - 5.0)
 				var blip_pos = center + offset.normalized() * radar_dist
 				draw_rect(Rect2(blip_pos - Vector2(3, 3), Vector2(6, 6)), Color(0.2, 0.9, 1.0, 0.85))
 	
 	# 7. Enemies (Regular & Elites / Bosses)
 	var enemies = get_tree().get_nodes_in_group("enemies")
-	var effective_range = world_detection_radius if not is_3d else 40.0
+	var enemy_range = world_detection_radius if not is_3d else 40.0
 	
 	for enemy in enemies:
 		if not is_instance_valid(enemy):
@@ -135,10 +135,10 @@ func _draw() -> void:
 		var offset = e_pos - p_pos
 		var dist = offset.length()
 		
-		if dist > effective_range:
+		if dist > enemy_range:
 			continue
 		
-		var radar_dist = (dist / effective_range) * radar_radius
+		var radar_dist = (dist / enemy_range) * radar_radius
 		var blip_pos = center + offset.normalized() * radar_dist
 		
 		var is_alpha = enemy.get("is_alpha_target") == true

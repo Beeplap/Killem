@@ -1,4 +1,4 @@
-[gd_scene load_steps=7 format=3 uid="uid://barmorypod001"]
+[gd_scene format=3 uid="uid://barmorypod001"]
 
 [ext_resource type="Script" path="res://scripts/armory_pod.gd" id="1_armory"]
 [ext_resource type="Texture2D" uid="uid://dbtf300teo8wc" path="res://assets/textures/props/armory_pod.png" id="2_pod"]

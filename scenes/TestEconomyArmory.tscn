@@ -1,4 +1,4 @@
-[gd_scene load_steps=2 format=3 uid="uid://btesteconomyscene001"]
+[gd_scene format=3 uid="uid://vr5ujbkpdsdk"]
 
 [ext_resource type="Script" path="res://tests/test_economy_armory.gd" id="1_test"]
 

@@ -1,50 +1,29 @@
-[gd_scene load_steps=44 format=3 uid="uid://cmainlevelscene001"]
+[gd_scene format=3 uid="uid://urjw7nhhcxu3"]
 
-[ext_resource type="Script" path="res://scripts/main_level.gd" id="1_level"]
-[ext_resource type="Script" path="res://scripts/bullet_pool.gd" id="2_pool"]
-[ext_resource type="PackedScene" path="res://scenes/Player.tscn" id="3_player"]
-[ext_resource type="Script" path="res://scripts/spawner.gd" id="4_spawner"]
-[ext_resource type="PackedScene" path="res://scenes/HUD.tscn" id="5_hud"]
-[ext_resource type="PackedScene" path="res://scenes/DestructibleCrate.tscn" id="6_crate"]
-[ext_resource type="PackedScene" path="res://scenes/TrashBag.tscn" id="7_trash"]
-[ext_resource type="PackedScene" path="res://scenes/OilBarrel.tscn" id="8_barrel"]
-[ext_resource type="Texture2D" path="res://assets/textures/ground/dirt_terrain.png" id="9_dirt"]
-[ext_resource type="Texture2D" path="res://assets/textures/ground/cracked_asphalt.png" id="10_asphalt"]
-[ext_resource type="Texture2D" path="res://assets/textures/railway/railway_track.png" id="11_railway"]
-[ext_resource type="Texture2D" path="res://assets/textures/railway/hazard_platform.png" id="12_hazard"]
-[ext_resource type="Texture2D" path="res://assets/textures/ground/dead_grass.png" id="13_grass"]
-[ext_resource type="Texture2D" path="res://assets/textures/environment/bunker_building.png" id="14_bunker"]
-[ext_resource type="Texture2D" path="res://assets/textures/environment/military_truck_wreck.png" id="15_truck"]
-[ext_resource type="Texture2D" path="res://assets/textures/environment/concrete_wall_h.png" id="16_wall_h"]
-[ext_resource type="Texture2D" path="res://assets/textures/environment/concrete_wall_v.png" id="17_wall_v"]
-[ext_resource type="Texture2D" path="res://assets/textures/environment/chainlink_fence_h.png" id="18_fence_h"]
-[ext_resource type="Texture2D" path="res://assets/textures/lighting/point_light_cookie.png" id="19_pointlight"]
-[ext_resource type="Texture2D" path="res://assets/textures/ground/dirt_terrain_n.png" id="20_dirt_n"]
-[ext_resource type="Texture2D" path="res://assets/textures/ground/cracked_asphalt_n.png" id="21_asphalt_n"]
-[ext_resource type="Texture2D" path="res://assets/textures/railway/railway_track_n.png" id="22_railway_n"]
-[ext_resource type="Texture2D" path="res://assets/textures/railway/hazard_platform_n.png" id="23_hazard_n"]
-[ext_resource type="Texture2D" path="res://assets/textures/environment/concrete_wall_h_n.png" id="24_wall_h_n"]
-[ext_resource type="Texture2D" path="res://assets/textures/environment/concrete_wall_v_n.png" id="25_wall_v_n"]
-[ext_resource type="Texture2D" path="res://assets/textures/environment/bunker_building_n.png" id="26_bunker_n"]
-[ext_resource type="Texture2D" path="res://assets/textures/environment/military_truck_wreck_n.png" id="27_truck_n"]
-[ext_resource type="Shader" path="res://shaders/volumetric_fog.gdshader" id="28_fog_shader"]
-[ext_resource type="Shader" path="res://shaders/post_process.gdshader" id="29_post_shader"]
-[ext_resource type="PackedScene" path="res://scenes/PowerTransformer.tscn" id="30_transformer"]
+[ext_resource type="Script" uid="uid://ymjx0tuj5mfh" path="res://scripts/main_level.gd" id="1_level"]
+[ext_resource type="Script" uid="uid://wd0lvd35rn5r" path="res://scripts/bullet_pool.gd" id="2_pool"]
+[ext_resource type="PackedScene" uid="uid://xhefkqn6hki" path="res://scenes/Player.tscn" id="3_player"]
+[ext_resource type="Script" uid="uid://cb1lay37vmc4n" path="res://scripts/spawner.gd" id="4_spawner"]
+[ext_resource type="PackedScene" uid="uid://chudscene001" path="res://scenes/HUD.tscn" id="5_hud"]
+[ext_resource type="PackedScene" uid="uid://6w5rrruhraea" path="res://scenes/DestructibleCrate.tscn" id="6_crate"]
+[ext_resource type="PackedScene" uid="uid://cdtfbji8vrace" path="res://scenes/TrashBag.tscn" id="7_trash"]
+[ext_resource type="PackedScene" uid="uid://4ubswtd7cfsy" path="res://scenes/OilBarrel.tscn" id="8_barrel"]
+[ext_resource type="Texture2D" uid="uid://c2flucfhaa15c" path="res://assets/textures/environment/bunker_building.png" id="14_bunker"]
+[ext_resource type="Texture2D" uid="uid://bmgdbx2lrg2ov" path="res://assets/textures/environment/military_truck_wreck.png" id="15_truck"]
+[ext_resource type="Texture2D" uid="uid://dot6svurcp330" path="res://assets/textures/environment/concrete_wall_h.png" id="16_wall_h"]
+[ext_resource type="Texture2D" uid="uid://bxyxchuhymhuw" path="res://assets/textures/environment/concrete_wall_v.png" id="17_wall_v"]
+[ext_resource type="Texture2D" uid="uid://bfliah64kuy4q" path="res://assets/textures/environment/chainlink_fence_h.png" id="18_fence_h"]
+[ext_resource type="Texture2D" uid="uid://brd6rqbmehjnl" path="res://assets/textures/lighting/point_light_cookie.png" id="19_pointlight"]
+[ext_resource type="Texture2D" uid="uid://b888t7tq04vj8" path="res://assets/textures/environment/concrete_wall_h_n.png" id="24_wall_h_n"]
+[ext_resource type="Texture2D" uid="uid://b5rkh3fyyprcj" path="res://assets/textures/environment/concrete_wall_v_n.png" id="25_wall_v_n"]
+[ext_resource type="Texture2D" uid="uid://cvetl4msk7svu" path="res://assets/textures/environment/bunker_building_n.png" id="26_bunker_n"]
+[ext_resource type="Texture2D" uid="uid://csf6t3iycuqim" path="res://assets/textures/environment/military_truck_wreck_n.png" id="27_truck_n"]
+[ext_resource type="Shader" uid="uid://bkuh6fir0udm3" path="res://shaders/volumetric_fog.gdshader" id="28_fog_shader"]
+[ext_resource type="Shader" uid="uid://0msaxi5ivxv6" path="res://shaders/post_process.gdshader" id="29_post_shader"]
+[ext_resource type="PackedScene" uid="uid://cs2xfnuri5xca" path="res://scenes/PowerTransformer.tscn" id="30_transformer"]
 [ext_resource type="PackedScene" path="res://scenes/CameraController.tscn" id="31_camera"]
-[ext_resource type="Script" path="res://scripts/ui/damage_text_manager.gd" id="32_damagetext"]
-[ext_resource type="Script" path="res://scripts/horde_director.gd" id="33_horde_dir"]
-
-[sub_resource type="CanvasTexture" id="CanvasTexture_wall_h"]
-diffuse_texture = ExtResource("16_wall_h")
-normal_texture = ExtResource("24_wall_h_n")
-specular_color = Color(0.25, 0.25, 0.28, 1)
-specular_shininess = 8.0
-
-[sub_resource type="CanvasTexture" id="CanvasTexture_wall_v"]
-diffuse_texture = ExtResource("17_wall_v")
-normal_texture = ExtResource("25_wall_v_n")
-specular_color = Color(0.25, 0.25, 0.28, 1)
-specular_shininess = 8.0
+[ext_resource type="Script" uid="uid://bpip0w65xe16b" path="res://scripts/ui/damage_text_manager.gd" id="32_damagetext"]
+[ext_resource type="Script" uid="uid://cule5dxk888l0" path="res://scripts/horde_director.gd" id="33_horde_dir"]
 
 [sub_resource type="CanvasTexture" id="CanvasTexture_bunker"]
 diffuse_texture = ExtResource("14_bunker")
@@ -52,23 +31,17 @@ normal_texture = ExtResource("26_bunker_n")
 specular_color = Color(0.42, 0.45, 0.52, 1)
 specular_shininess = 16.0
 
-[sub_resource type="CanvasTexture" id="CanvasTexture_truck"]
-diffuse_texture = ExtResource("15_truck")
-normal_texture = ExtResource("27_truck_n")
-specular_color = Color(0.38, 0.4, 0.45, 1)
-specular_shininess = 14.0
-
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_fog"]
-shader = ExtResource("28_fog_shader")
-
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_post"]
-shader = ExtResource("29_post_shader")
-
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_bunker"]
 size = Vector2(380, 140)
 
 [sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_bunker"]
 polygon = PackedVector2Array(-190, -40, 190, -40, 190, 80, -190, 80)
+
+[sub_resource type="CanvasTexture" id="CanvasTexture_truck"]
+diffuse_texture = ExtResource("15_truck")
+normal_texture = ExtResource("27_truck_n")
+specular_color = Color(0.38, 0.4, 0.45, 1)
+specular_shininess = 14.0
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_truck"]
 size = Vector2(170, 70)
@@ -76,11 +49,23 @@ size = Vector2(170, 70)
 [sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_truck"]
 polygon = PackedVector2Array(-85, -20, 85, -20, 85, 30, -85, 30)
 
+[sub_resource type="CanvasTexture" id="CanvasTexture_wall_h"]
+diffuse_texture = ExtResource("16_wall_h")
+normal_texture = ExtResource("24_wall_h_n")
+specular_color = Color(0.25, 0.25, 0.28, 1)
+specular_shininess = 8.0
+
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_wall_h"]
 size = Vector2(250, 40)
 
 [sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_wall_h"]
 polygon = PackedVector2Array(-125, -15, 125, -15, 125, 20, -125, 20)
+
+[sub_resource type="CanvasTexture" id="CanvasTexture_wall_v"]
+diffuse_texture = ExtResource("17_wall_v")
+normal_texture = ExtResource("25_wall_v_n")
+specular_color = Color(0.25, 0.25, 0.28, 1)
+specular_shininess = 8.0
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_wall_v"]
 size = Vector2(40, 240)
@@ -94,263 +79,286 @@ size = Vector2(250, 24)
 [sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_fence_h"]
 polygon = PackedVector2Array(-125, -8, 125, -8, 125, 12, -125, 12)
 
-[node name="MainLevel" type="Node2D"]
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_fog"]
+shader = ExtResource("28_fog_shader")
+shader_parameter/ray_speed = 0.06
+shader_parameter/ray_density = 13.5
+shader_parameter/ray_angle = -0.52
+shader_parameter/fog_speed = 0.035
+shader_parameter/fog_density = 1.7
+shader_parameter/overall_opacity = 0.08
+shader_parameter/ray_color = Color(0.85, 0.9, 0.98, 0.32)
+shader_parameter/fog_color = Color(0.6, 0.65, 0.72, 0.18)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_post"]
+shader = ExtResource("29_post_shader")
+shader_parameter/chromatic_aberration = 0.002
+shader_parameter/action_burst_aberration = 0.0
+shader_parameter/contrast = 1.04
+shader_parameter/saturation = 0.96
+shader_parameter/brightness_boost = 0.04
+shader_parameter/vignette_intensity = 0.22
+shader_parameter/vignette_opacity = 0.3
+shader_parameter/base_grain_intensity = 0.02
+shader_parameter/action_grain_boost = 0.0
+shader_parameter/firing_lens_dirt = 0.0
+
+[node name="MainLevel" type="Node2D" unique_id=1371648335]
 y_sort_enabled = true
 script = ExtResource("1_level")
 
-[node name="AtmosphericLighting" type="CanvasModulate" parent="."]
+[node name="AtmosphericLighting" type="CanvasModulate" parent="." unique_id=2094354700]
 color = Color(0.459, 0.49, 0.549, 1)
 
-[node name="BulletPool" type="Node2D" parent="." groups=["bullet_pool"]]
+[node name="BulletPool" type="Node2D" parent="." unique_id=836826611 groups=["bullet_pool"]]
 script = ExtResource("2_pool")
 
-[node name="DamageTextManager" type="Node2D" parent="." groups=["damage_text_manager"]]
+[node name="DamageTextManager" type="Node2D" parent="." unique_id=1956635883 groups=["damage_text_manager"]]
 script = ExtResource("32_damagetext")
 
-[node name="EnvironmentObjects" type="Node2D" parent="."]
+[node name="EnvironmentObjects" type="Node2D" parent="." unique_id=1194844262]
 y_sort_enabled = true
 
-[node name="BunkerBuilding" type="StaticBody2D" parent="EnvironmentObjects" groups=["obstacles"]]
+[node name="BunkerBuilding" type="StaticBody2D" parent="EnvironmentObjects" unique_id=145565181 groups=["obstacles"]]
 position = Vector2(-460, 180)
 collision_layer = 4
 collision_mask = 7
 
-[node name="Sprite2D" type="Sprite2D" parent="EnvironmentObjects/BunkerBuilding"]
+[node name="Sprite2D" type="Sprite2D" parent="EnvironmentObjects/BunkerBuilding" unique_id=527787616]
 position = Vector2(0, -40)
 texture = SubResource("CanvasTexture_bunker")
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="EnvironmentObjects/BunkerBuilding"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="EnvironmentObjects/BunkerBuilding" unique_id=570382493]
 position = Vector2(0, 30)
 shape = SubResource("RectangleShape2D_bunker")
 
-[node name="LightOccluder2D" type="LightOccluder2D" parent="EnvironmentObjects/BunkerBuilding"]
+[node name="LightOccluder2D" type="LightOccluder2D" parent="EnvironmentObjects/BunkerBuilding" unique_id=1173556835]
 occluder = SubResource("OccluderPolygon2D_bunker")
 
-[node name="BunkerLamp" type="PointLight2D" parent="EnvironmentObjects/BunkerBuilding"]
+[node name="BunkerLamp" type="PointLight2D" parent="EnvironmentObjects/BunkerBuilding" unique_id=1475990161]
 position = Vector2(0, -32)
 color = Color(1, 0.85, 0.55, 1)
 energy = 1.35
-height = 80.0
 shadow_enabled = true
+shadow_color = Color(0, 0, 0, 0.35)
 shadow_filter = 1
 shadow_filter_smooth = 2.0
-shadow_color = Color(0, 0, 0, 0.35)
 texture = ExtResource("19_pointlight")
 texture_scale = 2.4
+height = 80.0
 
-[node name="MilitaryTruck1" type="StaticBody2D" parent="EnvironmentObjects" groups=["obstacles"]]
+[node name="OilBarrel1" parent="EnvironmentObjects/BunkerBuilding" unique_id=820553352 instance=ExtResource("8_barrel")]
+position = Vector2(322, -40)
+
+[node name="MilitaryTruck1" type="StaticBody2D" parent="EnvironmentObjects" unique_id=382311833 groups=["obstacles"]]
 position = Vector2(-220, -260)
 collision_layer = 4
 collision_mask = 7
 
-[node name="Sprite2D" type="Sprite2D" parent="EnvironmentObjects/MilitaryTruck1"]
+[node name="Sprite2D" type="Sprite2D" parent="EnvironmentObjects/MilitaryTruck1" unique_id=766370998]
 position = Vector2(0, -15)
 texture = SubResource("CanvasTexture_truck")
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="EnvironmentObjects/MilitaryTruck1"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="EnvironmentObjects/MilitaryTruck1" unique_id=901035759]
 position = Vector2(0, 10)
 shape = SubResource("RectangleShape2D_truck")
 
-[node name="LightOccluder2D" type="LightOccluder2D" parent="EnvironmentObjects/MilitaryTruck1"]
+[node name="LightOccluder2D" type="LightOccluder2D" parent="EnvironmentObjects/MilitaryTruck1" unique_id=984252693]
 occluder = SubResource("OccluderPolygon2D_truck")
 
-[node name="MilitaryTruck2" type="StaticBody2D" parent="EnvironmentObjects" groups=["obstacles"]]
+[node name="MilitaryTruck2" type="StaticBody2D" parent="EnvironmentObjects" unique_id=349584165 groups=["obstacles"]]
 position = Vector2(380, 220)
 rotation = -0.32
 collision_layer = 4
 collision_mask = 7
 
-[node name="Sprite2D" type="Sprite2D" parent="EnvironmentObjects/MilitaryTruck2"]
+[node name="Sprite2D" type="Sprite2D" parent="EnvironmentObjects/MilitaryTruck2" unique_id=796765353]
 position = Vector2(0, -15)
 texture = SubResource("CanvasTexture_truck")
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="EnvironmentObjects/MilitaryTruck2"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="EnvironmentObjects/MilitaryTruck2" unique_id=549267991]
 position = Vector2(0, 10)
 shape = SubResource("RectangleShape2D_truck")
 
-[node name="LightOccluder2D" type="LightOccluder2D" parent="EnvironmentObjects/MilitaryTruck2"]
+[node name="LightOccluder2D" type="LightOccluder2D" parent="EnvironmentObjects/MilitaryTruck2" unique_id=990480782]
 occluder = SubResource("OccluderPolygon2D_truck")
 
-[node name="ConcreteWall1" type="StaticBody2D" parent="EnvironmentObjects" groups=["obstacles"]]
+[node name="ConcreteWall1" type="StaticBody2D" parent="EnvironmentObjects" unique_id=260725738 groups=["obstacles"]]
 position = Vector2(280, -220)
 collision_layer = 4
 collision_mask = 7
 
-[node name="Sprite2D" type="Sprite2D" parent="EnvironmentObjects/ConcreteWall1"]
+[node name="Sprite2D" type="Sprite2D" parent="EnvironmentObjects/ConcreteWall1" unique_id=688966454]
 position = Vector2(0, -20)
 texture = SubResource("CanvasTexture_wall_h")
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="EnvironmentObjects/ConcreteWall1"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="EnvironmentObjects/ConcreteWall1" unique_id=1142015520]
 position = Vector2(0, 10)
 shape = SubResource("RectangleShape2D_wall_h")
 
-[node name="LightOccluder2D" type="LightOccluder2D" parent="EnvironmentObjects/ConcreteWall1"]
+[node name="LightOccluder2D" type="LightOccluder2D" parent="EnvironmentObjects/ConcreteWall1" unique_id=294192304]
 occluder = SubResource("OccluderPolygon2D_wall_h")
 
-[node name="ConcreteWall2" type="StaticBody2D" parent="EnvironmentObjects" groups=["obstacles"]]
+[node name="ConcreteWall2" type="StaticBody2D" parent="EnvironmentObjects" unique_id=1147210622 groups=["obstacles"]]
 position = Vector2(400, -90)
 collision_layer = 4
 collision_mask = 7
 
-[node name="Sprite2D" type="Sprite2D" parent="EnvironmentObjects/ConcreteWall2"]
+[node name="Sprite2D" type="Sprite2D" parent="EnvironmentObjects/ConcreteWall2" unique_id=1684542844]
 position = Vector2(0, -10)
 texture = SubResource("CanvasTexture_wall_v")
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="EnvironmentObjects/ConcreteWall2"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="EnvironmentObjects/ConcreteWall2" unique_id=513659774]
 shape = SubResource("RectangleShape2D_wall_v")
 
-[node name="LightOccluder2D" type="LightOccluder2D" parent="EnvironmentObjects/ConcreteWall2"]
+[node name="LightOccluder2D" type="LightOccluder2D" parent="EnvironmentObjects/ConcreteWall2" unique_id=1236702570]
 occluder = SubResource("OccluderPolygon2D_wall_v")
 
-[node name="ChainlinkFence1" type="StaticBody2D" parent="EnvironmentObjects" groups=["obstacles"]]
+[node name="ChainlinkFence1" type="StaticBody2D" parent="EnvironmentObjects" unique_id=517219644 groups=["obstacles"]]
 position = Vector2(-130, 360)
 collision_layer = 4
 collision_mask = 7
 
-[node name="Sprite2D" type="Sprite2D" parent="EnvironmentObjects/ChainlinkFence1"]
+[node name="Sprite2D" type="Sprite2D" parent="EnvironmentObjects/ChainlinkFence1" unique_id=1411714027]
 position = Vector2(0, -18)
 texture = ExtResource("18_fence_h")
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="EnvironmentObjects/ChainlinkFence1"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="EnvironmentObjects/ChainlinkFence1" unique_id=1496339744]
 position = Vector2(0, 8)
 shape = SubResource("RectangleShape2D_fence_h")
 
-[node name="LightOccluder2D" type="LightOccluder2D" parent="EnvironmentObjects/ChainlinkFence1"]
+[node name="LightOccluder2D" type="LightOccluder2D" parent="EnvironmentObjects/ChainlinkFence1" unique_id=732369319]
 occluder = SubResource("OccluderPolygon2D_fence_h")
 
-[node name="ChainlinkFence2" type="StaticBody2D" parent="EnvironmentObjects" groups=["obstacles"]]
+[node name="ChainlinkFence2" type="StaticBody2D" parent="EnvironmentObjects" unique_id=742357220 groups=["obstacles"]]
 position = Vector2(120, 360)
 collision_layer = 4
 collision_mask = 7
 
-[node name="Sprite2D" type="Sprite2D" parent="EnvironmentObjects/ChainlinkFence2"]
+[node name="Sprite2D" type="Sprite2D" parent="EnvironmentObjects/ChainlinkFence2" unique_id=1056553971]
 position = Vector2(0, -18)
 texture = ExtResource("18_fence_h")
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="EnvironmentObjects/ChainlinkFence2"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="EnvironmentObjects/ChainlinkFence2" unique_id=1767047984]
 position = Vector2(0, 8)
 shape = SubResource("RectangleShape2D_fence_h")
 
-[node name="LightOccluder2D" type="LightOccluder2D" parent="EnvironmentObjects/ChainlinkFence2"]
+[node name="LightOccluder2D" type="LightOccluder2D" parent="EnvironmentObjects/ChainlinkFence2" unique_id=367104563]
 occluder = SubResource("OccluderPolygon2D_fence_h")
 
-[node name="DestructibleProps" type="Node2D" parent="."]
+[node name="DestructibleProps" type="Node2D" parent="." unique_id=1757058607]
 y_sort_enabled = true
 
-[node name="Crate1" parent="DestructibleProps" instance=ExtResource("6_crate")]
+[node name="Crate1" parent="DestructibleProps" unique_id=1756411847 instance=ExtResource("6_crate")]
 position = Vector2(-120, -80)
 
-[node name="Crate2" parent="DestructibleProps" instance=ExtResource("6_crate")]
+[node name="Crate2" parent="DestructibleProps" unique_id=916836525 instance=ExtResource("6_crate")]
 position = Vector2(-160, -80)
 
-[node name="Crate3" parent="DestructibleProps" instance=ExtResource("6_crate")]
+[node name="Crate3" parent="DestructibleProps" unique_id=412205973 instance=ExtResource("6_crate")]
 position = Vector2(-140, -120)
 
-[node name="Crate4" parent="DestructibleProps" instance=ExtResource("6_crate")]
+[node name="Crate4" parent="DestructibleProps" unique_id=1246320298 instance=ExtResource("6_crate")]
 position = Vector2(240, 160)
 
-[node name="Crate5" parent="DestructibleProps" instance=ExtResource("6_crate")]
+[node name="Crate5" parent="DestructibleProps" unique_id=104991123 instance=ExtResource("6_crate")]
 position = Vector2(280, 160)
 
-[node name="Crate6" parent="DestructibleProps" instance=ExtResource("6_crate")]
+[node name="Crate6" parent="DestructibleProps" unique_id=1264375206 instance=ExtResource("6_crate")]
 position = Vector2(-360, -160)
 
-[node name="Crate7" parent="DestructibleProps" instance=ExtResource("6_crate")]
+[node name="Crate7" parent="DestructibleProps" unique_id=1486575985 instance=ExtResource("6_crate")]
 position = Vector2(-400, -160)
 
-[node name="Crate8" parent="DestructibleProps" instance=ExtResource("6_crate")]
+[node name="Crate8" parent="DestructibleProps" unique_id=815430305 instance=ExtResource("6_crate")]
 position = Vector2(440, -320)
 
-[node name="TrashBag1" parent="DestructibleProps" instance=ExtResource("7_trash")]
+[node name="TrashBag1" parent="DestructibleProps" unique_id=2041571263 instance=ExtResource("7_trash")]
 position = Vector2(-190, 80)
 
-[node name="TrashBag2" parent="DestructibleProps" instance=ExtResource("7_trash")]
+[node name="TrashBag2" parent="DestructibleProps" unique_id=1633840617 instance=ExtResource("7_trash")]
 position = Vector2(-220, 95)
 
-[node name="TrashBag3" parent="DestructibleProps" instance=ExtResource("7_trash")]
+[node name="TrashBag3" parent="DestructibleProps" unique_id=1449166591 instance=ExtResource("7_trash")]
 position = Vector2(180, -140)
 
-[node name="TrashBag4" parent="DestructibleProps" instance=ExtResource("7_trash")]
+[node name="TrashBag4" parent="DestructibleProps" unique_id=1355741190 instance=ExtResource("7_trash")]
 position = Vector2(210, -125)
 
-[node name="TrashBag5" parent="DestructibleProps" instance=ExtResource("7_trash")]
+[node name="TrashBag5" parent="DestructibleProps" unique_id=153859106 instance=ExtResource("7_trash")]
 position = Vector2(-280, 340)
 
-[node name="OilBarrel1" parent="DestructibleProps" instance=ExtResource("8_barrel")]
-position = Vector2(-138, 140)
-
-[node name="OilBarrel1b" parent="DestructibleProps" instance=ExtResource("8_barrel")]
+[node name="OilBarrel1b" parent="DestructibleProps" unique_id=1279577857 instance=ExtResource("8_barrel")]
 position = Vector2(-78, 150)
 
-[node name="OilBarrel1c" parent="DestructibleProps" instance=ExtResource("8_barrel")]
+[node name="OilBarrel1c" parent="DestructibleProps" unique_id=796395754 instance=ExtResource("8_barrel")]
 position = Vector2(-20, 155)
 
-[node name="OilBarrel2" parent="DestructibleProps" instance=ExtResource("8_barrel")]
+[node name="OilBarrel2" parent="DestructibleProps" unique_id=864158607 instance=ExtResource("8_barrel")]
 position = Vector2(310, 160)
 
-[node name="OilBarrel2b" parent="DestructibleProps" instance=ExtResource("8_barrel")]
+[node name="OilBarrel2b" parent="DestructibleProps" unique_id=1918911741 instance=ExtResource("8_barrel")]
 position = Vector2(365, 175)
 
-[node name="OilBarrel3" parent="DestructibleProps" instance=ExtResource("8_barrel")]
+[node name="OilBarrel3" parent="DestructibleProps" unique_id=1054026253 instance=ExtResource("8_barrel")]
 position = Vector2(280, -280)
 
-[node name="OilBarrel4" parent="DestructibleProps" instance=ExtResource("8_barrel")]
+[node name="OilBarrel4" parent="DestructibleProps" unique_id=594884042 instance=ExtResource("8_barrel")]
 position = Vector2(-450, -160)
 
-[node name="PowerTransformer1" parent="DestructibleProps" instance=ExtResource("30_transformer")]
+[node name="PowerTransformer1" parent="DestructibleProps" unique_id=1924281948 instance=ExtResource("30_transformer")]
 position = Vector2(240, -145)
 
-[node name="PowerTransformer2" parent="DestructibleProps" instance=ExtResource("30_transformer")]
+[node name="PowerTransformer2" parent="DestructibleProps" unique_id=1779403186 instance=ExtResource("30_transformer")]
 position = Vector2(-180, -170)
 
-[node name="Player" parent="." instance=ExtResource("3_player")]
-position = Vector2(0, 0)
+[node name="Player" parent="." unique_id=314166586 instance=ExtResource("3_player")]
 
-[node name="CameraController" parent="." instance=ExtResource("31_camera")]
+[node name="CameraController" parent="." unique_id=768483160 instance=ExtResource("31_camera")]
 
-[node name="ZombieSpawner" type="Node2D" parent="."]
+[node name="ZombieSpawner" type="Node2D" parent="." unique_id=397439650]
 script = ExtResource("4_spawner")
 
-[node name="HordeDirector" type="Node2D" parent="." groups=["horde_director"]]
+[node name="HordeDirector" type="Node2D" parent="." unique_id=1491188876 groups=["horde_director"]]
 script = ExtResource("33_horde_dir")
 
-[node name="HUD" parent="." instance=ExtResource("5_hud")]
+[node name="HUD" parent="." unique_id=1999334780 instance=ExtResource("5_hud")]
 
-[node name="Lighting" type="Node2D" parent="."]
+[node name="Lighting" type="Node2D" parent="." unique_id=66369192]
 
-[node name="GlobalSunLight" type="DirectionalLight2D" parent="Lighting"]
+[node name="GlobalSunLight" type="DirectionalLight2D" parent="Lighting" unique_id=1664837567]
 color = Color(0.72, 0.76, 0.82, 1)
 energy = 0.32
 height = 90.0
 
-[node name="YardFloodlight1" type="PointLight2D" parent="Lighting"]
+[node name="YardFloodlight1" type="PointLight2D" parent="Lighting" unique_id=1731854588]
 position = Vector2(-280, 220)
 color = Color(0.72, 0.85, 1, 1)
 energy = 0.85
-height = 90.0
 shadow_enabled = true
+shadow_color = Color(0, 0, 0, 0.35)
 shadow_filter = 1
 shadow_filter_smooth = 2.0
-shadow_color = Color(0, 0, 0, 0.35)
 texture = ExtResource("19_pointlight")
 texture_scale = 2.4
+height = 90.0
 
-[node name="YardFloodlight2" type="PointLight2D" parent="Lighting"]
+[node name="YardFloodlight2" type="PointLight2D" parent="Lighting" unique_id=409856964]
 position = Vector2(280, -220)
 color = Color(1, 0.88, 0.72, 1)
 energy = 0.8
-height = 85.0
 shadow_enabled = true
+shadow_color = Color(0, 0, 0, 0.35)
 shadow_filter = 1
 shadow_filter_smooth = 2.0
-shadow_color = Color(0, 0, 0, 0.35)
 texture = ExtResource("19_pointlight")
 texture_scale = 2.0
+height = 85.0
 
-[node name="AtmosphereLayer" type="CanvasLayer" parent="."]
+[node name="AtmosphereLayer" type="CanvasLayer" parent="." unique_id=1071508904]
 layer = 2
 
-[node name="VolumetricFogRect" type="ColorRect" parent="AtmosphereLayer"]
+[node name="VolumetricFogRect" type="ColorRect" parent="AtmosphereLayer" unique_id=1910956391]
 material = SubResource("ShaderMaterial_fog")
 anchors_preset = 15
 anchor_right = 1.0
@@ -359,10 +367,10 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 
-[node name="PostProcessLayer" type="CanvasLayer" parent="."]
+[node name="PostProcessLayer" type="CanvasLayer" parent="." unique_id=1921596022]
 layer = 5
 
-[node name="PostProcessRect" type="ColorRect" parent="PostProcessLayer"]
+[node name="PostProcessRect" type="ColorRect" parent="PostProcessLayer" unique_id=1075079789]
 material = SubResource("ShaderMaterial_post")
 anchors_preset = 15
 anchor_right = 1.0

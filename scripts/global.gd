@@ -1,32 +1,59 @@
 extends Node
 
 # Global state and signals for KillEm
+@warning_ignore("unused_signal")
 signal health_changed(current: float, max_val: float)
+@warning_ignore("unused_signal")
 signal ammo_changed(weapon_name: String, current: int, max_val: int)
+@warning_ignore("unused_signal")
 signal score_changed(score: int, kills: int)
+@warning_ignore("unused_signal")
 signal wave_changed(wave: int)
+@warning_ignore("unused_signal")
 signal wave_cleared(wave_num: int, cooldown_duration: float)
+@warning_ignore("unused_signal")
 signal wave_countdown(seconds_left: int)
+@warning_ignore("unused_signal")
 signal wave_started(wave_num: int)
+@warning_ignore("unused_signal")
 signal player_died
+@warning_ignore("unused_signal")
 signal player_fired
+@warning_ignore("unused_signal")
 signal explosion_occurred
+@warning_ignore("unused_signal")
 signal keycard_collected(color: String)
+@warning_ignore("unused_signal")
 signal objective_completed(obj_id: String)
+@warning_ignore("unused_signal")
 signal perk_unlocked(perk_name: String, description: String)
+@warning_ignore("unused_signal")
 signal roll_cooldown_updated(current: float, max_val: float)
+@warning_ignore("unused_signal")
 signal deployables_updated(wires: int, mines: int, turrets: int)
+@warning_ignore("unused_signal")
 signal weapon_changed(new_weapon: WeaponType)
+@warning_ignore("unused_signal")
 signal active_deployable_changed(deployable_type: int)
+@warning_ignore("unused_signal")
 signal notification_displayed(title: String, subtitle: String, color: Color)
+@warning_ignore("unused_signal")
 signal boss_spawned(boss_node: Node2D)
+@warning_ignore("unused_signal")
 signal boss_defeated(boss_node: Node2D)
+@warning_ignore("unused_signal")
 signal camera_trauma_requested(amount: float)
+@warning_ignore("unused_signal")
 signal enemy_hit(enemy: Node2D, amount: float, is_crit: bool, is_fatal: bool, hit_dir: Vector2)
+@warning_ignore("unused_signal")
 signal deployable_warning_triggered(message: String)
+@warning_ignore("unused_signal")
 signal scrap_changed(current_scrap: int)
+@warning_ignore("unused_signal")
 signal military_alert_triggered(title: String, subtitle: String, color: Color)
+@warning_ignore("unused_signal")
 signal horde_event_started(event_name: String)
+@warning_ignore("unused_signal")
 signal horde_event_ended(event_name: String)
 
 # Core State
@@ -294,93 +321,64 @@ func play_sound(sound_name: String, pos = null) -> void:
 	# Generate quick synthesized sound wave
 	var sample_rate: int = 22050
 	var duration: float = 0.12
-	var freq: float = 440.0
 	
 	match sound_name:
 		"pistol":
 			duration = 0.09
-			freq = 280.0
 		"shotgun":
 			duration = 0.22
-			freq = 150.0
 		"rifle":
 			duration = 0.07
-			freq = 380.0
 		"flame":
 			duration = 0.14
-			freq = 85.0
 		"minigun_spin":
 			duration = 0.25
-			freq = 520.0
 		"minigun_fire":
 			duration = 0.05
-			freq = 175.0
 		"hit":
 			duration = 0.08
-			freq = 120.0
 		"pickup", "pickup_ammo", "pickup_health":
 			duration = 0.15
-			freq = 660.0
 		"scrap_pickup":
 			duration = 0.10
-			freq = 960.0
 		"keycard_chirp":
 			duration = 0.22
-			freq = 1400.0
 		"explode":
 			duration = 0.35
-			freq = 80.0
 		"mutant_step":
 			duration = 0.25
-			freq = 55.0
 		"mutant_roar":
 			duration = 0.75
-			freq = 75.0
 		"stomp_crash":
 			duration = 0.55
-			freq = 50.0
 		"zombie_groan":
 			duration = 0.30
-			freq = 110.0
 		"screamer":
 			duration = 0.45
-			freq = 880.0
 		"electric_zap":
 			duration = 0.20
-			freq = 950.0
 		"roll":
 			duration = 0.16
-			freq = 210.0
 		"perk":
 			duration = 0.42
-			freq = 784.0
 		"wave_clear":
 			duration = 0.36
-			freq = 587.33
 		"wave_start":
 			duration = 0.40
-			freq = 110.0
 		"boss_roar":
 			duration = 0.85
-			freq = 65.0
 		"boss_slam":
 			duration = 0.60
-			freq = 50.0
 		"boss_cleave":
 			duration = 0.28
-			freq = 240.0
 		"boss_alarm":
 			duration = 0.50
-			freq = 620.0
 		"rock_impact":
 			duration = 0.38
-			freq = 75.0
 		"gate_slam":
 			duration = 0.48
-			freq = 95.0
 		"radiation_tick":
 			duration = 0.10
-			freq = 1200.0
 	
 	var stream = AudioStreamWAV.new()
 	stream.format = AudioStreamWAV.FORMAT_8_BITS

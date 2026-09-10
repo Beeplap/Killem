@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3 uid="uid://barmorymenu001"]
+[gd_scene format=3 uid="uid://dudp2jad480xw"]
 
 [ext_resource type="Script" path="res://scripts/ui/armory_menu.gd" id="1_armory"]
 [ext_resource type="Texture2D" uid="uid://chagwm8wbo35m" path="res://assets/textures/ui/scrap_icon.png" id="2_scrap_icon"]

@@ -111,6 +111,12 @@ deploy_item={
 ]
 }
 
+[debug]
+
+gdscript/warnings/unused_signal=0
+gdscript/warnings/confusable_local_declaration=0
+gdscript/warnings/integer_division=0
+
 [rendering]
 
 textures/vram_compression/import_etc2_astc=true

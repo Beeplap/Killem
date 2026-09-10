@@ -1,6 +1,7 @@
 extends Node
 
 signal objective_updated(obj_id: String, text: String, current: int, target: int, is_done: bool)
+@warning_ignore("unused_signal")
 signal mission_completed(summary: Dictionary)
 signal level_started(level_idx: int, level_name: String)
 

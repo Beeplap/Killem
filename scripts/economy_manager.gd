@@ -179,7 +179,7 @@ func spawn_scrap(pos: Vector2, amount: int) -> void:
 	var drops_to_spawn = 1
 	var val_per_drop = amount
 	if amount >= 10:
-		drops_to_spawn = clampi(amount / 4, 2, 4)
+		drops_to_spawn = clampi(int(float(amount) / 4.0), 2, 4)
 		val_per_drop = int(ceil(float(amount) / float(drops_to_spawn)))
 	
 	for i in range(drops_to_spawn):
