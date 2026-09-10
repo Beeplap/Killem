@@ -1,0 +1,12 @@
+[gd_scene load_steps=2 format=3 uid="uid://pingmarker3d001"]
+
+[ext_resource type="Script" path="res://scripts/ui/ping_marker_3d.gd" id="1_marker3d"]
+
+[node name="PingMarker3D" type="Node3D"]
+script = ExtResource("1_marker3d")
+
+[node name="Label3D" type="Label3D" parent="."]
+billboard = 1
+text = "▼ MOVE HERE"
+font_size = 32
+outline_size = 6
