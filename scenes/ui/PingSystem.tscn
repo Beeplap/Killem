@@ -1,0 +1,7 @@
+[gd_scene load_steps=2 format=3 uid="uid://pingsystem2d001"]
+
+[ext_resource type="Script" path="res://scripts/ui/ping_system.gd" id="1_pingsys"]
+
+[node name="PingSystem" type="Node2D"]
+z_index = 35
+script = ExtResource("1_pingsys")
