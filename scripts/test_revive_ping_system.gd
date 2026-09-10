@@ -2,6 +2,9 @@ extends Node2D
 
 ## Automated Verification Suite: Downed State, Revive Zone & Tactical Ping System
 
+const PING_SYSTEM_SCRIPT = preload("res://scripts/ui/ping_system.gd")
+const PING_MARKER_SCRIPT = preload("res://scripts/ui/ping_marker.gd")
+
 func _ready() -> void:
 	print("--- BEGIN TEST: DOWNED STATE, REVIVE LOOP & TACTICAL PING SYSTEM ---")
 	
@@ -154,7 +157,7 @@ func _test_ping_system() -> void:
 	print("\n[TEST 5] Tactical Ping System (Move, Enemy, Supplies)...")
 	
 	var ping_sys_scene = preload("res://scenes/ui/PingSystem.tscn")
-	var ping_sys = ping_sys_scene.instantiate() as PingSystem
+	var ping_sys = ping_sys_scene.instantiate()
 	add_child(ping_sys)
 	
 	# 1. Test Default Move Ping
@@ -163,7 +166,7 @@ func _test_ping_system() -> void:
 	var markers = ping_sys.get_children()
 	assert(markers.size() >= 1, "PingSystem should spawn a PingMarker")
 	var m1 = markers[-1]
-	assert(m1.ping_type == PingMarker.PingType.MOVE, "Default ping must be PingType.MOVE")
+	assert(m1.ping_type == PING_MARKER_SCRIPT.PingType.MOVE, "Default ping must be PingType.MOVE")
 	assert(m1.lifetime == 6.0, "Ping lifetime must be 6.0s")
 	
 	# 2. Test Enemy Ping
@@ -175,7 +178,7 @@ func _test_ping_system() -> void:
 	ping_sys.trigger_ping(Vector2(405, 302)) # Close to enemy
 	markers = ping_sys.get_children()
 	var m2 = markers[-1]
-	assert(m2.ping_type == PingMarker.PingType.ENEMY, "Targeting an enemy must set PingType.ENEMY")
+	assert(m2.ping_type == PING_MARKER_SCRIPT.PingType.ENEMY, "Targeting an enemy must set PingType.ENEMY")
 	assert(m2.tracked_target == enemy_dummy, "Enemy ping should track the enemy node")
 	
 	# 3. Test Supplies Ping
@@ -187,7 +190,7 @@ func _test_ping_system() -> void:
 	ping_sys.trigger_ping(Vector2(-198, 148)) # Close to supply
 	markers = ping_sys.get_children()
 	var m3 = markers[-1]
-	assert(m3.ping_type == PingMarker.PingType.SUPPLIES, "Targeting supplies must set PingType.SUPPLIES")
+	assert(m3.ping_type == PING_MARKER_SCRIPT.PingType.SUPPLIES, "Targeting supplies must set PingType.SUPPLIES")
 	
 	# Clean up
 	enemy_dummy.queue_free()
