@@ -219,9 +219,11 @@ func take_player_damage(amount: float) -> void:
 		var players = get_tree().get_nodes_in_group("player")
 		var has_alive_teammate = false
 		for p in players:
-			if is_instance_valid(p) and not p.get("is_downed") and p.get("health", 100.0) > 0.0:
-				has_alive_teammate = true
-				break
+			if is_instance_valid(p) and not p.get("is_downed"):
+				var hp = p.get("current_health") if "current_health" in p else (p.get("health") if "health" in p else 100.0)
+				if hp == null or hp > 0.0:
+					has_alive_teammate = true
+					break
 		if not has_alive_teammate:
 			trigger_player_death()
 

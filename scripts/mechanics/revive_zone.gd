@@ -73,7 +73,8 @@ func _process(delta: float) -> void:
 	var candidates: Array[Node2D] = []
 	for body in get_overlapping_bodies():
 		if is_instance_valid(body) and body != parent_player and body.is_in_group("player"):
-			if not body.get("is_downed") and body.get("health", 100.0) > 0.0:
+			var b_hp = body.get("current_health") if "current_health" in body else (body.get("health") if "health" in body else 100.0)
+			if not body.get("is_downed") and (b_hp == null or b_hp > 0.0):
 				candidates.append(body)
 	
 	if candidates.is_empty():

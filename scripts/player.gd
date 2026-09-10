@@ -38,6 +38,16 @@ var stamina_regen_delay_timer: float = 0.0
 # Out-of-Combat Passive Health Regeneration
 var time_since_last_damage: float = 0.0
 
+# Health & Downed Revive State
+var health: float = 100.0
+var max_health: float = 100.0
+var is_downed: bool = false
+var bleed_out_timer: float = 30.0
+const BLEED_OUT_DURATION: float = 30.0
+
+signal player_took_damage(amount: float)
+signal player_downed_state_changed(downed: bool)
+
 # Deployable Mode [G] & Blueprint Placement
 var deployable_mode: bool = false
 var blueprint_rotation: float = 0.0
@@ -66,6 +76,10 @@ func _enter_tree() -> void:
 
 func _ready() -> void:
 	add_to_group("player")
+	
+	health = Global.player_health
+	max_health = Global.player_max_health
+	_setup_revive_zone()
 	
 	if name.is_valid_int():
 		set_multiplayer_authority(name.to_int())
@@ -109,6 +123,14 @@ func _ready() -> void:
 	
 	call_deferred("_find_dependencies")
 
+func _setup_revive_zone() -> void:
+	var revive_zone = get_node_or_null("ReviveZone")
+	if revive_zone == null:
+		var rz_scene = preload("res://scenes/mechanics/ReviveZone.tscn")
+		revive_zone = rz_scene.instantiate()
+		revive_zone.name = "ReviveZone"
+		add_child(revive_zone)
+
 func _setup_network_synchronizer() -> void:
 	var sync = get_node_or_null("MultiplayerSynchronizer")
 	if sync == null:
@@ -133,6 +155,8 @@ func _setup_network_synchronizer() -> void:
 	config.property_set_replication_mode(NodePath("WeaponMount:scale"), SceneReplicationConfig.REPLICATION_MODE_ALWAYS)
 	config.add_property(NodePath(".:is_rolling"))
 	config.property_set_replication_mode(NodePath(".:is_rolling"), SceneReplicationConfig.REPLICATION_MODE_ALWAYS)
+	config.add_property(NodePath(".:is_downed"))
+	config.property_set_replication_mode(NodePath(".:is_downed"), SceneReplicationConfig.REPLICATION_MODE_ALWAYS)
 	sync.replication_config = config
 
 func _setup_player_indicator() -> void:
@@ -155,6 +179,26 @@ func _setup_player_indicator() -> void:
 	else:
 		label.add_theme_color_override("font_color", Color(0.35, 0.75, 1.0, 0.85))
 	add_child(label)
+
+func _update_squad_tag() -> void:
+	var label = get_node_or_null("SquadTag") as Label
+	if not label:
+		return
+	var peer_id_num = name.to_int() if name.is_valid_int() else 1
+	var is_local = is_multiplayer_authority() if NetworkManager.is_network_active() else true
+	var name_prefix = "HOST" if peer_id_num == 1 else "P%d" % peer_id_num
+	if is_local:
+		name_prefix = "YOU (HOST)" if peer_id_num == 1 else "YOU (P%d)" % peer_id_num
+	
+	if is_downed:
+		label.text = "%s [DOWNED %ds]" % [name_prefix, int(ceil(bleed_out_timer))]
+		label.add_theme_color_override("font_color", Color(1.0, 0.25, 0.2, 1.0))
+	else:
+		label.text = name_prefix
+		if is_local:
+			label.add_theme_color_override("font_color", Color(0.3, 0.95, 0.55, 0.9))
+		else:
+			label.add_theme_color_override("font_color", Color(0.35, 0.75, 1.0, 0.85))
 
 func _find_dependencies() -> void:
 	bullet_pool = get_tree().get_first_node_in_group("bullet_pool")
@@ -182,6 +226,16 @@ func _unhandled_input(event: InputEvent) -> void:
 	if Global.is_game_over:
 		return
 	if NetworkManager.is_network_active() and not is_multiplayer_authority():
+		return
+	
+	if is_downed:
+		# Downed players are locked to the Pistol and cannot deploy items or roll
+		if event is InputEventKey and event.pressed:
+			if event.keycode == KEY_R:
+				if NetworkManager.is_network_active():
+					net_reload.rpc()
+				else:
+					_execute_reload()
 		return
 	
 	# Mouse Wheel: Blueprint Rotation (in deployable mode) OR Camera Zoom (in weapon mode)
@@ -280,6 +334,8 @@ func _execute_reload() -> void:
 	PlayerShooting.play_reload_sequence(get_tree(), global_position)
 
 func toggle_deployable_mode() -> void:
+	if is_downed:
+		return
 	deployable_mode = not deployable_mode
 	if placement_ghost:
 		placement_ghost.set_armed(deployable_mode)
@@ -294,11 +350,13 @@ const STEP_THRESHOLD_WALK: float = 42.0
 const STEP_THRESHOLD_DASH: float = 28.0
 
 func cycle_deployable() -> void:
+	if is_downed:
+		return
 	Global.set_active_deployable(Global.active_deployable_type + 1)
 	Global.play_sound("hit")
 
 func start_dodge_roll() -> void:
-	if is_rolling or stamina < DASH_STAMINA_COST or Global.is_game_over:
+	if is_rolling or is_downed or stamina < DASH_STAMINA_COST or Global.is_game_over:
 		return
 	
 	stamina -= DASH_STAMINA_COST
@@ -451,6 +509,14 @@ func _physics_process(delta: float) -> void:
 	
 	# Remote proxy handling in networked sessions
 	if NetworkManager.is_network_active() and not is_multiplayer_authority():
+		if is_downed:
+			if sprite:
+				sprite.modulate = Color(1.0, 0.45, 0.45, 0.85)
+				sprite.rotation = PI * 0.5
+		elif sprite and sprite.rotation != 0.0:
+			sprite.rotation = 0.0
+		_update_squad_tag()
+		
 		if is_rolling:
 			ghost_trail_timer -= delta
 			if ghost_trail_timer <= 0.0:
@@ -458,7 +524,7 @@ func _physics_process(delta: float) -> void:
 				spawn_ghost_trail()
 		if invulnerability_timer > 0.0:
 			invulnerability_timer -= delta
-			if invulnerability_timer <= 0.0 and sprite:
+			if invulnerability_timer <= 0.0 and sprite and not is_downed:
 				sprite.modulate = Color.WHITE
 		if muzzle_flash_timer > 0.0:
 			muzzle_flash_timer -= delta
@@ -467,18 +533,29 @@ func _physics_process(delta: float) -> void:
 		move_and_slide()
 		return
 	
+	# Downed State Processing
+	if is_downed:
+		bleed_out_timer -= delta
+		_update_squad_tag()
+		check_all_players_downed()
+		if bleed_out_timer <= 0.0:
+			die()
+			return
+	
 	# Stamina regeneration: 15.0/sec with 0.8s delay after expenditure
 	if stamina_regen_delay_timer > 0.0:
 		stamina_regen_delay_timer -= delta
-	elif stamina < MAX_STAMINA:
+	elif stamina < MAX_STAMINA and not is_downed:
 		stamina = min(MAX_STAMINA, stamina + STAMINA_REGEN_RATE * delta)
 		Global.roll_cooldown_updated.emit(stamina, MAX_STAMINA)
 	
 	# Out-of-Combat Passive Health Regeneration (3.0s after damage, 0.8% max HP/sec)
-	time_since_last_damage += delta
-	if time_since_last_damage >= 3.0 and Global.player_health < Global.player_max_health and not Global.is_game_over:
-		Global.player_health = min(Global.player_max_health, Global.player_health + Global.player_max_health * 0.008 * delta)
-		Global.health_changed.emit(Global.player_health, Global.player_max_health)
+	if not is_downed:
+		time_since_last_damage += delta
+		if time_since_last_damage >= 3.0 and Global.player_health < Global.player_max_health and not Global.is_game_over:
+			Global.player_health = min(Global.player_max_health, Global.player_health + Global.player_max_health * 0.008 * delta)
+			health = Global.player_health
+			Global.health_changed.emit(Global.player_health, Global.player_max_health)
 	
 	# Active Dodge Roll burst
 	if is_rolling:
@@ -514,7 +591,7 @@ func _physics_process(delta: float) -> void:
 	
 	if invulnerability_timer > 0.0:
 		invulnerability_timer -= delta
-		if invulnerability_timer <= 0.0 and sprite:
+		if invulnerability_timer <= 0.0 and sprite and not is_downed:
 			sprite.modulate = Color.WHITE
 	
 	if muzzle_flash_timer > 0.0:
@@ -532,8 +609,10 @@ func handle_movement(delta: float) -> void:
 		input_dir = input_dir.normalized()
 	
 	var effective_speed = move_speed
-	# -20% movement penalty while spooling or firing rotary minigun
-	if Global.current_weapon == Global.WeaponType.MINIGUN and minigun_spin_timer > 0.05:
+	# Downed crawl penalty (speed * 0.25)
+	if is_downed:
+		effective_speed = move_speed * 0.25
+	elif Global.current_weapon == Global.WeaponType.MINIGUN and minigun_spin_timer > 0.05:
 		effective_speed *= 0.80
 	
 	if input_dir != Vector2.ZERO:
@@ -852,9 +931,22 @@ func _execute_take_damage(amount: float, knockback_dir: Vector2 = Vector2.ZERO) 
 		return
 	
 	time_since_last_damage = 0.0
+	player_took_damage.emit(amount)
+	
+	if is_downed:
+		# Taking damage while downed accelerates bleed-out
+		bleed_out_timer = max(0.0, bleed_out_timer - amount * 0.15)
+		if sprite:
+			sprite.modulate = Color(1.0, 0.2, 0.2, 0.9)
+		if bleed_out_timer <= 0.0:
+			die()
+		return
+	
 	var is_local = is_multiplayer_authority() if NetworkManager.is_network_active() else true
+	health = max(0.0, health - amount)
 	if is_local:
-		Global.take_player_damage(amount)
+		Global.player_health = health
+		Global.health_changed.emit(health, max_health)
 		add_trauma(0.55)
 	
 	invulnerability_timer = 0.40
@@ -864,3 +956,151 @@ func _execute_take_damage(amount: float, knockback_dir: Vector2 = Vector2.ZERO) 
 	
 	if knockback_dir != Vector2.ZERO:
 		velocity = knockback_dir.normalized() * 320.0
+	
+	if health <= 0.0:
+		var alive_teammates = get_alive_teammates_count()
+		if alive_teammates > 0:
+			enter_downed_state()
+		else:
+			die()
+
+func get_alive_teammates_count() -> int:
+	var count = 0
+	var players = get_tree().get_nodes_in_group("player")
+	for p in players:
+		if p != self and is_instance_valid(p):
+			var p_hp = p.get("current_health") if "current_health" in p else (p.get("health") if "health" in p else 100.0)
+			if not p.get("is_downed") and (p_hp == null or p_hp > 0.0):
+				count += 1
+	return count
+
+func enter_downed_state() -> void:
+	if is_downed:
+		return
+	if NetworkManager.is_network_active():
+		net_set_downed.rpc(true)
+	else:
+		_execute_enter_downed()
+
+@rpc("any_peer", "call_local", "reliable")
+func net_set_downed(downed: bool) -> void:
+	if downed:
+		_execute_enter_downed()
+	else:
+		_execute_revive(0.35)
+
+func _execute_enter_downed() -> void:
+	if is_downed:
+		return
+	is_downed = true
+	bleed_out_timer = BLEED_OUT_DURATION
+	is_rolling = false
+	set_collision_mask_value(2, true)
+	
+	if deployable_mode:
+		deployable_mode = false
+		if placement_ghost:
+			placement_ghost.set_armed(false)
+	
+	var is_local = is_multiplayer_authority() if NetworkManager.is_network_active() else true
+	if is_local:
+		Global.set_weapon(Global.WeaponType.PISTOL)
+	
+	if sprite:
+		sprite.modulate = Color(1.0, 0.45, 0.45, 0.85)
+		sprite.rotation = PI * 0.5
+	
+	var revive_zone = get_node_or_null("ReviveZone")
+	if revive_zone and revive_zone.has_method("activate"):
+		revive_zone.activate()
+	
+	# Squad Down Warnings
+	Global.military_alert_triggered.emit(
+		"SQUAD MEMBER DOWN!",
+		"REVIVE TEAMMATE BEFORE BLEEDOUT (%ds)" % int(bleed_out_timer),
+		Color(1.0, 0.2, 0.15)
+	)
+	Global.show_notification("SQUAD MEMBER DOWN!", "Hold [E] near downed player to revive", Color(1.0, 0.25, 0.2))
+	Global.play_sound("klaxon")
+	
+	Global.player_downed.emit(self)
+	player_downed_state_changed.emit(true)
+	_update_squad_tag()
+	check_all_players_downed()
+
+func revive(health_ratio: float = 0.35) -> void:
+	if not is_downed:
+		return
+	if NetworkManager.is_network_active():
+		net_set_downed.rpc(false)
+	else:
+		_execute_revive(health_ratio)
+
+func _execute_revive(health_ratio: float = 0.35) -> void:
+	if not is_downed:
+		return
+	is_downed = false
+	bleed_out_timer = BLEED_OUT_DURATION
+	health = max_health * health_ratio
+	
+	var is_local = is_multiplayer_authority() if NetworkManager.is_network_active() else true
+	if is_local:
+		Global.player_health = health
+		Global.health_changed.emit(health, max_health)
+	
+	if sprite:
+		sprite.modulate = Color.WHITE
+		sprite.rotation = 0.0
+	
+	var revive_zone = get_node_or_null("ReviveZone")
+	if revive_zone and revive_zone.has_method("deactivate"):
+		revive_zone.deactivate()
+	
+	invulnerability_timer = 1.2
+	
+	var audio_mgr = get_node_or_null("/root/AudioManager")
+	if audio_mgr and audio_mgr.has_method("play_sound"):
+		audio_mgr.play_sound("perk")
+	else:
+		Global.play_sound("perk")
+	
+	Global.show_notification("TEAMMATE REVIVED", "Restored to 35% HP", Color(0.2, 0.95, 0.55))
+	Global.player_revived.emit(self)
+	player_downed_state_changed.emit(false)
+	_update_squad_tag()
+
+func die() -> void:
+	if Global.is_game_over:
+		return
+	is_downed = false
+	health = 0.0
+	var is_local = is_multiplayer_authority() if NetworkManager.is_network_active() else true
+	if is_local:
+		Global.player_health = 0.0
+		Global.trigger_player_death()
+	else:
+		var any_alive = false
+		for p in get_tree().get_nodes_in_group("player"):
+			if is_instance_valid(p) and not p.get("is_downed"):
+				var p_hp = p.get("current_health") if "current_health" in p else (p.get("health") if "health" in p else 100.0)
+				if p_hp == null or p_hp > 0.0:
+					any_alive = true
+					break
+		if not any_alive:
+			Global.trigger_player_death()
+
+func check_all_players_downed() -> void:
+	if Global.is_game_over:
+		return
+	var players = get_tree().get_nodes_in_group("player")
+	if players.is_empty():
+		return
+	var any_alive = false
+	for p in players:
+		if is_instance_valid(p) and not p.get("is_downed"):
+			var p_hp = p.get("current_health") if "current_health" in p else (p.get("health") if "health" in p else 100.0)
+			if p_hp == null or p_hp > 0.0:
+				any_alive = true
+				break
+	if not any_alive:
+		die()

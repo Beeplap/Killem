@@ -67,7 +67,7 @@ func net_spawn_ping(type_idx: int, pos: Vector2, target_path: NodePath) -> void:
 	_execute_spawn_ping(type_idx, pos, target)
 
 func _execute_spawn_ping(type_idx: int, pos: Vector2, target: Node2D = null) -> void:
-	var marker = PING_MARKER_SCENE.instantiate() as PingMarker
+	var marker = PING_MARKER_SCENE.instantiate() as Node2D
 	add_child(marker)
 	marker.setup_ping(type_idx, pos, target)
 	ping_created.emit(type_idx, pos, target)

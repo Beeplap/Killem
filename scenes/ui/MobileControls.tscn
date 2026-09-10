@@ -261,7 +261,7 @@ anchor_left = 1.0
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = -290.0
+offset_left = -360.0
 offset_top = -268.0
 offset_right = -30.0
 offset_bottom = -216.0
@@ -269,6 +269,15 @@ grow_horizontal = 0
 grow_vertical = 0
 theme_override_constants/separation = 8
 alignment = 2
+
+[node name="PingBtn" type="Button" parent="MobileCanvas/ActionButtons"]
+custom_minimum_size = Vector2(58, 50)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.98, 0.85, 0.15, 1)
+theme_override_font_sizes/font_size = 11
+theme_override_styles/normal = SubResource("StyleBoxFlat_action_btn_amber")
+text = "[PING]
+MARK"
 
 [node name="RollBtn" type="Button" parent="MobileCanvas/ActionButtons"]
 custom_minimum_size = Vector2(58, 50)

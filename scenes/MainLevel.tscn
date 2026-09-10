@@ -24,6 +24,7 @@
 [ext_resource type="PackedScene" path="res://scenes/CameraController.tscn" id="31_camera"]
 [ext_resource type="Script" uid="uid://bpip0w65xe16b" path="res://scripts/ui/damage_text_manager.gd" id="32_damagetext"]
 [ext_resource type="Script" uid="uid://cule5dxk888l0" path="res://scripts/horde_director.gd" id="33_horde_dir"]
+[ext_resource type="PackedScene" path="res://scenes/ui/PingSystem.tscn" id="34_pingsys"]
 
 [sub_resource type="CanvasTexture" id="CanvasTexture_bunker"]
 diffuse_texture = ExtResource("14_bunker")
@@ -335,6 +336,8 @@ script = ExtResource("4_spawner")
 script = ExtResource("33_horde_dir")
 
 [node name="HUD" parent="." unique_id=1999334780 instance=ExtResource("5_hud")]
+
+[node name="PingSystem" parent="." unique_id=208119283 instance=ExtResource("34_pingsys")]
 
 [node name="Lighting" type="Node2D" parent="." unique_id=66369192]
 

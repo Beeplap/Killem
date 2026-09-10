@@ -11,6 +11,7 @@ extends CanvasLayer
 @onready var right_base: Control = $MobileCanvas/RightZone/RightBase
 @onready var right_knob: Control = $MobileCanvas/RightZone/RightBase/Knob
 
+@onready var btn_ping: Button = get_node_or_null("MobileCanvas/ActionButtons/PingBtn")
 @onready var btn_roll: Button = $MobileCanvas/ActionButtons/RollBtn
 @onready var btn_deploy: Button = $MobileCanvas/ActionButtons/DeployBtn
 @onready var btn_cycle: Button = $MobileCanvas/ActionButtons/CycleBtn
@@ -46,7 +47,14 @@ func _update_visibility() -> void:
 			var is_touch = DisplayServer.is_touchscreen_available() or OS.has_feature("mobile")
 			visible = is_touch
 
+func _on_ping_pressed() -> void:
+	var ping_sys = get_tree().get_first_node_in_group("ping_system")
+	if ping_sys and ping_sys.has_method("trigger_ping"):
+		ping_sys.trigger_ping()
+
 func _connect_action_buttons() -> void:
+	if btn_ping:
+		btn_ping.pressed.connect(_on_ping_pressed)
 	if btn_roll:
 		btn_roll.pressed.connect(_on_roll_pressed)
 	if btn_deploy:

@@ -68,6 +68,12 @@ func _process(delta: float) -> void:
 	
 	queue_redraw()
 
+func _offset_points(pts: PackedVector2Array, offset: Vector2) -> PackedVector2Array:
+	var result = PackedVector2Array()
+	for p in pts:
+		result.append(p + offset)
+	return result
+
 func _draw() -> void:
 	var base_col: Color
 	var label_text: String
@@ -104,7 +110,7 @@ func _draw() -> void:
 				center + Vector2(-w, -h - 4.0 * current_scale)
 			])
 			# Drop shadow
-			draw_colored_polygon(Transform2D(0, Vector2(1, 2)).basis_xform(pts), shadow_col)
+			draw_colored_polygon(_offset_points(pts, Vector2(1.5, 2.0)), shadow_col)
 			draw_colored_polygon(pts, base_col)
 			
 			# Secondary smaller chevron
@@ -116,13 +122,14 @@ func _draw() -> void:
 				center + Vector2(0, 5.0 * current_scale),
 				center + Vector2(-w * 0.75, -h + 5.0 * current_scale)
 			])
+			draw_colored_polygon(_offset_points(pts2, Vector2(1.5, 2.0)), shadow_col)
 			draw_colored_polygon(pts2, base_col)
 			
 		PingType.ENEMY:
 			# Tactical Pulsing Reticle / Crosshair
 			var r = (14.0 + pulse * 2.0) * current_scale
 			# Shadow circle
-			draw_arc(center + Vector2(1, 2), r, 0, TAU, 32, shadow_col, 3.0 * current_scale)
+			draw_arc(center + Vector2(1.5, 2.0), r, 0, TAU, 32, shadow_col, 3.0 * current_scale)
 			# Outer ring
 			draw_arc(center, r, 0, TAU, 32, base_col, 2.5 * current_scale)
 			
@@ -146,7 +153,7 @@ func _draw() -> void:
 				center + Vector2(0, d_size),
 				center + Vector2(-d_size, 0)
 			])
-			draw_colored_polygon(Transform2D(0, Vector2(1, 2)).basis_xform(pts), shadow_col)
+			draw_colored_polygon(_offset_points(pts, Vector2(1.5, 2.0)), shadow_col)
 			draw_colored_polygon(pts, Color(base_col.r, base_col.g, base_col.b, 0.25 * alpha_mult))
 			draw_polyline(pts, base_col, 2.5 * current_scale, true)
 			# Inner supply dot
@@ -167,3 +174,4 @@ func _draw() -> void:
 			
 			# Text string
 			draw_string(font, text_pos + Vector2(0, text_size.y * 0.8), label_text, HORIZONTAL_ALIGNMENT_CENTER, -1, font_size, base_col)
+

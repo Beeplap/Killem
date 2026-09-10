@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=3 uid="uid://cplayerscene001"]
+[gd_scene load_steps=12 format=3 uid="uid://cplayerscene001"]
 
 [ext_resource type="Script" path="res://scripts/player.gd" id="1_player"]
 [ext_resource type="Texture2D" path="res://assets/textures/characters/soldier_8dir.png" id="2_soldier"]
@@ -8,6 +8,7 @@
 [ext_resource type="PackedScene" path="res://scenes/weapons/PlayerWeapons2D.tscn" id="6_weapons"]
 [ext_resource type="PackedScene" path="res://scenes/mechanics/PlacementGhost.tscn" id="7_ghost"]
 [ext_resource type="PackedScene" path="res://scenes/mechanics/InteractionDetector.tscn" id="8_interact"]
+[ext_resource type="PackedScene" path="res://scenes/mechanics/ReviveZone.tscn" id="9_revive"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_1"]
 radius = 12.0
@@ -35,6 +36,9 @@ properties/5/replication_mode = 1
 properties/6/path = NodePath(".:is_rolling")
 properties/6/spawn = true
 properties/6/replication_mode = 1
+properties/7/path = NodePath(".:is_downed")
+properties/7/spawn = true
+properties/7/replication_mode = 1
 
 [node name="Player" type="CharacterBody2D"]
 collision_layer = 1
@@ -88,6 +92,8 @@ texture_scale = 1.2
 [node name="PlacementGhost" parent="." instance=ExtResource("7_ghost")]
 
 [node name="InteractionDetector" parent="." instance=ExtResource("8_interact")]
+
+[node name="ReviveZone" parent="." instance=ExtResource("9_revive")]
 
 [node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
 root_path = NodePath("..")
