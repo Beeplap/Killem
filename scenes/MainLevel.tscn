@@ -312,7 +312,19 @@ position = Vector2(240, -145)
 [node name="PowerTransformer2" parent="DestructibleProps" unique_id=1779403186 instance=ExtResource("30_transformer")]
 position = Vector2(-180, -170)
 
-[node name="Player" parent="." unique_id=314166586 instance=ExtResource("3_player")]
+[node name="Players" type="Node2D" parent="." unique_id=184918231]
+y_sort_enabled = true
+
+[node name="PlayerSpawner" type="MultiplayerSpawner" parent="." unique_id=987123451]
+_spawnable_scenes = PackedStringArray("res://scenes/Player.tscn")
+spawn_path = NodePath("../Players")
+
+[node name="Enemies" type="Node2D" parent="." unique_id=184918232 groups=["enemies_container"]]
+y_sort_enabled = true
+
+[node name="EnemySpawner" type="MultiplayerSpawner" parent="." unique_id=987123452]
+_spawnable_scenes = PackedStringArray("res://scenes/Zombie.tscn", "res://scenes/InfectedDog.tscn", "res://scenes/HeavyZombie.tscn", "res://scenes/SpitterZombie.tscn", "res://scenes/ArmoredZombie.tscn", "res://scenes/ColossusZombie.tscn", "res://scenes/ScreamerZombie.tscn")
+spawn_path = NodePath("../Enemies")
 
 [node name="CameraController" parent="." unique_id=768483160 instance=ExtResource("31_camera")]
 

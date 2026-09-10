@@ -60,22 +60,44 @@ var bullet_pool: Node2D = null
 var casing_pool: Node2D = null
 var tactical_crosshair: Control = null
 
+func _enter_tree() -> void:
+	if name.is_valid_int():
+		set_multiplayer_authority(name.to_int())
+
 func _ready() -> void:
 	add_to_group("player")
-	Global.health_changed.emit(Global.player_health, Global.player_max_health)
-	Global.emit_current_ammo()
-	Global.deployables_updated.emit(Global.deployable_grenades, Global.deployable_barbwire, Global.deployable_turrets)
-	Global.roll_cooldown_updated.emit(stamina, MAX_STAMINA)
-	Global.active_deployable_changed.connect(func(type: int):
-		active_deployable_type = type
-	)
-	active_deployable_type = Global.active_deployable_type
+	
+	if name.is_valid_int():
+		set_multiplayer_authority(name.to_int())
+	
+	_setup_network_synchronizer()
+	_setup_player_indicator()
+	
+	var is_local = is_multiplayer_authority() if NetworkManager.is_network_active() else true
+	
+	if is_local:
+		Global.health_changed.emit(Global.player_health, Global.player_max_health)
+		Global.emit_current_ammo()
+		Global.deployables_updated.emit(Global.deployable_grenades, Global.deployable_barbwire, Global.deployable_turrets)
+		Global.roll_cooldown_updated.emit(stamina, MAX_STAMINA)
+		Global.active_deployable_changed.connect(func(type: int):
+			active_deployable_type = type
+		)
+		active_deployable_type = Global.active_deployable_type
+		
+		var cam_ctrl = get_tree().get_first_node_in_group("camera_controller")
+		if cam_ctrl and cam_ctrl.has_method("set_player_target"):
+			cam_ctrl.set_player_target(self)
+	else:
+		if placement_ghost:
+			placement_ghost.visible = false
+			placement_ghost.set_process(false)
 	
 	if placement_ghost:
 		placement_ghost.set_armed(false)
 	
 	var detector = get_node_or_null("InteractionDetector")
-	if detector == null:
+	if detector == null and is_local:
 		var detector_scene = preload("res://scenes/mechanics/InteractionDetector.tscn")
 		detector = detector_scene.instantiate()
 		add_child(detector)
@@ -86,6 +108,53 @@ func _ready() -> void:
 		muzzle_flash.enabled = false
 	
 	call_deferred("_find_dependencies")
+
+func _setup_network_synchronizer() -> void:
+	var sync = get_node_or_null("MultiplayerSynchronizer")
+	if sync == null:
+		sync = MultiplayerSynchronizer.new()
+		sync.name = "MultiplayerSynchronizer"
+		add_child(sync)
+	
+	sync.replication_interval = 0.033 # 30 Hz tick rate
+	sync.delta_interval = 0.033
+	var config = SceneReplicationConfig.new()
+	config.add_property(NodePath(".:position"))
+	config.property_set_replication_mode(NodePath(".:position"), SceneReplicationConfig.REPLICATION_MODE_ALWAYS)
+	config.add_property(NodePath(".:rotation"))
+	config.property_set_replication_mode(NodePath(".:rotation"), SceneReplicationConfig.REPLICATION_MODE_ALWAYS)
+	config.add_property(NodePath(".:velocity"))
+	config.property_set_replication_mode(NodePath(".:velocity"), SceneReplicationConfig.REPLICATION_MODE_ALWAYS)
+	config.add_property(NodePath("Sprite2D:frame"))
+	config.property_set_replication_mode(NodePath("Sprite2D:frame"), SceneReplicationConfig.REPLICATION_MODE_ALWAYS)
+	config.add_property(NodePath("WeaponMount:rotation"))
+	config.property_set_replication_mode(NodePath("WeaponMount:rotation"), SceneReplicationConfig.REPLICATION_MODE_ALWAYS)
+	config.add_property(NodePath("WeaponMount:scale"))
+	config.property_set_replication_mode(NodePath("WeaponMount:scale"), SceneReplicationConfig.REPLICATION_MODE_ALWAYS)
+	config.add_property(NodePath(".:is_rolling"))
+	config.property_set_replication_mode(NodePath(".:is_rolling"), SceneReplicationConfig.REPLICATION_MODE_ALWAYS)
+	sync.replication_config = config
+
+func _setup_player_indicator() -> void:
+	var label = Label.new()
+	label.name = "SquadTag"
+	var peer_id_num = name.to_int() if name.is_valid_int() else 1
+	var is_local = is_multiplayer_authority() if NetworkManager.is_network_active() else true
+	
+	if peer_id_num == 1:
+		label.text = "HOST" if not is_local else "YOU (HOST)"
+	else:
+		label.text = "P%d" % peer_id_num if not is_local else "YOU (P%d)" % peer_id_num
+	
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	label.position = Vector2(-40, -38)
+	label.custom_minimum_size = Vector2(80, 20)
+	label.add_theme_font_size_override("font_size", 10)
+	if is_local:
+		label.add_theme_color_override("font_color", Color(0.3, 0.95, 0.55, 0.9))
+	else:
+		label.add_theme_color_override("font_color", Color(0.35, 0.75, 1.0, 0.85))
+	add_child(label)
 
 func _find_dependencies() -> void:
 	bullet_pool = get_tree().get_first_node_in_group("bullet_pool")
@@ -111,6 +180,8 @@ func _find_dependencies() -> void:
 
 func _unhandled_input(event: InputEvent) -> void:
 	if Global.is_game_over:
+		return
+	if NetworkManager.is_network_active() and not is_multiplayer_authority():
 		return
 	
 	# Mouse Wheel: Blueprint Rotation (in deployable mode) OR Camera Zoom (in weapon mode)
@@ -172,7 +243,10 @@ func _unhandled_input(event: InputEvent) -> void:
 				Global.set_weapon(Global.WeaponType.MINIGUN)
 		
 		if event.keycode == KEY_R:
-			PlayerShooting.play_reload_sequence(get_tree(), global_position)
+			if NetworkManager.is_network_active():
+				net_reload.rpc()
+			else:
+				_execute_reload()
 		elif event.keycode == KEY_SPACE:
 			start_dodge_roll()
 		elif event.keycode == KEY_E:
@@ -197,6 +271,13 @@ func _unhandled_input(event: InputEvent) -> void:
 				deploy_current_item()
 		elif event.keycode == KEY_Q:
 			cycle_deployable()
+
+@rpc("any_peer", "call_local", "reliable")
+func net_reload() -> void:
+	_execute_reload()
+
+func _execute_reload() -> void:
+	PlayerShooting.play_reload_sequence(get_tree(), global_position)
 
 func toggle_deployable_mode() -> void:
 	deployable_mode = not deployable_mode
@@ -231,11 +312,19 @@ func start_dodge_roll() -> void:
 		if Input.is_key_pressed(KEY_W) or Input.is_key_pressed(KEY_UP): input_dir.y -= 1.0
 		if Input.is_key_pressed(KEY_S) or Input.is_key_pressed(KEY_DOWN): input_dir.y += 1.0
 	
-	if input_dir != Vector2.ZERO:
-		roll_dir = input_dir.normalized()
-	else:
-		roll_dir = (get_global_mouse_position() - global_position).normalized()
+	var chosen_dir: Vector2 = input_dir.normalized() if input_dir != Vector2.ZERO else (get_global_mouse_position() - global_position).normalized()
 	
+	if NetworkManager.is_network_active():
+		net_start_dodge_roll.rpc(chosen_dir)
+	else:
+		_execute_dodge_roll(chosen_dir)
+
+@rpc("any_peer", "call_local", "reliable")
+func net_start_dodge_roll(dir: Vector2) -> void:
+	_execute_dodge_roll(dir)
+
+func _execute_dodge_roll(dir: Vector2) -> void:
+	roll_dir = dir
 	is_rolling = true
 	roll_timer = ROLL_DURATION
 	invulnerability_timer = max(invulnerability_timer, ROLL_DURATION + 0.05) # Full i-frames
@@ -289,60 +378,92 @@ func deploy_current_item() -> void:
 	
 	var place_rot = placement_ghost.blueprint_rotation if placement_ghost else to_mouse.angle()
 	
+	# Spend local supplies
 	match active_deployable_type:
 		0:
-			# Slot 1: Frag Grenade Throwable
-			if Global.deployable_grenades > 0:
-				Global.deployable_grenades -= 1
-				var grenade_scene = preload("res://scenes/weapons/Grenade.tscn")
-				var g = grenade_scene.instantiate()
-				level.add_child(g)
-				g.launch(global_position, target_deploy_pos)
-				Global.play_sound("hit")
-				Global.deployables_updated.emit(Global.deployable_grenades, Global.deployable_barbwire, Global.deployable_turrets)
-			else:
+			if Global.deployable_grenades <= 0:
 				Global.show_notification("OUT OF GRENADES", "Replenish via tactical supply drop", Color(0.95, 0.3, 0.2))
 				Global.play_sound("empty_click")
+				return
+			Global.deployable_grenades -= 1
 		1:
-			# Slot 2: Barbwire Deployable
-			if Global.deployable_barbwire > 0:
-				Global.deployable_barbwire -= 1
-				var wire_scene = preload("res://scenes/deployables/Barbwire.tscn")
-				var wire = wire_scene.instantiate()
-				wire.global_position = target_deploy_pos
-				wire.rotation = place_rot
-				level.add_child(wire)
-				Global.play_sound("hit")
-				Global.deployables_updated.emit(Global.deployable_grenades, Global.deployable_barbwire, Global.deployable_turrets)
-			else:
+			if Global.deployable_barbwire <= 0:
 				Global.show_notification("OUT OF BARBWIRE", "Replenish via tactical supply drop", Color(0.95, 0.3, 0.2))
 				Global.play_sound("empty_click")
+				return
+			Global.deployable_barbwire -= 1
 		2:
-			# Slot 3: Sentry Turret Deployable (Enforce 5 active turrets cap)
 			var active_turrets = get_tree().get_nodes_in_group("turrets")
 			if active_turrets.size() >= 5:
 				Global.show_notification("TURRET LIMIT REACHED (5/5)", "Maximum map deployment capacity reached", Color(1.0, 0.3, 0.2))
 				Global.deployable_warning_triggered.emit("TURRET LIMIT REACHED (5/5)")
 				Global.play_sound("empty_click")
 				return
-			
-			if Global.deployable_turrets > 0:
-				Global.deployable_turrets -= 1
-				var turret_scene = preload("res://scenes/deployables/Turret.tscn")
-				var turret = turret_scene.instantiate()
-				turret.global_position = target_deploy_pos
-				if turret.has_method("setup_placement"):
-					turret.setup_placement(place_rot)
-				level.add_child(turret)
-				Global.play_sound("hit")
-				Global.deployables_updated.emit(Global.deployable_grenades, Global.deployable_barbwire, Global.deployable_turrets)
-			else:
+			if Global.deployable_turrets <= 0:
 				Global.show_notification("OUT OF TURRETS", "Replenish via tactical supply drop", Color(0.95, 0.3, 0.2))
 				Global.play_sound("empty_click")
+				return
+			Global.deployable_turrets -= 1
+	
+	Global.deployables_updated.emit(Global.deployable_grenades, Global.deployable_barbwire, Global.deployable_turrets)
+	
+	if NetworkManager.is_network_active():
+		net_deploy_item.rpc(active_deployable_type, target_deploy_pos, place_rot)
+	else:
+		_execute_deploy_item(active_deployable_type, target_deploy_pos, place_rot)
+
+@rpc("any_peer", "call_local", "reliable")
+func net_deploy_item(item_type: int, target_pos: Vector2, place_rot: float) -> void:
+	_execute_deploy_item(item_type, target_pos, place_rot)
+
+func _execute_deploy_item(item_type: int, target_pos: Vector2, place_rot: float) -> void:
+	var level = get_tree().current_scene
+	if not level:
+		return
+	match item_type:
+		0:
+			var grenade_scene = preload("res://scenes/weapons/Grenade.tscn")
+			var g = grenade_scene.instantiate()
+			level.add_child(g)
+			g.launch(global_position, target_pos)
+			Global.play_sound("hit")
+		1:
+			var wire_scene = preload("res://scenes/deployables/Barbwire.tscn")
+			var wire = wire_scene.instantiate()
+			wire.global_position = target_pos
+			wire.rotation = place_rot
+			level.add_child(wire)
+			Global.play_sound("hit")
+		2:
+			var turret_scene = preload("res://scenes/deployables/Turret.tscn")
+			var turret = turret_scene.instantiate()
+			turret.global_position = target_pos
+			if turret.has_method("setup_placement"):
+				turret.setup_placement(place_rot)
+			level.add_child(turret)
+			Global.play_sound("hit")
 
 func _physics_process(delta: float) -> void:
 	if Global.is_game_over:
 		velocity = velocity.move_toward(Vector2.ZERO, friction * delta)
+		move_and_slide()
+		return
+	
+	# Remote proxy handling in networked sessions
+	if NetworkManager.is_network_active() and not is_multiplayer_authority():
+		if is_rolling:
+			ghost_trail_timer -= delta
+			if ghost_trail_timer <= 0.0:
+				ghost_trail_timer = 0.045
+				spawn_ghost_trail()
+		if invulnerability_timer > 0.0:
+			invulnerability_timer -= delta
+			if invulnerability_timer <= 0.0 and sprite:
+				sprite.modulate = Color.WHITE
+		if muzzle_flash_timer > 0.0:
+			muzzle_flash_timer -= delta
+			if muzzle_flash_timer <= 0.0 and muzzle_flash:
+				muzzle_flash.enabled = false
 		move_and_slide()
 		return
 	
@@ -539,10 +660,26 @@ func fire_weapon() -> void:
 	var custom_muzzle = weapon_mount.get_muzzle_marker() if weapon_mount else null
 	var spawn_pos: Vector2 = custom_muzzle.global_position if custom_muzzle else global_position + base_dir * 32.0 + Vector2(0, -4)
 	
+	# Consume ammo locally on firing peer
+	Global.consume_ammo(Global.current_weapon)
+	
+	if NetworkManager.is_network_active():
+		net_fire_weapon.rpc(Global.current_weapon, spawn_pos, base_dir)
+	else:
+		_execute_fire_weapon(Global.current_weapon, spawn_pos, base_dir)
+
+@rpc("any_peer", "call_local", "reliable")
+func net_fire_weapon(w_type: int, spawn_pos: Vector2, shoot_dir: Vector2) -> void:
+	_execute_fire_weapon(w_type, spawn_pos, shoot_dir)
+
+func _execute_fire_weapon(w_type: int, spawn_pos: Vector2, shoot_dir: Vector2) -> void:
+	if bullet_pool == null:
+		_find_dependencies()
+	
 	# Apply visual procedural recoil kick
 	if weapon_mount:
 		var kick_amount = 3.5
-		match Global.current_weapon:
+		match w_type:
 			Global.WeaponType.PISTOL: kick_amount = 3.0
 			Global.WeaponType.SHOTGUN: kick_amount = 6.0
 			Global.WeaponType.ASSAULT_RIFLE: kick_amount = 3.2
@@ -551,16 +688,18 @@ func fire_weapon() -> void:
 		weapon_mount.apply_recoil_kick(kick_amount)
 	
 	# Eject brass casing (except flamethrower)
-	if Global.current_weapon != Global.WeaponType.FLAMETHROWER and casing_pool:
+	if w_type != Global.WeaponType.FLAMETHROWER and casing_pool:
 		var custom_eject = weapon_mount.get_ejection_marker() if weapon_mount else null
-		var eject_pos = custom_eject.global_position if custom_eject else global_position + base_dir * 14.0 + Vector2(0, -2)
-		casing_pool.spawn_casing(eject_pos, base_dir)
+		var eject_pos = custom_eject.global_position if custom_eject else global_position + shoot_dir * 14.0 + Vector2(0, -2)
+		casing_pool.spawn_casing(eject_pos, shoot_dir)
 	
-	if muzzle_flash and Global.current_weapon != Global.WeaponType.FLAMETHROWER:
+	if muzzle_flash and w_type != Global.WeaponType.FLAMETHROWER:
 		muzzle_flash.enabled = true
 		muzzle_flash_timer = 0.04
 	
-	Global.player_fired.emit()
+	var is_local = is_multiplayer_authority() if NetworkManager.is_network_active() else true
+	if is_local:
+		Global.player_fired.emit()
 	
 	var laser = muzzle.get_node_or_null("LaserSight") if muzzle else null
 	if laser and laser.has_method("add_recoil_scatter"):
@@ -569,61 +708,60 @@ func fire_weapon() -> void:
 	var dmg_mult: float = Global.get_damage_multiplier()
 	var spd_mult: float = Global.get_bullet_speed_multiplier()
 	
-	match Global.current_weapon:
+	match w_type:
 		Global.WeaponType.PISTOL:
-			Global.consume_ammo(Global.WeaponType.PISTOL)
 			if bullet_pool:
-				bullet_pool.spawn_bullet(spawn_pos, base_dir, 38.0 * dmg_mult, 950.0 * spd_mult, 1.8)
-			fire_cooldown = 0.12 if Global.perk_full_auto else 0.20
-			add_trauma(0.14)
-			if tactical_crosshair:
-				tactical_crosshair.add_bloom(6.5)
+				bullet_pool.spawn_bullet(spawn_pos, shoot_dir, 38.0 * dmg_mult, 950.0 * spd_mult, 1.8)
+			if is_local:
+				fire_cooldown = 0.12 if Global.perk_full_auto else 0.20
+				add_trauma(0.14)
+				if tactical_crosshair:
+					tactical_crosshair.add_bloom(6.5)
 			PlayerShooting.play_weapon_fire_audio("pistol", global_position)
 		
 		Global.WeaponType.SHOTGUN:
-			Global.consume_ammo(Global.WeaponType.SHOTGUN)
 			var pellet_count: int = 6
 			var spread_angle: float = 0.28
 			for i in range(pellet_count):
 				var angle_offset: float = randf_range(-spread_angle * 0.5, spread_angle * 0.5)
-				var pellet_dir: Vector2 = base_dir.rotated(angle_offset)
+				var pellet_dir: Vector2 = shoot_dir.rotated(angle_offset)
 				if bullet_pool:
 					bullet_pool.spawn_bullet(spawn_pos, pellet_dir, 24.0 * dmg_mult, 800.0 * spd_mult, 0.75)
-			fire_cooldown = 0.70
-			add_trauma(0.44)
-			if tactical_crosshair:
-				tactical_crosshair.add_bloom(19.0)
+			if is_local:
+				fire_cooldown = 0.70
+				add_trauma(0.44)
+				if tactical_crosshair:
+					tactical_crosshair.add_bloom(19.0)
 			PlayerShooting.play_weapon_fire_audio("shotgun", global_position)
 		
 		Global.WeaponType.ASSAULT_RIFLE:
-			Global.consume_ammo(Global.WeaponType.ASSAULT_RIFLE)
 			var spread: float = randf_range(-0.06, 0.06)
 			if bullet_pool:
-				bullet_pool.spawn_bullet(spawn_pos, base_dir.rotated(spread), 32.0 * dmg_mult, 1050.0 * spd_mult, 1.8)
-			fire_cooldown = 0.095
-			# Screen shake removed completely for Assault Rifle / AK
-			if tactical_crosshair:
-				tactical_crosshair.add_bloom(9.5)
+				bullet_pool.spawn_bullet(spawn_pos, shoot_dir.rotated(spread), 32.0 * dmg_mult, 1050.0 * spd_mult, 1.8)
+			if is_local:
+				fire_cooldown = 0.095
+				if tactical_crosshair:
+					tactical_crosshair.add_bloom(9.5)
 			PlayerShooting.play_weapon_fire_audio("rifle", global_position)
 		
 		Global.WeaponType.FLAMETHROWER:
-			Global.consume_ammo(Global.WeaponType.FLAMETHROWER)
-			process_flame_cone(base_dir, spawn_pos)
-			fire_cooldown = 0.08
-			add_trauma(0.06)
-			if tactical_crosshair:
-				tactical_crosshair.add_bloom(12.0)
+			process_flame_cone(shoot_dir, spawn_pos)
+			if is_local:
+				fire_cooldown = 0.08
+				add_trauma(0.06)
+				if tactical_crosshair:
+					tactical_crosshair.add_bloom(12.0)
 			PlayerShooting.play_weapon_fire_audio("flame", global_position)
 		
 		Global.WeaponType.MINIGUN:
-			Global.consume_ammo(Global.WeaponType.MINIGUN)
 			var spread: float = randf_range(-0.11, 0.11)
 			if bullet_pool:
-				bullet_pool.spawn_bullet(spawn_pos, base_dir.rotated(spread), 28.0 * dmg_mult, 1150.0 * spd_mult, 1.6)
-			fire_cooldown = 0.05 # 20 rounds / sec
-			add_trauma(0.12)
-			if tactical_crosshair:
-				tactical_crosshair.add_bloom(14.0)
+				bullet_pool.spawn_bullet(spawn_pos, shoot_dir.rotated(spread), 28.0 * dmg_mult, 1150.0 * spd_mult, 1.6)
+			if is_local:
+				fire_cooldown = 0.05 # 20 rounds / sec
+				add_trauma(0.12)
+				if tactical_crosshair:
+					tactical_crosshair.add_bloom(14.0)
 			PlayerShooting.play_weapon_fire_audio("minigun_fire", global_position)
 
 func process_flame_cone(base_dir: Vector2, spawn_pos: Vector2) -> void:
@@ -700,15 +838,28 @@ func handle_camera_and_shake(delta: float) -> void:
 			camera.rotation = 0.0
 
 func take_damage(amount: float, knockback_dir: Vector2 = Vector2.ZERO) -> void:
+	if NetworkManager.is_network_active():
+		net_take_damage.rpc(amount, knockback_dir)
+	else:
+		_execute_take_damage(amount, knockback_dir)
+
+@rpc("any_peer", "call_local", "reliable")
+func net_take_damage(amount: float, knockback_dir: Vector2 = Vector2.ZERO) -> void:
+	_execute_take_damage(amount, knockback_dir)
+
+func _execute_take_damage(amount: float, knockback_dir: Vector2 = Vector2.ZERO) -> void:
 	if invulnerability_timer > 0.0 or Global.is_game_over:
 		return
 	
 	time_since_last_damage = 0.0
-	Global.take_player_damage(amount)
+	var is_local = is_multiplayer_authority() if NetworkManager.is_network_active() else true
+	if is_local:
+		Global.take_player_damage(amount)
+		add_trauma(0.55)
+	
 	invulnerability_timer = 0.40
 	if sprite:
 		sprite.modulate = Color(1.0, 0.35, 0.35, 1.0)
-	add_trauma(0.55)
 	Global.play_sound("hit")
 	
 	if knockback_dir != Vector2.ZERO:

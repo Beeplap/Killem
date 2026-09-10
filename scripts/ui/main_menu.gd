@@ -9,10 +9,12 @@ extends Control
 @export var campaign_3d_scene: String = "res://scenes/levels/BaseLevel3D.tscn"
 
 @onready var play_btn: Button = $Content/VBox/Buttons/PlayButton
+@onready var lan_btn: Button = get_node_or_null("Content/VBox/Buttons/CoopLanButton")
 @onready var play_3d_btn: Button = get_node_or_null("Content/VBox/Buttons/Play3DButton")
 @onready var settings_btn: Button = $Content/VBox/Buttons/SettingsButton
 @onready var quit_btn: Button = $Content/VBox/Buttons/QuitButton
 @onready var settings_modal: CanvasLayer = $SettingsMenu
+@onready var lan_modal: CanvasLayer = get_node_or_null("LanMenu")
 
 @onready var hazard_light_1: PointLight2D = get_node_or_null("Background/HazardLight1")
 @onready var hazard_light_2: PointLight2D = get_node_or_null("Background/HazardLight2")
@@ -31,6 +33,10 @@ func _connect_buttons() -> void:
 	if play_btn:
 		play_btn.pressed.connect(_on_play_pressed)
 		play_btn.mouse_entered.connect(_on_button_hover)
+	
+	if lan_btn:
+		lan_btn.pressed.connect(_on_lan_pressed)
+		lan_btn.mouse_entered.connect(_on_button_hover)
 	
 	if play_3d_btn:
 		play_3d_btn.pressed.connect(_on_play_3d_pressed)
@@ -81,6 +87,13 @@ func _launch_level(scene_path: String) -> void:
 	tween.tween_callback(func():
 		get_tree().change_scene_to_file(scene_path)
 	)
+
+func _on_lan_pressed() -> void:
+	Global.play_sound("perk")
+	if lan_modal and lan_modal.has_method("open_menu"):
+		lan_modal.open_menu()
+	elif lan_modal:
+		lan_modal.visible = true
 
 func _on_settings_pressed() -> void:
 	Global.play_sound("perk")

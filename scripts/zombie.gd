@@ -86,8 +86,42 @@ func _ready() -> void:
 		shadow_scale = Vector2(0.75, 0.35)
 	ProceduralTextures.add_drop_shadow(self, Vector2(0, 14), shadow_scale)
 	
+	_setup_network_synchronizer()
 	call_deferred("_find_player")
 
+func _setup_network_synchronizer() -> void:
+	var sync = get_node_or_null("MultiplayerSynchronizer")
+	if sync == null:
+		sync = MultiplayerSynchronizer.new()
+		sync.name = "MultiplayerSynchronizer"
+		add_child(sync)
+	
+	sync.replication_interval = 0.033 # 30 Hz tick rate
+	sync.delta_interval = 0.033
+	var config = SceneReplicationConfig.new()
+	config.add_property(NodePath(".:position"))
+	config.property_set_replication_mode(NodePath(".:position"), SceneReplicationConfig.REPLICATION_MODE_ALWAYS)
+	config.add_property(NodePath(".:velocity"))
+	config.property_set_replication_mode(NodePath(".:velocity"), SceneReplicationConfig.REPLICATION_MODE_ALWAYS)
+	config.add_property(NodePath("Sprite2D:frame"))
+	config.property_set_replication_mode(NodePath("Sprite2D:frame"), SceneReplicationConfig.REPLICATION_MODE_ALWAYS)
+	config.add_property(NodePath(".:current_health"))
+	config.property_set_replication_mode(NodePath(".:current_health"), SceneReplicationConfig.REPLICATION_MODE_ALWAYS)
+	sync.replication_config = config
+
+var target_recheck_timer: float = 0.0
+
+func _find_player() -> void:
+	var players = get_tree().get_nodes_in_group("player")
+	var closest: Node2D = null
+	var min_dist: float = INF
+	for p in players:
+		if is_instance_valid(p) and p is Node2D:
+			var d = global_position.distance_to(p.global_position)
+			if d < min_dist:
+				min_dist = d
+				closest = p
+	player = closest
 func configure_type() -> void:
 	var base_scale: float = 1.0
 	
@@ -200,9 +234,6 @@ func configure_type() -> void:
 	var final_scale = base_scale * wave_growth
 	scale = Vector2(final_scale, final_scale)
 
-func _find_player() -> void:
-	player = get_tree().get_first_node_in_group("player")
-
 func ignite(duration: float, dps: float) -> void:
 	burning_timer = max(burning_timer, duration)
 	burning_dps = max(burning_dps, dps)
@@ -220,6 +251,22 @@ func stagger(duration: float) -> void:
 func _physics_process(delta: float) -> void:
 	if current_health <= 0.0:
 		return
+	
+	# Host CPU Ownership: All pathfinding, state machines, and damage evaluations run strictly on the host
+	if NetworkManager.is_network_active() and not multiplayer.is_server():
+		if hit_flash_timer > 0.0:
+			hit_flash_timer -= delta
+			if hit_flash_timer <= 0.0 and sprite:
+				sprite.modulate = base_modulate
+		if knockback_velocity.length_squared() > 1.0:
+			knockback_velocity = knockback_velocity.move_toward(Vector2.ZERO, 900.0 * delta)
+		move_and_slide()
+		return
+	
+	target_recheck_timer -= delta
+	if target_recheck_timer <= 0.0:
+		target_recheck_timer = 0.6
+		_find_player()
 	
 	if player == null or not is_instance_valid(player):
 		_find_player()
@@ -407,9 +454,12 @@ func update_facing(face_dir: Vector2) -> void:
 		sprite.frame = dir_idx % 8
 
 func perform_attack() -> void:
-	if player and player.has_method("take_damage"):
+	if player and is_instance_valid(player) and player.has_method("take_damage"):
 		var push_dir = (player.global_position - global_position).normalized()
-		player.take_damage(attack_damage, push_dir)
+		if NetworkManager.is_network_active() and player.has_method("net_take_damage"):
+			player.net_take_damage.rpc(attack_damage, push_dir)
+		else:
+			player.take_damage(attack_damage, push_dir)
 		attack_timer = attack_cooldown
 		Global.play_sound("zombie_groan")
 		
@@ -417,8 +467,17 @@ func perform_attack() -> void:
 		if zombie_type == ZombieType.COLOSSUS and player.has_method("trigger_shake"):
 			player.trigger_shake(8.0, 0.25)
 
+@rpc("any_peer", "call_remote", "reliable")
+func request_damage(amount: float, hit_direction: Vector2) -> void:
+	if multiplayer.is_server():
+		take_damage(amount, hit_direction)
+
 func take_damage(amount: float, hit_direction: Vector2 = Vector2.ZERO) -> void:
 	if current_health <= 0.0:
+		return
+	
+	if NetworkManager.is_network_active() and not multiplayer.is_server():
+		request_damage.rpc_id(1, amount, hit_direction)
 		return
 	
 	var effective_damage = amount
@@ -510,6 +569,16 @@ func spawn_shield_ricochet(hit_dir: Vector2) -> void:
 		level.add_child(sparks)
 
 func die(hit_direction: Vector2, is_overkill: bool = false) -> void:
+	if NetworkManager.is_network_active() and multiplayer.is_server():
+		net_die.rpc(hit_direction, is_overkill)
+	else:
+		_execute_die(hit_direction, is_overkill)
+
+@rpc("call_local", "reliable")
+func net_die(hit_direction: Vector2, is_overkill: bool = false) -> void:
+	_execute_die(hit_direction, is_overkill)
+
+func _execute_die(hit_direction: Vector2, is_overkill: bool = false) -> void:
 	Global.add_kill(score_value)
 	
 	var audio_mgr = get_node_or_null("/root/AudioManager")
@@ -552,16 +621,15 @@ func die(hit_direction: Vector2, is_overkill: bool = false) -> void:
 		Global.explosion_occurred.emit()
 		if player and player.has_method("trigger_shake"):
 			player.trigger_shake(14.0, 0.4)
-		# Colossus drops guaranteed health and ammo
 		spawn_pickup(0)
 		spawn_pickup(1)
 	else:
 		roll_loot()
 	
-	# In-World Tactical Scrap Currency Drops
 	spawn_scrap_drop()
 	
-	queue_free()
+	if not NetworkManager.is_network_active() or multiplayer.is_server():
+		queue_free()
 
 func apply_slow(factor: float, duration: float) -> void:
 	# Frenzied bloodhounds are immune to barbwire slow effects

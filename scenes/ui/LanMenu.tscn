@@ -1,0 +1,296 @@
+﻿[gd_scene load_steps=6 format=3 uid="uid://lanmenu001"]
+
+[ext_resource type="Script" path="res://scripts/ui/lan_menu.gd" id="1_lan"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_modal_panel"]
+bg_color = Color(0.06, 0.08, 0.11, 0.96)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.2, 0.6, 0.8, 0.85)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+shadow_color = Color(0, 0, 0, 0.7)
+shadow_size = 12
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn_host"]
+content_margin_left = 16.0
+content_margin_top = 10.0
+content_margin_right = 16.0
+content_margin_bottom = 10.0
+bg_color = Color(0.12, 0.48, 0.26, 0.9)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.3, 0.95, 0.55, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn_join"]
+content_margin_left = 16.0
+content_margin_top = 8.0
+content_margin_right = 16.0
+content_margin_bottom = 8.0
+bg_color = Color(0.1, 0.35, 0.55, 0.9)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.35, 0.8, 1, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn_close"]
+content_margin_left = 14.0
+content_margin_top = 6.0
+content_margin_right = 14.0
+content_margin_bottom = 6.0
+bg_color = Color(0.18, 0.12, 0.12, 0.85)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.7, 0.3, 0.3, 0.7)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[node name="LanMenu" type="CanvasLayer"]
+layer = 12
+script = ExtResource("1_lan")
+
+[node name="ModalBackdrop" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Dimmer" type="ColorRect" parent="ModalBackdrop"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.02, 0.03, 0.05, 0.82)
+
+[node name="Panel" type="PanelContainer" parent="ModalBackdrop"]
+custom_minimum_size = Vector2(980, 600)
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -490.0
+offset_top = -300.0
+offset_right = 490.0
+offset_bottom = 300.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_modal_panel")
+
+[node name="Margin" type="MarginContainer" parent="ModalBackdrop/Panel"]
+layout_mode = 2
+theme_override_constants/margin_left = 28
+theme_override_constants/margin_top = 22
+theme_override_constants/margin_right = 28
+theme_override_constants/margin_bottom = 20
+
+[node name="VBox" type="VBoxContainer" parent="ModalBackdrop/Panel/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="HeaderBox" type="HBoxContainer" parent="ModalBackdrop/Panel/Margin/VBox"]
+layout_mode = 2
+
+[node name="TitleBox" type="VBoxContainer" parent="ModalBackdrop/Panel/Margin/VBox/HeaderBox"]
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="Title" type="Label" parent="ModalBackdrop/Panel/Margin/VBox/HeaderBox/TitleBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.98, 0.82, 0.15, 1)
+theme_override_font_sizes/font_size = 24
+text = "TACTICAL CO-OP LAN SQUAD OPS"
+
+[node name="Subtitle" type="Label" parent="ModalBackdrop/Panel/Margin/VBox/HeaderBox/TitleBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.3, 0.85, 1, 1)
+theme_override_font_sizes/font_size = 12
+text = "SECTOR 7 PEER-TO-PEER MULTIPLAYER INTERFACE • UP TO 16 COMBATANTS"
+
+[node name="HSeparatorTop" type="HSeparator" parent="ModalBackdrop/Panel/Margin/VBox"]
+layout_mode = 2
+
+[node name="Columns" type="HBoxContainer" parent="ModalBackdrop/Panel/Margin/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 24
+
+[node name="HostCol" type="VBoxContainer" parent="ModalBackdrop/Panel/Margin/VBox/Columns"]
+custom_minimum_size = Vector2(380, 0)
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="HostHeader" type="Label" parent="ModalBackdrop/Panel/Margin/VBox/Columns/HostCol"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.3, 0.95, 0.55, 1)
+theme_override_font_sizes/font_size = 16
+text = "HOST OPERATIONS"
+
+[node name="HostDesc" type="Label" parent="ModalBackdrop/Panel/Margin/VBox/Columns/HostCol"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.65, 0.72, 0.8, 0.85)
+theme_override_font_sizes/font_size = 11
+text = "Deploys a local LAN server. Broadcasts UDP announcement packets every 1.0s to 255.255.255.255:7778."
+autowrap_mode = 3
+
+[node name="Sep1" type="HSeparator" parent="ModalBackdrop/Panel/Margin/VBox/Columns/HostCol"]
+layout_mode = 2
+
+[node name="NameLabel" type="Label" parent="ModalBackdrop/Panel/Margin/VBox/Columns/HostCol"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "SQUAD DESIGNATION"
+
+[node name="ServerNameInput" type="LineEdit" parent="ModalBackdrop/Panel/Margin/VBox/Columns/HostCol"]
+layout_mode = 2
+text = "Alpha Squad"
+placeholder_text = "Enter squad name..."
+
+[node name="CapacityLabel" type="Label" parent="ModalBackdrop/Panel/Margin/VBox/Columns/HostCol"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "MAX SQUAD CAPACITY (1-16 PLAYERS)"
+
+[node name="MaxPlayersSpin" type="SpinBox" parent="ModalBackdrop/Panel/Margin/VBox/Columns/HostCol"]
+layout_mode = 2
+min_value = 2.0
+max_value = 16.0
+value = 16.0
+alignment = 1
+
+[node name="PortLabel" type="Label" parent="ModalBackdrop/Panel/Margin/VBox/Columns/HostCol"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "GAME SERVER PORT"
+
+[node name="HostPortInput" type="LineEdit" parent="ModalBackdrop/Panel/Margin/VBox/Columns/HostCol"]
+layout_mode = 2
+text = "7777"
+placeholder_text = "7777"
+
+[node name="HostSpacer" type="Control" parent="ModalBackdrop/Panel/Margin/VBox/Columns/HostCol"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="HostButton" type="Button" parent="ModalBackdrop/Panel/Margin/VBox/Columns/HostCol"]
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.95, 1, 0.95, 1)
+theme_override_font_sizes/font_size = 16
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn_host")
+text = "▶ START HOSTING SQUAD"
+
+[node name="VSeparator" type="VSeparator" parent="ModalBackdrop/Panel/Margin/VBox/Columns"]
+layout_mode = 2
+
+[node name="JoinCol" type="VBoxContainer" parent="ModalBackdrop/Panel/Margin/VBox/Columns"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 8
+
+[node name="JoinHeader" type="Label" parent="ModalBackdrop/Panel/Margin/VBox/Columns/JoinCol"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.98, 0.82, 0.15, 1)
+theme_override_font_sizes/font_size = 16
+text = "JOIN OPERATIONS (SERVER BROWSER)"
+
+[node name="ScannerStatusLabel" type="Label" parent="ModalBackdrop/Panel/Margin/VBox/Columns/JoinCol"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.3, 0.85, 1, 1)
+theme_override_font_sizes/font_size = 11
+text = "● SCANNING LOCAL NETWORK (PORT 7778)..."
+
+[node name="ServerItemList" type="ItemList" parent="ModalBackdrop/Panel/Margin/VBox/Columns/JoinCol"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_font_sizes/font_size = 12
+
+[node name="JoinActionRow" type="HBoxContainer" parent="ModalBackdrop/Panel/Margin/VBox/Columns/JoinCol"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="ConnectButton" type="Button" parent="ModalBackdrop/Panel/Margin/VBox/Columns/JoinCol/JoinActionRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 14
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn_join")
+text = "▶ CONNECT TO SQUAD"
+
+[node name="RefreshButton" type="Button" parent="ModalBackdrop/Panel/Margin/VBox/Columns/JoinCol/JoinActionRow"]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 13
+text = "⟳ REFRESH"
+
+[node name="Sep2" type="HSeparator" parent="ModalBackdrop/Panel/Margin/VBox/Columns/JoinCol"]
+layout_mode = 2
+
+[node name="DirectLabel" type="Label" parent="ModalBackdrop/Panel/Margin/VBox/Columns/JoinCol"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "DIRECT IP CONNECT (ROUTER FALLBACK)"
+
+[node name="DirectBox" type="HBoxContainer" parent="ModalBackdrop/Panel/Margin/VBox/Columns/JoinCol"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="DirectIPInput" type="LineEdit" parent="ModalBackdrop/Panel/Margin/VBox/Columns/JoinCol/DirectBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "127.0.0.1"
+placeholder_text = "Host IP (e.g. 192.168.1.50)"
+
+[node name="DirectPortInput" type="LineEdit" parent="ModalBackdrop/Panel/Margin/VBox/Columns/JoinCol/DirectBox"]
+custom_minimum_size = Vector2(80, 0)
+layout_mode = 2
+text = "7777"
+placeholder_text = "7777"
+
+[node name="DirectConnectButton" type="Button" parent="ModalBackdrop/Panel/Margin/VBox/Columns/JoinCol/DirectBox"]
+custom_minimum_size = Vector2(140, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 13
+text = "DIRECT CONNECT"
+
+[node name="HSeparatorBottom" type="HSeparator" parent="ModalBackdrop/Panel/Margin/VBox"]
+layout_mode = 2
+
+[node name="Footer" type="HBoxContainer" parent="ModalBackdrop/Panel/Margin/VBox"]
+layout_mode = 2
+
+[node name="StatusLabel" type="Label" parent="ModalBackdrop/Panel/Margin/VBox/Footer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.4, 0.8, 1, 1)
+theme_override_font_sizes/font_size = 12
+text = "Ready to deploy."
+
+[node name="CloseButton" type="Button" parent="ModalBackdrop/Panel/Margin/VBox/Footer"]
+custom_minimum_size = Vector2(100, 32)
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn_close")
+text = "✖ CLOSE"

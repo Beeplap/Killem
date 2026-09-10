@@ -28,6 +28,8 @@ busses/default_bus_layout="res://default_bus_layout.tres"
 
 AudioManager="*res://scripts/audio_manager.gd"
 Global="*res://scripts/global.gd"
+GameManager="*res://scripts/network/game_manager_alias.gd"
+NetworkManager="*res://scripts/network/network_manager.gd"
 EconomyManager="*res://scripts/economy_manager.gd"
 CampaignManager="*res://scripts/campaign_manager.gd"
 DecalManager="*res://scripts/decal_manager.gd"
@@ -110,7 +112,6 @@ deploy_item={
 "events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":-1,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"keycode":69,"physical_keycode":0,"key_label":0,"unicode":101,"location":0,"echo":false,"script":null)
 ]
 }
-
 
 [rendering]
 

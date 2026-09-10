@@ -3,6 +3,7 @@
 [ext_resource type="Script" path="res://scripts/ui/main_menu.gd" id="1_menu"]
 [ext_resource type="Texture2D" uid="uid://brd6rqbmehjnl" path="res://assets/textures/lighting/point_light_cookie.png" id="2_cookie"]
 [ext_resource type="PackedScene" path="res://scenes/ui/SettingsMenu.tscn" id="3_settings"]
+[ext_resource type="PackedScene" path="res://scenes/ui/LanMenu.tscn" id="4_lan"]
 
 [sub_resource type="Gradient" id="Gradient_fog"]
 offsets = PackedFloat32Array(0, 0.5, 1)
@@ -79,6 +80,42 @@ corner_radius_bottom_right = 6
 corner_radius_bottom_left = 6
 shadow_color = Color(0.2, 0.65, 0.9, 0.3)
 shadow_size = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn_lan"]
+content_margin_left = 20.0
+content_margin_top = 11.0
+content_margin_right = 20.0
+content_margin_bottom = 11.0
+bg_color = Color(0.06, 0.18, 0.28, 0.92)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.25, 0.8, 1, 0.9)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+shadow_color = Color(0.2, 0.7, 0.95, 0.35)
+shadow_size = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn_lan_hover"]
+content_margin_left = 20.0
+content_margin_top = 11.0
+content_margin_right = 20.0
+content_margin_bottom = 11.0
+bg_color = Color(0.1, 0.28, 0.42, 0.98)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.4, 0.95, 1, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+shadow_color = Color(0.25, 0.85, 1, 0.5)
+shadow_size = 8
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel_frame"]
 bg_color = Color(0.04, 0.06, 0.08, 0.65)
@@ -206,6 +243,16 @@ theme_override_styles/hover = SubResource("StyleBoxFlat_btn_play_hover")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_btn_play_hover")
 text = "▶  SURVIVE (SURVIVAL MODE)"
 
+[node name="CoopLanButton" type="Button" parent="Content/VBox/Buttons"]
+custom_minimum_size = Vector2(340, 48)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.3, 0.95, 1, 1)
+theme_override_font_sizes/font_size = 16
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn_lan")
+theme_override_styles/hover = SubResource("StyleBoxFlat_btn_lan_hover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_btn_lan_hover")
+text = "🌐  CO-OP LAN (16-PLAYER SQUAD)"
+
 [node name="Play3DButton" type="Button" parent="Content/VBox/Buttons"]
 custom_minimum_size = Vector2(340, 46)
 layout_mode = 2
@@ -257,4 +304,7 @@ theme_override_font_sizes/font_size = 12
 text = "SYSTEMS NOMINAL • HARDWARE DETECTED"
 
 [node name="SettingsMenu" parent="." instance=ExtResource("3_settings")]
+visible = false
+
+[node name="LanMenu" parent="." instance=ExtResource("4_lan")]
 visible = false

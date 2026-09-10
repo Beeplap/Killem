@@ -81,9 +81,17 @@ func _setup_cameras() -> void:
 		boss_pcam.tween_resource = tween_res
 
 func _find_player() -> void:
-	var p = get_tree().get_first_node_in_group("player")
-	if p and p is Node2D:
-		player = p
+	var players = get_tree().get_nodes_in_group("player")
+	var chosen: Node2D = null
+	for p in players:
+		if p is Node2D and p.is_multiplayer_authority():
+			chosen = p
+			break
+	if chosen == null and not players.is_empty() and players[0] is Node2D:
+		chosen = players[0]
+	
+	if chosen:
+		player = chosen
 		if player_pcam:
 			player_pcam.follow_target = player
 		if boss_pcam and (boss_pcam.follow_targets.is_empty() or not boss_pcam.follow_targets.has(player)):
@@ -91,6 +99,14 @@ func _find_player() -> void:
 			if active_boss_target and is_instance_valid(active_boss_target):
 				targets.append(active_boss_target)
 			boss_pcam.follow_targets = targets
+
+func set_player_target(new_player: Node2D) -> void:
+	if new_player and new_player is Node2D:
+		player = new_player
+		if player_pcam:
+			player_pcam.follow_target = player
+		if boss_pcam:
+			boss_pcam.follow_targets = [player]
 
 func _process(delta: float) -> void:
 	if not is_instance_valid(player):

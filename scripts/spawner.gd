@@ -53,8 +53,14 @@ func _process(delta: float) -> void:
 	if Global.is_game_over:
 		return
 	
+	# Host CPU Ownership: In multiplayer, only the host/server runs wave progression
+	if NetworkManager.is_network_active() and not multiplayer.is_server():
+		return
+	
 	if player == null or not is_instance_valid(player):
-		player = get_tree().get_first_node_in_group("player")
+		var players = get_tree().get_nodes_in_group("player")
+		if not players.is_empty():
+			player = players.pick_random()
 		return
 	
 	# Repeating 30-Second Tactical Supply Drop
@@ -152,10 +158,15 @@ func start_wave(target_wave: int) -> void:
 
 func spawn_batch(count: int) -> void:
 	if player == null or not is_instance_valid(player):
-		return
+		var players = get_tree().get_nodes_in_group("player")
+		if not players.is_empty():
+			player = players.pick_random()
+		else:
+			return
 	
 	# Horde pack coordination: spawn cluster along an incoming vector
 	var cluster_center_angle = randf() * TAU
+	var enemies_container = get_parent().get_node_or_null("Enemies") if get_parent() else null
 	
 	for _i in range(count):
 		if zombies_remaining_to_spawn <= 0:
@@ -170,7 +181,10 @@ func spawn_batch(count: int) -> void:
 		var zombie = zombie_scene.instantiate()
 		zombie.global_position = spawn_pos
 		zombie.wave_number = wave_number
-		get_parent().call_deferred("add_child", zombie)
+		if enemies_container:
+			enemies_container.add_child(zombie, true)
+		elif get_parent():
+			get_parent().call_deferred("add_child", zombie)
 		zombies_remaining_to_spawn -= 1
 
 func spawn_boss_zombie() -> void:
@@ -184,7 +198,11 @@ func spawn_boss_zombie() -> void:
 	var boss = COLOSSUS_ZOMBIE.instantiate()
 	boss.global_position = spawn_pos
 	boss.wave_number = wave_number
-	get_parent().call_deferred("add_child", boss)
+	var enemies_container = get_parent().get_node_or_null("Enemies") if get_parent() else null
+	if enemies_container:
+		enemies_container.add_child(boss, true)
+	elif get_parent():
+		get_parent().call_deferred("add_child", boss)
 	Global.boss_spawned.emit(boss)
 	Global.play_sound("zombie_groan")
 
