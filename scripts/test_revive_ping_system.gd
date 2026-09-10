@@ -8,8 +8,6 @@ const PING_MARKER_SCRIPT = preload("res://scripts/ui/ping_marker.gd")
 func _ready() -> void:
 	print("--- BEGIN TEST: DOWNED STATE, REVIVE LOOP & TACTICAL PING SYSTEM ---")
 	
-	Global.reset_state()
-	
 	_test_downed_state_and_crawl()
 	_test_revive_damage_interruption()
 	_test_revive_completion()
@@ -23,6 +21,7 @@ func _ready() -> void:
 
 func _test_downed_state_and_crawl() -> void:
 	print("\n[TEST 1] Downed State & Crawl Mechanics...")
+	Global.reset_state()
 	
 	var player_scene = preload("res://scenes/Player.tscn")
 	var p1 = player_scene.instantiate()
@@ -57,12 +56,13 @@ func _test_downed_state_and_crawl() -> void:
 	assert(rz != null, "ReviveZone must exist on Player node")
 	assert(rz.is_active, "ReviveZone must be active while player is downed")
 	
-	p1.queue_free()
-	p2.queue_free()
+	remove_child(p1); p1.free()
+	remove_child(p2); p2.free()
 	print("  ✔ Downed state entered, bleed-out started, roll blocked, weapon locked to Pistol")
 
 func _test_revive_damage_interruption() -> void:
 	print("\n[TEST 2] Revive Zone Channel & Damage Interruption...")
+	Global.reset_state()
 	
 	var player_scene = preload("res://scenes/Player.tscn")
 	var p1 = player_scene.instantiate()
@@ -89,12 +89,13 @@ func _test_revive_damage_interruption() -> void:
 	assert(rz.revive_progress == 0.0, "Revive progress must reset to 0.0 upon reviver taking damage")
 	assert(rz.current_reviver == null, "Reviver channel must be severed upon taking damage")
 	
-	p1.queue_free()
-	p2.queue_free()
+	remove_child(p1); p1.free()
+	remove_child(p2); p2.free()
 	print("  ✔ Revive channel cancelled and reset when reviver takes damage")
 
 func _test_revive_completion() -> void:
 	print("\n[TEST 3] Revive Channel Completion & 35% HP Restoration...")
+	Global.reset_state()
 	
 	var player_scene = preload("res://scenes/Player.tscn")
 	var p1 = player_scene.instantiate()
@@ -117,17 +118,16 @@ func _test_revive_completion() -> void:
 	rz._complete_revive(p1)
 	
 	assert(not p1.is_downed, "P1 downed state must be cleared after revive")
-	assert(is_equal_approx(p1.health, p1.max_health * 0.35), "P1 must be restored to 35% of max health (expected %.1f, got %.1f)" % [p1.max_health * 0.35, p1.health])
+	assert(is_equal_approx(p1.health, p1.max_health * 0.35), "P1 must be restored to 35% of max health")
 	assert(not rz.is_active, "ReviveZone must deactivate once revive is completed")
 	assert(p1.invulnerability_timer > 0.0, "P1 must have i-frames grace period after being revived")
 	
-	p1.queue_free()
-	p2.queue_free()
+	remove_child(p1); p1.free()
+	remove_child(p2); p2.free()
 	print("  ✔ Revive completed: downed cleared, 35% HP restored, i-frames granted")
 
 func _test_squad_wipe_condition() -> void:
 	print("\n[TEST 4] Squad Wipe (All Squad Members Downed simultaneously)...")
-	
 	Global.reset_state()
 	assert(not Global.is_game_over, "Game should not be over initially")
 	
@@ -149,8 +149,8 @@ func _test_squad_wipe_condition() -> void:
 	p2._execute_take_damage(150.0)
 	assert(Global.is_game_over, "All players downed simultaneously must trigger Game Over")
 	
-	p1.queue_free()
-	p2.queue_free()
+	remove_child(p1); p1.free()
+	remove_child(p2); p2.free()
 	print("  ✔ All players downed simultaneously triggers true death / Game Over")
 
 func _test_ping_system() -> void:
@@ -193,7 +193,7 @@ func _test_ping_system() -> void:
 	assert(m3.ping_type == PING_MARKER_SCRIPT.PingType.SUPPLIES, "Targeting supplies must set PingType.SUPPLIES")
 	
 	# Clean up
-	enemy_dummy.queue_free()
-	supply_dummy.queue_free()
-	ping_sys.queue_free()
+	remove_child(enemy_dummy); enemy_dummy.free()
+	remove_child(supply_dummy); supply_dummy.free()
+	remove_child(ping_sys); ping_sys.free()
 	print("  ✔ Ping markers verified: MOVE (Yellow), ENEMY (Red tracking), SUPPLIES (Blue), 6.0s lifetime")
