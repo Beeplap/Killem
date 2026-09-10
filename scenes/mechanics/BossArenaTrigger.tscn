@@ -1,6 +1,6 @@
 [gd_scene load_steps=7 format=3]
 
-[ext_resource type="Script" path="res://scripts/boss_arena_controller.gd" id="1_controller"]
+[ext_resource type="Script" path="res://scripts/mechanics/boss_arena_trigger.gd" id="1_controller"]
 [ext_resource type="ArrayMesh" path="res://assets/models/environment/blast_gate.obj" id="2_gate_mesh"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_trigger"]
