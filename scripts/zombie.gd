@@ -301,6 +301,14 @@ func _setup_3d_viewport() -> void:
 		
 		sub_viewport.add_child(model_3d)
 		
+		# Ensure visual 3D model is purely visual and NOT registered as a gameplay enemy entity
+		if model_3d.is_in_group("enemies"):
+			model_3d.remove_from_group("enemies")
+		if model_3d.is_in_group("plague_hounds"):
+			model_3d.remove_from_group("plague_hounds")
+		model_3d.collision_layer = 0
+		model_3d.collision_mask = 0
+		
 		if zombie_type == ZombieType.INFECTED_DOG:
 			front_left_leg_3d = model_3d.get_node_or_null("Visuals/Torso/FrontLeftLeg")
 			front_right_leg_3d = model_3d.get_node_or_null("Visuals/Torso/FrontRightLeg")

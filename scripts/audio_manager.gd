@@ -146,7 +146,11 @@ func _process(delta: float) -> void:
 		_zombies_lpf.cutoff_hz = 18000.0
 		return
 	
-	var p_pos: Vector2 = player.global_position if "global_position" in player else Vector2.ZERO
+	var p_pos_raw = player.get("global_position")
+	var is_player_2d = p_pos_raw is Vector2
+	var p_pos_2d: Vector2 = p_pos_raw if is_player_2d else Vector2.ZERO
+	var p_pos_3d: Vector3 = p_pos_raw if not is_player_2d and p_pos_raw is Vector3 else Vector3.ZERO
+	
 	var enemies = get_tree().get_nodes_in_group("enemies")
 	if enemies.is_empty():
 		_zombies_lpf.cutoff_hz = 18000.0
@@ -155,11 +159,19 @@ func _process(delta: float) -> void:
 	var min_dist_sq: float = INF
 	for enemy in enemies:
 		if is_instance_valid(enemy) and "global_position" in enemy:
-			var d_sq = p_pos.distance_squared_to(enemy.global_position)
-			if d_sq < min_dist_sq:
-				min_dist_sq = d_sq
-				if min_dist_sq < 2500.0:
-					break
+			var e_pos = enemy.global_position
+			if is_player_2d and e_pos is Vector2:
+				var d_sq = p_pos_2d.distance_squared_to(e_pos)
+				if d_sq < min_dist_sq:
+					min_dist_sq = d_sq
+					if min_dist_sq < 2500.0:
+						break
+			elif not is_player_2d and e_pos is Vector3:
+				var d_sq = p_pos_3d.distance_squared_to(e_pos)
+				if d_sq < min_dist_sq:
+					min_dist_sq = d_sq
+					if min_dist_sq < 25.0:
+						break
 	
 	var min_dist = sqrt(min_dist_sq) if min_dist_sq != INF else 1000.0
 	var target_cutoff: float
