@@ -60,6 +60,25 @@ var anim_idle_breathe: float = 0.015    # Idle breathing scale pulse
 var anim_gallop_asymmetry: float = 0.0  # >0 for dog gallop (asymmetric bob)
 var death_anim_progress: float = -1.0   # -1 = not dying, 0..1 = death anim
 
+# 3D Model Viewport & Real Limb Hierarchy
+var sub_viewport: SubViewport = null
+var model_3d: Node3D = null
+var left_leg_3d: Node3D = null
+var right_leg_3d: Node3D = null
+var left_arm_3d: Node3D = null
+var right_arm_3d: Node3D = null
+var torso_3d: Node3D = null
+var head_3d: Node3D = null
+var base_torso_y: float = 1.15
+
+# Quadruped / Dog Limbs
+var front_left_leg_3d: Node3D = null
+var front_right_leg_3d: Node3D = null
+var back_left_leg_3d: Node3D = null
+var back_right_leg_3d: Node3D = null
+var lower_jaw_3d: Node3D = null
+var gallop_cycle: float = 0.0
+
 @onready var nav_agent: NavigationAgent2D = $NavigationAgent2D
 @onready var collision_shape: CollisionShape2D = $CollisionShape2D
 @onready var sprite: Sprite2D = $Sprite2D
@@ -151,21 +170,7 @@ func configure_type() -> void:
 			attack_cooldown = 0.95
 			score_value = 100
 			base_scale = 1.0
-			if sprite:
-				# 4 Distinct 3D Model Clothing Variations (Garwalfs Release 14 & Variants)
-				var walker_skins = [
-					{"tex": "res://assets/textures/characters/zombie_regular_8dir.png", "norm": "res://assets/textures/characters/zombie_regular_8dir_n.png"},
-					{"tex": "res://assets/textures/characters/zombie_regular_green_8dir.png", "norm": "res://assets/textures/characters/zombie_regular_green_8dir_n.png"},
-					{"tex": "res://assets/textures/characters/zombie_regular_blue_8dir.png", "norm": "res://assets/textures/characters/zombie_regular_blue_8dir_n.png"},
-					{"tex": "res://assets/textures/characters/zombie_regular_brown_8dir.png", "norm": "res://assets/textures/characters/zombie_regular_brown_8dir_n.png"},
-				]
-				var skin = walker_skins.pick_random()
-				var c_tex = CanvasTexture.new()
-				c_tex.diffuse_texture = load(skin["tex"])
-				c_tex.normal_texture = load(skin["norm"])
-				sprite.texture = c_tex
-				sprite.hframes = 8
-		
+			anim_bob_frequency = 7.5
 		ZombieType.INFECTED_DOG:
 			max_health = 40.0
 			speed = 235.0
@@ -174,14 +179,7 @@ func configure_type() -> void:
 			attack_cooldown = 0.65
 			score_value = 140
 			base_scale = 0.95
-			if sprite:
-				# Resident Evil Cerberus 3D Model Render
-				var c_tex = CanvasTexture.new()
-				c_tex.diffuse_texture = load("res://assets/textures/characters/zombie_dog_8dir.png")
-				c_tex.normal_texture = load("res://assets/textures/characters/zombie_dog_8dir_n.png")
-				sprite.texture = c_tex
-				sprite.hframes = 8
-		
+			anim_bob_frequency = 14.0
 		ZombieType.HEAVY:
 			max_health = 250.0
 			speed = 70.0
@@ -190,14 +188,7 @@ func configure_type() -> void:
 			attack_cooldown = 1.3
 			score_value = 280
 			base_scale = 1.35
-			if sprite:
-				# Garwalfs Fur-Collar Brute 3D Model Render
-				var c_tex = CanvasTexture.new()
-				c_tex.diffuse_texture = load("res://assets/textures/characters/zombie_heavy_8dir.png")
-				c_tex.normal_texture = load("res://assets/textures/characters/zombie_heavy_8dir_n.png")
-				sprite.texture = c_tex
-				sprite.hframes = 8
-		
+			anim_bob_frequency = 4.5
 		ZombieType.SPITTER:
 			max_health = 90.0
 			speed = 145.0
@@ -206,10 +197,7 @@ func configure_type() -> void:
 			attack_cooldown = 0.85
 			score_value = 180
 			base_scale = 1.05
-			if sprite:
-				sprite.texture = load("res://assets/textures/characters/zombie_spitter_8dir.png")
-				sprite.hframes = 8
-		
+			anim_bob_frequency = 9.0
 		ZombieType.ARMORED:
 			max_health = 180.0
 			speed = 105.0
@@ -218,10 +206,7 @@ func configure_type() -> void:
 			attack_cooldown = 1.0
 			score_value = 250
 			base_scale = 1.12
-			if sprite:
-				sprite.texture = load("res://assets/textures/characters/zombie_armored_8dir.png")
-				sprite.hframes = 8
-		
+			anim_bob_frequency = 6.0
 		ZombieType.COLOSSUS:
 			max_health = 750.0
 			speed = 52.0
@@ -230,10 +215,7 @@ func configure_type() -> void:
 			attack_cooldown = 1.6
 			score_value = 850
 			base_scale = 1.75
-			if sprite:
-				sprite.texture = load("res://assets/textures/characters/zombie_colossus_8dir.png")
-				sprite.hframes = 8
-		
+			anim_bob_frequency = 3.2
 		ZombieType.SCREAMER:
 			max_health = 110.0
 			speed = 135.0
@@ -242,66 +224,119 @@ func configure_type() -> void:
 			attack_cooldown = 1.0
 			score_value = 220
 			base_scale = 1.05
-			if sprite:
-				sprite.texture = load("res://assets/textures/characters/zombie_screamer_8dir.png")
-				sprite.hframes = 8
+			anim_bob_frequency = 10.0
 	
 	# Progressive growth in size as waves and time pass
 	var wave_growth = 1.0 + min((wave_number - 1) * 0.045, 0.40)
 	var final_scale = base_scale * wave_growth
 	scale = Vector2(final_scale, final_scale)
 	
-	# Per-type procedural walk animation parameters
+	_setup_3d_viewport()
+
+func _setup_3d_viewport() -> void:
+	if sub_viewport != null:
+		return
+	
+	sub_viewport = SubViewport.new()
+	sub_viewport.name = "ModelViewport"
+	sub_viewport.own_world_3d = true
+	sub_viewport.transparent_bg = true
+	sub_viewport.size = Vector2i(128, 128)
+	sub_viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
+	add_child(sub_viewport)
+	
+	var cam = Camera3D.new()
+	cam.projection = Camera3D.PROJECTION_ORTHOGONAL
+	cam.rotation_degrees = Vector3(-36.0, 0, 0)
+	
+	var light = DirectionalLight3D.new()
+	light.rotation_degrees = Vector3(-55.0, 35.0, 0)
+	light.light_energy = 1.35
+	sub_viewport.add_child(light)
+	
+	var w_env = WorldEnvironment.new()
+	var env = Environment.new()
+	env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
+	env.ambient_light_color = Color(0.48, 0.50, 0.55)
+	env.ambient_light_energy = 0.85
+	w_env.environment = env
+	sub_viewport.add_child(w_env)
+	
+	var model_scene_path: String = ""
+	var cam_size: float = 2.6
+	var cam_pos: Vector3 = Vector3(0, 1.25, 1.7)
+	
 	match zombie_type:
-		ZombieType.REGULAR:
-			# Shambling, uneven zombie walk
-			anim_bob_height = 3.2
-			anim_bob_frequency = 7.5
-			anim_lean_max = 0.07
-			anim_squash_intensity = 0.04
-			anim_gallop_asymmetry = 0.0
+		ZombieType.REGULAR, ZombieType.ARMORED:
+			model_scene_path = "res://scenes/enemies/ShamblerZombie3D.tscn"
+			cam_size = 2.6
+			cam_pos = Vector3(0, 1.25, 1.7)
 		ZombieType.INFECTED_DOG:
-			# Fast quadruped gallop with pronounced vertical bounce
-			anim_bob_height = 4.5
-			anim_bob_frequency = 14.0
-			anim_lean_max = 0.10
-			anim_squash_intensity = 0.08
-			anim_gallop_asymmetry = 0.35  # Asymmetric gallop cycle
-		ZombieType.HEAVY:
-			# Slow, heavy lumbering steps with ground-shaking weight
-			anim_bob_height = 2.5
-			anim_bob_frequency = 4.5
-			anim_lean_max = 0.04
-			anim_squash_intensity = 0.06
-			anim_gallop_asymmetry = 0.0
-		ZombieType.SPITTER:
-			# Twitchy, hunched movement
-			anim_bob_height = 2.8
-			anim_bob_frequency = 9.0
-			anim_lean_max = 0.08
-			anim_squash_intensity = 0.035
-			anim_gallop_asymmetry = 0.0
-		ZombieType.ARMORED:
-			# Stiff, mechanical march
-			anim_bob_height = 2.0
-			anim_bob_frequency = 6.0
-			anim_lean_max = 0.03
-			anim_squash_intensity = 0.025
-			anim_gallop_asymmetry = 0.0
-		ZombieType.COLOSSUS:
-			# Massive, earth-shaking strides
-			anim_bob_height = 4.0
-			anim_bob_frequency = 3.0
-			anim_lean_max = 0.035
-			anim_squash_intensity = 0.07
-			anim_gallop_asymmetry = 0.0
-		ZombieType.SCREAMER:
-			# Nervous, jittery movement
-			anim_bob_height = 3.0
-			anim_bob_frequency = 10.0
-			anim_lean_max = 0.09
-			anim_squash_intensity = 0.05
-			anim_gallop_asymmetry = 0.0
+			model_scene_path = "res://scenes/enemies/PlagueHound3D.tscn"
+			cam_size = 2.2
+			cam_pos = Vector3(0, 0.65, 1.35)
+		ZombieType.HEAVY, ZombieType.COLOSSUS:
+			model_scene_path = "res://scenes/enemies/SuperMutant3D.tscn"
+			cam_size = 4.2
+			cam_pos = Vector3(0, 2.2, 3.0)
+		ZombieType.SPITTER, ZombieType.SCREAMER:
+			model_scene_path = "res://scenes/enemies/ToxicSpitter3D.tscn"
+			cam_size = 2.7
+			cam_pos = Vector3(0, 1.25, 1.7)
+	
+	cam.size = cam_size
+	cam.position = cam_pos
+	sub_viewport.add_child(cam)
+	
+	var p_scene = load(model_scene_path)
+	if p_scene:
+		model_3d = p_scene.instantiate()
+		model_3d.set_physics_process(false)
+		model_3d.set_process(false)
+		
+		var c3d = model_3d.get_node_or_null("CollisionShape3D")
+		if c3d: c3d.queue_free()
+		var n3d = model_3d.get_node_or_null("NavigationAgent3D")
+		if n3d: n3d.queue_free()
+		
+		sub_viewport.add_child(model_3d)
+		
+		if zombie_type == ZombieType.INFECTED_DOG:
+			front_left_leg_3d = model_3d.get_node_or_null("Visuals/Torso/FrontLeftLeg")
+			front_right_leg_3d = model_3d.get_node_or_null("Visuals/Torso/FrontRightLeg")
+			back_left_leg_3d = model_3d.get_node_or_null("Visuals/Torso/BackLeftLeg")
+			back_right_leg_3d = model_3d.get_node_or_null("Visuals/Torso/BackRightLeg")
+			lower_jaw_3d = model_3d.get_node_or_null("Visuals/Torso/Head/LowerJaw")
+			torso_3d = model_3d.get_node_or_null("Visuals/Torso")
+			head_3d = model_3d.get_node_or_null("Visuals/Torso/Head")
+		elif zombie_type in [ZombieType.HEAVY, ZombieType.COLOSSUS]:
+			left_leg_3d = model_3d.get_node_or_null("Visuals/LeftLeg")
+			right_leg_3d = model_3d.get_node_or_null("Visuals/RightLeg")
+			left_arm_3d = model_3d.get_node_or_null("Visuals/Torso/LeftArm")
+			right_arm_3d = model_3d.get_node_or_null("Visuals/Torso/RightArm")
+			torso_3d = model_3d.get_node_or_null("Visuals/Torso")
+			head_3d = model_3d.get_node_or_null("Visuals/Torso/Head")
+			base_torso_y = torso_3d.position.y if torso_3d else 2.2
+		elif zombie_type in [ZombieType.SPITTER, ZombieType.SCREAMER]:
+			left_arm_3d = model_3d.get_node_or_null("Visuals/LeftArm")
+			right_arm_3d = model_3d.get_node_or_null("Visuals/RightArm")
+			torso_3d = model_3d.get_node_or_null("Visuals")
+		else:
+			left_leg_3d = model_3d.get_node_or_null("Visuals/LeftLeg")
+			right_leg_3d = model_3d.get_node_or_null("Visuals/RightLeg")
+			left_arm_3d = model_3d.get_node_or_null("Visuals/Torso/LeftArm")
+			right_arm_3d = model_3d.get_node_or_null("Visuals/Torso/RightArm")
+			torso_3d = model_3d.get_node_or_null("Visuals/Torso")
+			head_3d = model_3d.get_node_or_null("Visuals/Torso/Head")
+			base_torso_y = torso_3d.position.y if torso_3d else 1.15
+	
+	if sprite:
+		sprite.texture = sub_viewport.get_texture()
+		sprite.hframes = 1
+		sprite.vframes = 1
+		sprite.frame = 0
+		sprite.offset = Vector2(0, -6)
+
 
 func ignite(duration: float, dps: float) -> void:
 	burning_timer = max(burning_timer, duration)
@@ -333,6 +368,8 @@ func _physics_process(delta: float) -> void:
 		if knockback_velocity.length_squared() > 1.0:
 			knockback_velocity = knockback_velocity.move_toward(Vector2.ZERO, 900.0 * delta)
 		move_and_slide()
+		if velocity.length() > 10.0:
+			update_facing(velocity.normalized())
 		_animate_walk_cycle(delta)  # Clients still need visual walk animation
 		return
 	
@@ -522,76 +559,105 @@ func screech_and_buff() -> void:
 
 func update_facing(face_dir: Vector2) -> void:
 	current_facing_dir = face_dir
-	var angle = face_dir.angle()
-	var dir_idx = int(round(angle / (PI / 4.0)))
-	if dir_idx < 0:
-		dir_idx += 8
-	if sprite:
-		sprite.frame = dir_idx % 8
+	_update_3d_orientation(face_dir)
+
+func _update_3d_orientation(face_dir: Vector2) -> void:
+	if not model_3d:
+		return
+	var angle_2d = face_dir.angle()
+	var target_rot_y: float
+	if zombie_type == ZombieType.INFECTED_DOG:
+		target_rot_y = (3.0 * PI * 0.5) - angle_2d
+	else:
+		target_rot_y = (PI * 0.5) - angle_2d
+	model_3d.rotation.y = target_rot_y
 
 func _animate_walk_cycle(delta: float) -> void:
-	if not sprite:
-		return
-	
-	# Death fall animation
+	# Death collapse animation
 	if death_anim_progress >= 0.0:
 		death_anim_progress = min(death_anim_progress + delta * 3.5, 1.0)
 		var t = death_anim_progress
-		var ease_t = 1.0 - pow(1.0 - t, 3.0)  # Ease-out cubic
-		sprite.rotation = lerp(0.0, PI * 0.45, ease_t) * sign(current_facing_dir.x + 0.001)
-		sprite.offset = sprite_base_offset + Vector2(0, ease_t * 8.0)
-		sprite.scale = Vector2(
-			lerp(1.0, 0.92, ease_t),
-			lerp(1.0, 0.85, ease_t)
-		)
-		modulate.a = lerp(1.0, 0.6, ease_t)
+		var ease_t = 1.0 - pow(1.0 - t, 3.0)
+		if model_3d:
+			if zombie_type == ZombieType.INFECTED_DOG:
+				model_3d.rotation.z = lerp(0.0, PI * 0.48, ease_t)
+				model_3d.position.y = lerp(0.0, -0.3, ease_t)
+			else:
+				model_3d.rotation.x = lerp(0.0, -PI * 0.48, ease_t)
+				model_3d.position.y = lerp(0.0, -0.6, ease_t)
+		if sprite:
+			sprite.modulate.a = lerp(1.0, 0.4, ease_t)
 		return
 	
 	var spd = velocity.length()
-	is_moving = spd > 15.0
+	is_moving = spd > 12.0
 	
 	if is_moving:
-		# Advance walk cycle based on actual movement speed
-		var speed_ratio = clamp(spd / max(speed, 1.0), 0.3, 1.8)
+		var speed_ratio = clamp(spd / max(speed, 1.0), 0.35, 1.75)
 		walk_cycle_time += delta * anim_bob_frequency * speed_ratio
 		
-		# --- Vertical Bob (footstep simulation) ---
-		var bob_wave: float
-		if anim_gallop_asymmetry > 0.0:
-			# Quadruped gallop: front legs hit, brief air, back legs hit
-			var phase = fmod(walk_cycle_time, TAU)
-			bob_wave = abs(sin(phase)) + anim_gallop_asymmetry * sin(phase * 2.0)
-			bob_wave = bob_wave * 0.7  # Normalize
+		if zombie_type == ZombieType.INFECTED_DOG:
+			# Quadruped realistic 4-leg gallop
+			gallop_cycle += delta * 18.0 * speed_ratio
+			if front_left_leg_3d and front_right_leg_3d:
+				front_left_leg_3d.rotation.x = sin(gallop_cycle) * 0.58
+				front_right_leg_3d.rotation.x = -sin(gallop_cycle) * 0.58
+			if back_left_leg_3d and back_right_leg_3d:
+				back_left_leg_3d.rotation.x = -sin(gallop_cycle) * 0.58
+				back_right_leg_3d.rotation.x = sin(gallop_cycle) * 0.58
+			if lower_jaw_3d:
+				lower_jaw_3d.rotation.x = deg_to_rad(12.0) + abs(sin(gallop_cycle * 0.5)) * 0.28
+			if torso_3d:
+				torso_3d.rotation.z = sin(gallop_cycle * 0.5) * 0.08
+				torso_3d.position.y = 0.45 + abs(sin(gallop_cycle)) * 0.08
 		else:
-			# Bipedal walk: simple sinusoidal step cycle
-			bob_wave = abs(sin(walk_cycle_time))
-		
-		var bob_offset = -bob_wave * anim_bob_height * speed_ratio
-		sprite.offset = sprite_base_offset + Vector2(0, bob_offset)
-		
-		# --- Lean (rotation toward movement direction) ---
-		var lean_target = current_facing_dir.x * anim_lean_max * speed_ratio
-		sprite.rotation = lerp(sprite.rotation, lean_target, delta * 12.0)
-		
-		# --- Squash & Stretch ---
-		# On "landing" (bob at peak), squash horizontally and stretch vertically
-		# On "lift" (bob at trough), stretch horizontally and compress vertically
-		var squash_phase = cos(walk_cycle_time * 2.0)  # Double frequency for step
-		var sx = 1.0 + squash_phase * anim_squash_intensity * speed_ratio
-		var sy = 1.0 - squash_phase * anim_squash_intensity * speed_ratio * 0.7
-		sprite.scale = Vector2(sx, sy)
-		
+			# Bipedal walking: Left and right legs swing alternately!
+			if left_leg_3d and right_leg_3d:
+				left_leg_3d.rotation.x = sin(walk_cycle_time) * 0.55
+				right_leg_3d.rotation.x = -sin(walk_cycle_time) * 0.55
+			# Arms swing in opposition!
+			if left_arm_3d and right_arm_3d:
+				left_arm_3d.rotation.x = deg_to_rad(-65.0) - sin(walk_cycle_time) * 0.35
+				right_arm_3d.rotation.x = deg_to_rad(-65.0) + sin(walk_cycle_time) * 0.35
+			# Torso sway & subtle vertical step bob
+			if torso_3d:
+				torso_3d.rotation.z = sin(walk_cycle_time) * 0.07
+				torso_3d.position.y = base_torso_y + abs(sin(walk_cycle_time)) * 0.05
+			if head_3d:
+				head_3d.rotation.x = sin(walk_cycle_time * 2.0) * 0.05
 	else:
-		# --- Idle Breathing ---
-		walk_cycle_time += delta * 2.0  # Slow idle pulse
-		var breathe = sin(walk_cycle_time) * anim_idle_breathe
-		sprite.scale = Vector2(1.0 + breathe, 1.0 - breathe * 0.5)
-		
-		# Smoothly return to neutral
-		sprite.offset = sprite.offset.lerp(sprite_base_offset, delta * 8.0)
-		sprite.rotation = lerp(sprite.rotation, 0.0, delta * 6.0)
+		# Idle: smoothly return legs and arms to resting standing position
+		walk_cycle_time += delta * 2.0
+		if zombie_type == ZombieType.INFECTED_DOG:
+			if front_left_leg_3d and front_right_leg_3d:
+				front_left_leg_3d.rotation.x = lerp_angle(front_left_leg_3d.rotation.x, 0.0, delta * 10.0)
+				front_right_leg_3d.rotation.x = lerp_angle(front_right_leg_3d.rotation.x, 0.0, delta * 10.0)
+			if back_left_leg_3d and back_right_leg_3d:
+				back_left_leg_3d.rotation.x = lerp_angle(back_left_leg_3d.rotation.x, 0.0, delta * 10.0)
+				back_right_leg_3d.rotation.x = lerp_angle(back_right_leg_3d.rotation.x, 0.0, delta * 10.0)
+			if lower_jaw_3d:
+				lower_jaw_3d.rotation.x = lerp_angle(lower_jaw_3d.rotation.x, deg_to_rad(6.0), delta * 8.0)
+			if torso_3d:
+				torso_3d.rotation.z = lerp_angle(torso_3d.rotation.z, 0.0, delta * 8.0)
+				torso_3d.position.y = lerp(torso_3d.position.y, 0.45, delta * 6.0)
+		else:
+			if left_leg_3d and right_leg_3d:
+				left_leg_3d.rotation.x = lerp_angle(left_leg_3d.rotation.x, 0.0, delta * 10.0)
+				right_leg_3d.rotation.x = lerp_angle(right_leg_3d.rotation.x, 0.0, delta * 10.0)
+			if left_arm_3d and right_arm_3d:
+				left_arm_3d.rotation.x = lerp_angle(left_arm_3d.rotation.x, deg_to_rad(-55.0), delta * 8.0)
+				right_arm_3d.rotation.x = lerp_angle(right_arm_3d.rotation.x, deg_to_rad(-55.0), delta * 8.0)
+			if torso_3d:
+				torso_3d.rotation.z = lerp_angle(torso_3d.rotation.z, 0.0, delta * 8.0)
+				torso_3d.position.y = lerp(torso_3d.position.y, base_torso_y + sin(walk_cycle_time * 2.0) * 0.02, delta * 6.0)
 
 func perform_attack() -> void:
+	if left_arm_3d and right_arm_3d:
+		left_arm_3d.rotation.x = deg_to_rad(-115.0)
+		right_arm_3d.rotation.x = deg_to_rad(-115.0)
+	if lower_jaw_3d:
+		lower_jaw_3d.rotation.x = deg_to_rad(30.0)
+	
 	if player and is_instance_valid(player) and player.has_method("take_damage"):
 		var push_dir = (player.global_position - global_position).normalized()
 		if NetworkManager.is_network_active() and player.has_method("net_take_damage"):

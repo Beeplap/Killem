@@ -138,8 +138,10 @@ func enter_prepare_leap(target_pos: Vector2) -> void:
 	leap_direction = (target_pos - global_position).normalized()
 	update_facing(leap_direction)
 	
-	# Slightly squash scale to visually telegraph the leap
-	scale = normal_scale * Vector2(1.2, 0.8)
+	if model_3d:
+		model_3d.scale = Vector3(1.25, 0.65, 1.25)
+	if lower_jaw_3d:
+		lower_jaw_3d.rotation.x = deg_to_rad(28.0)
 
 func _process_prepare_leap(delta: float, target_pos: Vector2) -> void:
 	# Stop moving for 0.25s, track player gaze
@@ -149,11 +151,10 @@ func _process_prepare_leap(delta: float, target_pos: Vector2) -> void:
 	velocity = knockback_velocity
 	move_and_slide()
 	
-	# Crouching animation — compress sprite downward
-	if sprite:
+	# 3D Crouching animation — compress 3D dog model downward
+	if model_3d:
 		var crouch_t = 1.0 - (state_timer / prepare_leap_duration)
-		sprite.offset = sprite_base_offset + Vector2(0, crouch_t * 3.0)
-		sprite.scale = Vector2(1.0 + crouch_t * 0.1, 1.0 - crouch_t * 0.15)
+		model_3d.scale = Vector3(1.0 + crouch_t * 0.25, 1.0 - crouch_t * 0.35, 1.0 + crouch_t * 0.25)
 	
 	state_timer -= delta
 	if state_timer <= 0.0:
@@ -168,8 +169,9 @@ func enter_leaping() -> void:
 	var leap_speed = speed * leap_speed_multiplier
 	velocity = (leap_direction * leap_speed) + knockback_velocity
 	
-	# Stretch scale during forward thrust
-	scale = normal_scale * Vector2(0.8, 1.3)
+	# Stretch 3D model during forward thrust
+	if model_3d:
+		model_3d.scale = Vector3(0.85, 1.35, 0.85)
 	update_facing(leap_direction)
 	Global.play_sound("zombie_groan")
 
@@ -179,14 +181,11 @@ func _process_leaping(delta: float) -> void:
 	velocity = (leap_direction * leap_speed) + knockback_velocity
 	move_and_slide()
 	
-	# Airborne stretch animation — elongate in movement direction
-	if sprite:
+	# 3D Airborne stretch animation — arc upward and forward
+	if model_3d:
 		var leap_progress = 1.0 - (state_timer / leap_duration)
-		# Arc motion: rise then fall
-		var arc_height = sin(leap_progress * PI) * 6.0
-		sprite.offset = sprite_base_offset + Vector2(0, -arc_height)
-		sprite.scale = Vector2(0.88, 1.12)
-		sprite.rotation = leap_direction.angle() * 0.15
+		var arc_height = sin(leap_progress * PI) * 0.45
+		model_3d.position.y = arc_height
 	
 	# Deal damage if it intersects the player during LEAPING
 	if not has_damaged_during_leap and _check_player_leap_intersection():
@@ -205,29 +204,25 @@ func enter_cooldown() -> void:
 	dog_state = DogState.COOLDOWN
 	state_timer = leap_landing_duration
 	
-	# Restore normal scale upon landing
-	scale = normal_scale
+	# Landing impact squash in 3D
+	if model_3d:
+		model_3d.scale = Vector3(1.2, 0.75, 1.2)
+		model_3d.position.y = 0.0
 	velocity = Vector2.ZERO
-	
-	# Landing impact squash
-	if sprite:
-		sprite.scale = Vector2(1.15, 0.85)
-		sprite.offset = sprite_base_offset + Vector2(0, 3.0)
 
 func _process_cooldown(delta: float) -> void:
 	# Pause movement for 0.4s upon landing
 	velocity = knockback_velocity
 	move_and_slide()
 	
-	# Recover from landing squash to normal
-	if sprite:
+	# Recover from landing squash to normal in 3D
+	if model_3d:
 		var recover_t = 1.0 - (state_timer / leap_landing_duration)
-		sprite.scale = Vector2(
-			lerp(1.15, 1.0, recover_t),
-			lerp(0.85, 1.0, recover_t)
+		model_3d.scale = Vector3(
+			lerp(1.2, 1.0, recover_t),
+			lerp(0.75, 1.0, recover_t),
+			lerp(1.2, 1.0, recover_t)
 		)
-		sprite.offset = sprite_base_offset + Vector2(0, lerp(3.0, 0.0, recover_t))
-		sprite.rotation = lerp(sprite.rotation, 0.0, delta * 8.0)
 	
 	state_timer -= delta
 	if state_timer <= 0.0:
@@ -253,5 +248,6 @@ func _check_player_leap_intersection() -> bool:
 	return false
 
 func die(hit_direction: Vector2, is_headshot: bool = false) -> void:
-	scale = normal_scale
+	if model_3d:
+		model_3d.scale = Vector3.ONE
 	super.die(hit_direction, is_headshot)
