@@ -37,11 +37,11 @@ func _ready() -> void:
 	lan_discovery = LAN_DISCOVERY_SCRIPT.new()
 	lan_discovery.name = "LanDiscovery"
 	add_child(lan_discovery)
+	
+	_connect_multiplayer_signals()
 
 func get_lan_discovery() -> Node:
 	return lan_discovery
-	
-	_connect_multiplayer_signals()
 
 func _connect_multiplayer_signals() -> void:
 	multiplayer.peer_connected.connect(_on_multiplayer_peer_connected)
@@ -70,7 +70,6 @@ func host_game(server_name: String, port: int = DEFAULT_PORT, max_clients: int =
 		return err
 	
 	multiplayer.multiplayer_peer = peer
-	multiplayer.multiplayer_poll = true
 	connected_peers.clear()
 	
 	# Start background UDP LAN announcements
@@ -105,7 +104,6 @@ func join_game(target_ip: String, port: int = DEFAULT_PORT) -> Error:
 		return err
 	
 	multiplayer.multiplayer_peer = peer
-	multiplayer.multiplayer_poll = true
 	connected_peers.clear()
 	
 	print("[NETWORK] Attempting to connect to %s:%d..." % [sanitized_ip, port])

@@ -292,21 +292,21 @@ func _get_or_create_sound(sound_name: String) -> AudioStream:
 		var path = "res://assets/audio/%s%s" % [sound_name, ext]
 		if ResourceLoader.exists(path):
 			var stream = load(path)
-			var rand = AudioStreamRandomizer.new()
-			rand.random_pitch = 1.08
-			rand.random_volume_offset_db = 1.2
-			rand.add_stream(0, stream)
-			_sound_cache[sound_name] = rand
-			return rand
+			var file_rand = AudioStreamRandomizer.new()
+			file_rand.random_pitch = 1.08
+			file_rand.random_volume_offset_db = 1.2
+			file_rand.add_stream(0, stream)
+			_sound_cache[sound_name] = file_rand
+			return file_rand
 	
 	# Procedural fallback
 	var proc_stream = _synthesize_procedural_stream(sound_name)
-	var rand = AudioStreamRandomizer.new()
-	rand.random_pitch = 1.08
-	rand.random_volume_offset_db = 1.2
-	rand.add_stream(0, proc_stream)
-	_sound_cache[sound_name] = rand
-	return rand
+	var proc_rand = AudioStreamRandomizer.new()
+	proc_rand.random_pitch = 1.08
+	proc_rand.random_volume_offset_db = 1.2
+	proc_rand.add_stream(0, proc_stream)
+	_sound_cache[sound_name] = proc_rand
+	return proc_rand
 
 func play_sound(sound_name: String, pos = null, bus_override: String = "") -> Node:
 	if sound_name == "zombie_death":
