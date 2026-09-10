@@ -1,39 +1,111 @@
-[gd_scene load_steps=12 format=3]
+[gd_scene format=3 uid="uid://cplaguehound3d001"]
 
 [ext_resource type="Script" path="res://scripts/plague_hound_3d.gd" id="1_hound"]
 [ext_resource type="Texture2D" path="res://assets/textures/characters/hound_hide_pbr.png" id="2_hide"]
-[ext_resource type="Texture2D" path="res://assets/textures/characters/hound_hide_pbr_n.png" id="3_norm"]
+[ext_resource type="Texture2D" path="res://assets/textures/characters/hound_hide_pbr_n.png" id="3_hide_norm"]
+[ext_resource type="Texture2D" path="res://assets/textures/characters/hound_flesh_pbr.png" id="4_flesh"]
+[ext_resource type="Texture2D" path="res://assets/textures/characters/hound_flesh_pbr_n.png" id="5_flesh_norm"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_hound"]
 size = Vector3(0.65, 0.75, 1.4)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_hide"]
 albedo_texture = ExtResource("2_hide")
-normal_enabled = true
-normal_texture = ExtResource("3_norm")
 roughness = 0.75
+normal_enabled = true
+normal_texture = ExtResource("3_hide_norm")
 
-[sub_resource type="BoxMesh" id="BoxMesh_body"]
-material = SubResource("StandardMaterial3D_hide")
-size = Vector3(0.5, 0.45, 1.1)
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_flesh"]
+albedo_texture = ExtResource("4_flesh")
+roughness = 0.35
+specular_mode = 1
+normal_enabled = true
+normal_texture = ExtResource("5_flesh_norm")
 
-[sub_resource type="BoxMesh" id="BoxMesh_head"]
-material = SubResource("StandardMaterial3D_hide")
-size = Vector3(0.32, 0.3, 0.45)
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_bone"]
+albedo_color = Color(0.85, 0.82, 0.74, 1)
+roughness = 0.55
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_eye"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_eye_cataract"]
 shading_mode = 0
-albedo_color = Color(1, 0.1, 0.05, 1)
+albedo_color = Color(0.95, 0.95, 1, 1)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_eye_glow"]
+shading_mode = 0
+albedo_color = Color(1, 0.15, 0.08, 1)
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_body_hide"]
+material = SubResource("StandardMaterial3D_hide")
+radius = 0.22
+height = 0.95
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_raw_muscle"]
+material = SubResource("StandardMaterial3D_flesh")
+radius = 0.2
+height = 0.85
+
+[sub_resource type="BoxMesh" id="BoxMesh_spine"]
+material = SubResource("StandardMaterial3D_bone")
+size = Vector3(0.06, 0.08, 0.8)
+
+[sub_resource type="TorusMesh" id="TorusMesh_rib"]
+material = SubResource("StandardMaterial3D_bone")
+inner_radius = 0.15
+outer_radius = 0.19
+
+[sub_resource type="BoxMesh" id="BoxMesh_skull"]
+material = SubResource("StandardMaterial3D_hide")
+size = Vector3(0.24, 0.22, 0.28)
+
+[sub_resource type="BoxMesh" id="BoxMesh_snout"]
+material = SubResource("StandardMaterial3D_flesh")
+size = Vector3(0.18, 0.14, 0.32)
+
+[sub_resource type="BoxMesh" id="BoxMesh_jaw"]
+material = SubResource("StandardMaterial3D_flesh")
+size = Vector3(0.16, 0.08, 0.28)
+
+[sub_resource type="PrismMesh" id="PrismMesh_fang"]
+material = SubResource("StandardMaterial3D_bone")
+size = Vector3(0.03, 0.08, 0.03)
 
 [sub_resource type="SphereMesh" id="SphereMesh_eye"]
-material = SubResource("StandardMaterial3D_eye")
-radius = 0.04
-height = 0.08
+material = SubResource("StandardMaterial3D_eye_cataract")
+radius = 0.035
+height = 0.07
 
-[sub_resource type="CapsuleMesh" id="CapsuleMesh_leg"]
+[sub_resource type="SphereMesh" id="SphereMesh_eye_red"]
+material = SubResource("StandardMaterial3D_eye_glow")
+radius = 0.025
+height = 0.05
+
+[sub_resource type="BoxMesh" id="BoxMesh_ear"]
 material = SubResource("StandardMaterial3D_hide")
-radius = 0.07
-height = 0.5
+size = Vector3(0.04, 0.22, 0.1)
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_upper_leg"]
+material = SubResource("StandardMaterial3D_flesh")
+radius = 0.065
+height = 0.35
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_lower_leg"]
+material = SubResource("StandardMaterial3D_hide")
+radius = 0.045
+height = 0.32
+
+[sub_resource type="BoxMesh" id="BoxMesh_paw"]
+material = SubResource("StandardMaterial3D_hide")
+size = Vector3(0.1, 0.06, 0.14)
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_hind_haunch"]
+material = SubResource("StandardMaterial3D_flesh")
+radius = 0.085
+height = 0.42
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_tail"]
+material = SubResource("StandardMaterial3D_hide")
+radius = 0.035
+height = 0.38
 
 [node name="PlagueHound3D" type="CharacterBody3D"]
 collision_layer = 2
@@ -51,53 +123,143 @@ shape = SubResource("BoxShape3D_hound")
 [node name="Torso" type="Node3D" parent="Visuals"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.45, 0)
 
-[node name="BodyMesh" type="MeshInstance3D" parent="Visuals/Torso"]
-mesh = SubResource("BoxMesh_body")
+[node name="BodyHideMesh" type="MeshInstance3D" parent="Visuals/Torso"]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0)
+mesh = SubResource("CapsuleMesh_body_hide")
+
+[node name="RawMuscleMesh" type="MeshInstance3D" parent="Visuals/Torso"]
+transform = Transform3D(0.965926, 0, 0.258819, 0, -4.37114e-08, -1, -0.258819, 0.965926, -4.2222e-08, 0.05, 0.02, -0.05)
+mesh = SubResource("CapsuleMesh_raw_muscle")
+
+[node name="SpineMesh" type="MeshInstance3D" parent="Visuals/Torso"]
+transform = Transform3D(1, 0, 0, 0, 0.996195, 0.0871557, 0, -0.0871557, 0.996195, 0, 0.22, -0.02)
+mesh = SubResource("BoxMesh_spine")
+
+[node name="Rib1" type="MeshInstance3D" parent="Visuals/Torso"]
+transform = Transform3D(0.707107, 0, -0.707107, 0, 1, 0, 0.707107, 0, 0.707107, 0.04, 0.06, -0.2)
+mesh = SubResource("TorusMesh_rib")
+
+[node name="Rib2" type="MeshInstance3D" parent="Visuals/Torso"]
+transform = Transform3D(0.707107, 0, -0.707107, 0, 1, 0, 0.707107, 0, 0.707107, 0.04, 0.06, -0.05)
+mesh = SubResource("TorusMesh_rib")
+
+[node name="Rib3" type="MeshInstance3D" parent="Visuals/Torso"]
+transform = Transform3D(0.707107, 0, -0.707107, 0, 1, 0, 0.707107, 0, 0.707107, 0.04, 0.06, 0.1)
+mesh = SubResource("TorusMesh_rib")
+
+[node name="Tail" type="MeshInstance3D" parent="Visuals/Torso"]
+transform = Transform3D(1, 0, 0, 0, 0.866025, 0.5, 0, -0.5, 0.866025, 0, 0.12, 0.55)
+mesh = SubResource("CapsuleMesh_tail")
 
 [node name="Head" type="Node3D" parent="Visuals/Torso"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.18, -0.65)
+transform = Transform3D(1, 0, 0, 0, 0.965926, 0.258819, 0, -0.258819, 0.965926, 0, 0.18, -0.55)
 
-[node name="HeadMesh" type="MeshInstance3D" parent="Visuals/Torso/Head"]
-mesh = SubResource("BoxMesh_head")
+[node name="SkullMesh" type="MeshInstance3D" parent="Visuals/Torso/Head"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.05, 0)
+mesh = SubResource("BoxMesh_skull")
+
+[node name="SnoutMesh" type="MeshInstance3D" parent="Visuals/Torso/Head"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.02, -0.25)
+mesh = SubResource("BoxMesh_snout")
+
+[node name="LowerJaw" type="MeshInstance3D" parent="Visuals/Torso/Head"]
+transform = Transform3D(1, 0, 0, 0, 0.939693, 0.34202, 0, -0.34202, 0.939693, 0, -0.08, -0.22)
+mesh = SubResource("BoxMesh_jaw")
+
+[node name="UpperFangLeft" type="MeshInstance3D" parent="Visuals/Torso/Head"]
+transform = Transform3D(1, 0, 0, 0, -1, 8.74228e-08, 0, -8.74228e-08, -1, -0.07, -0.04, -0.32)
+mesh = SubResource("PrismMesh_fang")
+
+[node name="UpperFangRight" type="MeshInstance3D" parent="Visuals/Torso/Head"]
+transform = Transform3D(1, 0, 0, 0, -1, 8.74228e-08, 0, -8.74228e-08, -1, 0.07, -0.04, -0.32)
+mesh = SubResource("PrismMesh_fang")
+
+[node name="LowerFangLeft" type="MeshInstance3D" parent="Visuals/Torso/Head/LowerJaw"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.06, 0.06, -0.1)
+mesh = SubResource("PrismMesh_fang")
+
+[node name="LowerFangRight" type="MeshInstance3D" parent="Visuals/Torso/Head/LowerJaw"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.06, 0.06, -0.1)
+mesh = SubResource("PrismMesh_fang")
 
 [node name="LeftEye" type="MeshInstance3D" parent="Visuals/Torso/Head"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.1, 0.08, -0.16)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.1, 0.08, -0.12)
 mesh = SubResource("SphereMesh_eye")
 
 [node name="RightEye" type="MeshInstance3D" parent="Visuals/Torso/Head"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.1, 0.08, -0.16)
-mesh = SubResource("SphereMesh_eye")
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.1, 0.08, -0.12)
+mesh = SubResource("SphereMesh_eye_red")
+
+[node name="LeftEar" type="MeshInstance3D" parent="Visuals/Torso/Head"]
+transform = Transform3D(0.965926, 0, 0.258819, 0.258819, 0, -0.965926, 0, 1, 0, -0.14, 0.02, 0.08)
+mesh = SubResource("BoxMesh_ear")
+
+[node name="RightEar" type="MeshInstance3D" parent="Visuals/Torso/Head"]
+transform = Transform3D(0.965926, 0, -0.258819, -0.258819, 0, -0.965926, 0, 1, 0, 0.14, 0.02, 0.08)
+mesh = SubResource("BoxMesh_ear")
 
 [node name="EyeLight" type="OmniLight3D" parent="Visuals/Torso/Head"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.05, -0.2)
-light_color = Color(1, 0.15, 0.1, 1)
-light_energy = 1.8
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.08, -0.2)
+light_color = Color(1, 0.25, 0.15, 1)
+light_energy = 2.2
 omni_range = 3.5
 
 [node name="FrontLeftLeg" type="Node3D" parent="Visuals/Torso"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.22, -0.1, -0.4)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.2, 0.02, -0.35)
 
-[node name="Mesh" type="MeshInstance3D" parent="Visuals/Torso/FrontLeftLeg"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.15, 0)
-mesh = SubResource("CapsuleMesh_leg")
+[node name="Upper" type="MeshInstance3D" parent="Visuals/Torso/FrontLeftLeg"]
+transform = Transform3D(1, 0, 0, 0, 0.965926, -0.258819, 0, 0.258819, 0.965926, 0, -0.12, 0.02)
+mesh = SubResource("CapsuleMesh_upper_leg")
+
+[node name="Lower" type="MeshInstance3D" parent="Visuals/Torso/FrontLeftLeg"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.32, 0)
+mesh = SubResource("CapsuleMesh_lower_leg")
+
+[node name="Paw" type="MeshInstance3D" parent="Visuals/Torso/FrontLeftLeg"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.45, -0.04)
+mesh = SubResource("BoxMesh_paw")
 
 [node name="FrontRightLeg" type="Node3D" parent="Visuals/Torso"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.22, -0.1, -0.4)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.2, 0.02, -0.35)
 
-[node name="Mesh" type="MeshInstance3D" parent="Visuals/Torso/FrontRightLeg"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.15, 0)
-mesh = SubResource("CapsuleMesh_leg")
+[node name="Upper" type="MeshInstance3D" parent="Visuals/Torso/FrontRightLeg"]
+transform = Transform3D(1, 0, 0, 0, 0.965926, -0.258819, 0, 0.258819, 0.965926, 0, -0.12, 0.02)
+mesh = SubResource("CapsuleMesh_upper_leg")
+
+[node name="Lower" type="MeshInstance3D" parent="Visuals/Torso/FrontRightLeg"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.32, 0)
+mesh = SubResource("CapsuleMesh_lower_leg")
+
+[node name="Paw" type="MeshInstance3D" parent="Visuals/Torso/FrontRightLeg"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.45, -0.04)
+mesh = SubResource("BoxMesh_paw")
 
 [node name="BackLeftLeg" type="Node3D" parent="Visuals/Torso"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.22, -0.1, 0.4)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.2, 0.05, 0.35)
 
-[node name="Mesh" type="MeshInstance3D" parent="Visuals/Torso/BackLeftLeg"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.15, 0)
-mesh = SubResource("CapsuleMesh_leg")
+[node name="Haunch" type="MeshInstance3D" parent="Visuals/Torso/BackLeftLeg"]
+transform = Transform3D(1, 0, 0, 0, 0.906308, 0.422618, 0, -0.422618, 0.906308, 0, -0.14, -0.04)
+mesh = SubResource("CapsuleMesh_hind_haunch")
+
+[node name="Lower" type="MeshInstance3D" parent="Visuals/Torso/BackLeftLeg"]
+transform = Transform3D(1, 0, 0, 0, 0.965926, -0.258819, 0, 0.258819, 0.965926, 0, -0.35, 0.04)
+mesh = SubResource("CapsuleMesh_lower_leg")
+
+[node name="Paw" type="MeshInstance3D" parent="Visuals/Torso/BackLeftLeg"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.48, 0)
+mesh = SubResource("BoxMesh_paw")
 
 [node name="BackRightLeg" type="Node3D" parent="Visuals/Torso"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.22, -0.1, 0.4)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.2, 0.05, 0.35)
 
-[node name="Mesh" type="MeshInstance3D" parent="Visuals/Torso/BackRightLeg"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.15, 0)
-mesh = SubResource("CapsuleMesh_leg")
+[node name="Haunch" type="MeshInstance3D" parent="Visuals/Torso/BackRightLeg"]
+transform = Transform3D(1, 0, 0, 0, 0.906308, 0.422618, 0, -0.422618, 0.906308, 0, -0.14, -0.04)
+mesh = SubResource("CapsuleMesh_hind_haunch")
+
+[node name="Lower" type="MeshInstance3D" parent="Visuals/Torso/BackRightLeg"]
+transform = Transform3D(1, 0, 0, 0, 0.965926, -0.258819, 0, 0.258819, 0.965926, 0, -0.35, 0.04)
+mesh = SubResource("CapsuleMesh_lower_leg")
+
+[node name="Paw" type="MeshInstance3D" parent="Visuals/Torso/BackRightLeg"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.48, 0)
+mesh = SubResource("BoxMesh_paw")

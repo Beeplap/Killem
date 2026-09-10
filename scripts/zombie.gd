@@ -101,7 +101,18 @@ func configure_type() -> void:
 			score_value = 100
 			base_scale = 1.0
 			if sprite:
-				sprite.texture = load("res://assets/textures/characters/zombie_regular_8dir.png")
+				# 4 Distinct 3D Model Clothing Variations (Garwalfs Release 14 & Variants)
+				var walker_skins = [
+					{"tex": "res://assets/textures/characters/zombie_regular_8dir.png", "norm": "res://assets/textures/characters/zombie_regular_8dir_n.png"},
+					{"tex": "res://assets/textures/characters/zombie_regular_green_8dir.png", "norm": "res://assets/textures/characters/zombie_regular_green_8dir_n.png"},
+					{"tex": "res://assets/textures/characters/zombie_regular_blue_8dir.png", "norm": "res://assets/textures/characters/zombie_regular_blue_8dir_n.png"},
+					{"tex": "res://assets/textures/characters/zombie_regular_brown_8dir.png", "norm": "res://assets/textures/characters/zombie_regular_brown_8dir_n.png"},
+				]
+				var skin = walker_skins.pick_random()
+				var c_tex = CanvasTexture.new()
+				c_tex.diffuse_texture = load(skin["tex"])
+				c_tex.normal_texture = load(skin["norm"])
+				sprite.texture = c_tex
 				sprite.hframes = 8
 		
 		ZombieType.INFECTED_DOG:
@@ -113,7 +124,11 @@ func configure_type() -> void:
 			score_value = 140
 			base_scale = 0.95
 			if sprite:
-				sprite.texture = load("res://assets/textures/characters/zombie_dog_8dir.png")
+				# Resident Evil Cerberus 3D Model Render
+				var c_tex = CanvasTexture.new()
+				c_tex.diffuse_texture = load("res://assets/textures/characters/zombie_dog_8dir.png")
+				c_tex.normal_texture = load("res://assets/textures/characters/zombie_dog_8dir_n.png")
+				sprite.texture = c_tex
 				sprite.hframes = 8
 		
 		ZombieType.HEAVY:
@@ -125,7 +140,11 @@ func configure_type() -> void:
 			score_value = 280
 			base_scale = 1.35
 			if sprite:
-				sprite.texture = load("res://assets/textures/characters/zombie_heavy_8dir.png")
+				# Garwalfs Fur-Collar Brute 3D Model Render
+				var c_tex = CanvasTexture.new()
+				c_tex.diffuse_texture = load("res://assets/textures/characters/zombie_heavy_8dir.png")
+				c_tex.normal_texture = load("res://assets/textures/characters/zombie_heavy_8dir_n.png")
+				sprite.texture = c_tex
 				sprite.hframes = 8
 		
 		ZombieType.SPITTER:

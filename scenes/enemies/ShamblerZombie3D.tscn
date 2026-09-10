@@ -1,8 +1,14 @@
-[gd_scene load_steps=12 format=3]
+[gd_scene format=3 uid="uid://cshamblerzombie3d001"]
 
 [ext_resource type="Script" path="res://scripts/shambler_zombie_3d.gd" id="1_shambler"]
 [ext_resource type="Texture2D" path="res://assets/textures/characters/zombie_flesh_pbr.png" id="2_flesh"]
-[ext_resource type="Texture2D" path="res://assets/textures/characters/zombie_flesh_pbr_n.png" id="3_norm"]
+[ext_resource type="Texture2D" path="res://assets/textures/characters/zombie_flesh_pbr_n.png" id="3_flesh_norm"]
+[ext_resource type="Texture2D" path="res://assets/textures/characters/zombie_flannel_pbr.png" id="4_flannel"]
+[ext_resource type="Texture2D" path="res://assets/textures/characters/zombie_flannel_pbr_n.png" id="5_flannel_norm"]
+[ext_resource type="Texture2D" path="res://assets/textures/characters/zombie_denim_pbr.png" id="6_denim"]
+[ext_resource type="Texture2D" path="res://assets/textures/characters/zombie_denim_pbr_n.png" id="7_denim_norm"]
+[ext_resource type="Texture2D" path="res://assets/textures/characters/zombie_tanktop_pbr.png" id="8_tank"]
+[ext_resource type="Texture2D" path="res://assets/textures/characters/zombie_tanktop_pbr_n.png" id="9_tank_norm"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_zombie"]
 radius = 0.35
@@ -10,37 +16,121 @@ height = 1.8
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_flesh"]
 albedo_texture = ExtResource("2_flesh")
-normal_enabled = true
-normal_texture = ExtResource("3_norm")
 roughness = 0.85
+normal_enabled = true
+normal_texture = ExtResource("3_flesh_norm")
 
-[sub_resource type="CapsuleMesh" id="CapsuleMesh_torso"]
-material = SubResource("StandardMaterial3D_flesh")
-radius = 0.28
-height = 0.9
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_flannel"]
+albedo_texture = ExtResource("4_flannel")
+roughness = 0.9
+normal_enabled = true
+normal_texture = ExtResource("5_flannel_norm")
 
-[sub_resource type="SphereMesh" id="SphereMesh_head"]
-material = SubResource("StandardMaterial3D_flesh")
-radius = 0.2
-height = 0.4
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_denim"]
+albedo_texture = ExtResource("6_denim")
+roughness = 0.85
+normal_enabled = true
+normal_texture = ExtResource("7_denim_norm")
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_tanktop"]
+albedo_texture = ExtResource("8_tank")
+roughness = 0.88
+normal_enabled = true
+normal_texture = ExtResource("9_tank_norm")
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_bone"]
+albedo_color = Color(0.92, 0.9, 0.82, 1)
+roughness = 0.5
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_hair"]
+albedo_color = Color(0.68, 0.66, 0.62, 1)
+roughness = 0.95
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_bandana"]
+albedo_color = Color(0.72, 0.12, 0.12, 1)
+roughness = 0.85
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_eye"]
 shading_mode = 0
-albedo_color = Color(1, 0.15, 0.1, 1)
+albedo_color = Color(1, 0.18, 0.1, 1)
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_inner_chest"]
+material = SubResource("StandardMaterial3D_flesh")
+radius = 0.24
+height = 0.75
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_shirt"]
+material = SubResource("StandardMaterial3D_flannel")
+radius = 0.27
+height = 0.78
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_tanktop"]
+material = SubResource("StandardMaterial3D_tanktop")
+radius = 0.26
+height = 0.76
+
+[sub_resource type="BoxMesh" id="BoxMesh_belt"]
+material = SubResource("StandardMaterial3D_denim")
+size = Vector3(0.54, 0.08, 0.38)
+
+[sub_resource type="SphereMesh" id="SphereMesh_head"]
+material = SubResource("StandardMaterial3D_flesh")
+radius = 0.18
+height = 0.38
+
+[sub_resource type="BoxMesh" id="BoxMesh_jaw"]
+material = SubResource("StandardMaterial3D_flesh")
+size = Vector3(0.18, 0.08, 0.16)
+
+[sub_resource type="PrismMesh" id="PrismMesh_fang"]
+material = SubResource("StandardMaterial3D_bone")
+size = Vector3(0.025, 0.06, 0.025)
 
 [sub_resource type="SphereMesh" id="SphereMesh_eye"]
 material = SubResource("StandardMaterial3D_eye")
-radius = 0.04
-height = 0.08
+radius = 0.035
+height = 0.07
 
-[sub_resource type="BoxMesh" id="BoxMesh_arm"]
-material = SubResource("StandardMaterial3D_flesh")
-size = Vector3(0.1, 0.1, 0.65)
+[sub_resource type="PrismMesh" id="PrismMesh_hair_spike"]
+material = SubResource("StandardMaterial3D_hair")
+size = Vector3(0.08, 0.16, 0.08)
 
-[sub_resource type="CapsuleMesh" id="CapsuleMesh_leg"]
+[sub_resource type="TorusMesh" id="TorusMesh_bandana"]
+material = SubResource("StandardMaterial3D_bandana")
+inner_radius = 0.14
+outer_radius = 0.19
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_sleeve"]
+material = SubResource("StandardMaterial3D_flannel")
+radius = 0.1
+height = 0.25
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_upper_arm"]
 material = SubResource("StandardMaterial3D_flesh")
-radius = 0.12
-height = 0.85
+radius = 0.075
+height = 0.34
+
+[sub_resource type="BoxMesh" id="BoxMesh_forearm"]
+material = SubResource("StandardMaterial3D_flesh")
+size = Vector3(0.09, 0.09, 0.42)
+
+[sub_resource type="BoxMesh" id="BoxMesh_hand"]
+material = SubResource("StandardMaterial3D_flesh")
+size = Vector3(0.12, 0.05, 0.16)
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_denim_shorts"]
+material = SubResource("StandardMaterial3D_denim")
+radius = 0.14
+height = 0.45
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_shin"]
+material = SubResource("StandardMaterial3D_flesh")
+radius = 0.09
+height = 0.46
+
+[sub_resource type="BoxMesh" id="BoxMesh_foot"]
+material = SubResource("StandardMaterial3D_flesh")
+size = Vector3(0.12, 0.07, 0.22)
 
 [node name="ShamblerZombie3D" type="CharacterBody3D"]
 collision_layer = 2
@@ -58,9 +148,22 @@ shape = SubResource("CapsuleShape3D_zombie")
 [node name="Torso" type="Node3D" parent="Visuals"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.15, 0)
 
-[node name="TorsoMesh" type="MeshInstance3D" parent="Visuals/Torso"]
+[node name="InnerChest" type="MeshInstance3D" parent="Visuals/Torso"]
 transform = Transform3D(1, 0, 0, 0, 0.965926, 0.258819, 0, -0.258819, 0.965926, 0, -0.15, 0.05)
-mesh = SubResource("CapsuleMesh_torso")
+mesh = SubResource("CapsuleMesh_inner_chest")
+
+[node name="FlannelShirt" type="MeshInstance3D" parent="Visuals/Torso"]
+transform = Transform3D(1, 0, 0, 0, 0.965926, 0.258819, 0, -0.258819, 0.965926, 0, -0.15, 0.05)
+mesh = SubResource("CapsuleMesh_shirt")
+
+[node name="TankTop" type="MeshInstance3D" parent="Visuals/Torso"]
+visible = false
+transform = Transform3D(1, 0, 0, 0, 0.965926, 0.258819, 0, -0.258819, 0.965926, 0, -0.15, 0.05)
+mesh = SubResource("CapsuleMesh_tanktop")
+
+[node name="Belt" type="MeshInstance3D" parent="Visuals/Torso"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.48, 0)
+mesh = SubResource("BoxMesh_belt")
 
 [node name="Head" type="Node3D" parent="Visuals/Torso"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.45, 0.08)
@@ -68,32 +171,107 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.45, 0.08)
 [node name="HeadMesh" type="MeshInstance3D" parent="Visuals/Torso/Head"]
 mesh = SubResource("SphereMesh_head")
 
+[node name="Jaw" type="MeshInstance3D" parent="Visuals/Torso/Head"]
+transform = Transform3D(1, 0, 0, 0, 0.939693, 0.34202, 0, -0.34202, 0.939693, 0, -0.12, 0.12)
+mesh = SubResource("BoxMesh_jaw")
+
+[node name="FangLeft" type="MeshInstance3D" parent="Visuals/Torso/Head"]
+transform = Transform3D(1, 0, 0, 0, -1, 8.74228e-08, 0, -8.74228e-08, -1, -0.06, -0.05, 0.18)
+mesh = SubResource("PrismMesh_fang")
+
+[node name="FangRight" type="MeshInstance3D" parent="Visuals/Torso/Head"]
+transform = Transform3D(1, 0, 0, 0, -1, 8.74228e-08, 0, -8.74228e-08, -1, 0.06, -0.05, 0.18)
+mesh = SubResource("PrismMesh_fang")
+
+[node name="HairSpike1" type="MeshInstance3D" parent="Visuals/Torso/Head"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.22, -0.02)
+mesh = SubResource("PrismMesh_hair_spike")
+
+[node name="HairSpike2" type="MeshInstance3D" parent="Visuals/Torso/Head"]
+transform = Transform3D(0.965926, 0.258819, 0, -0.258819, 0.965926, 0, 0, 0, 1, -0.08, 0.18, -0.04)
+mesh = SubResource("PrismMesh_hair_spike")
+
+[node name="HairSpike3" type="MeshInstance3D" parent="Visuals/Torso/Head"]
+transform = Transform3D(0.965926, -0.258819, 0, 0.258819, 0.965926, 0, 0, 0, 1, 0.08, 0.18, -0.04)
+mesh = SubResource("PrismMesh_hair_spike")
+
+[node name="Bandana" type="MeshInstance3D" parent="Visuals/Torso/Head"]
+visible = false
+transform = Transform3D(1, 0, 0, 0, 0.939693, -0.34202, 0, 0.34202, 0.939693, 0, 0.08, 0)
+mesh = SubResource("TorusMesh_bandana")
+
 [node name="LeftEye" type="MeshInstance3D" parent="Visuals/Torso/Head"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.07, 0.05, 0.18)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.07, 0.05, 0.16)
 mesh = SubResource("SphereMesh_eye")
 
 [node name="RightEye" type="MeshInstance3D" parent="Visuals/Torso/Head"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.07, 0.05, 0.18)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.07, 0.05, 0.16)
 mesh = SubResource("SphereMesh_eye")
 
 [node name="LeftArm" type="Node3D" parent="Visuals/Torso"]
 transform = Transform3D(0.965926, 0, 0.258819, 0, 1, 0, -0.258819, 0, 0.965926, -0.32, 0.15, 0)
 
-[node name="ArmMesh" type="MeshInstance3D" parent="Visuals/Torso/LeftArm"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.28)
-mesh = SubResource("BoxMesh_arm")
+[node name="Sleeve" type="MeshInstance3D" parent="Visuals/Torso/LeftArm"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.04, 0.08)
+mesh = SubResource("CapsuleMesh_sleeve")
+
+[node name="UpperArm" type="MeshInstance3D" parent="Visuals/Torso/LeftArm"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.08, 0.12)
+mesh = SubResource("CapsuleMesh_upper_arm")
+
+[node name="Forearm" type="MeshInstance3D" parent="Visuals/Torso/LeftArm"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.35)
+mesh = SubResource("BoxMesh_forearm")
+
+[node name="Hand" type="MeshInstance3D" parent="Visuals/Torso/LeftArm"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.02, 0.58)
+mesh = SubResource("BoxMesh_hand")
 
 [node name="RightArm" type="Node3D" parent="Visuals/Torso"]
 transform = Transform3D(0.965926, 0, -0.258819, 0, 1, 0, 0.258819, 0, 0.965926, 0.32, 0.15, 0)
 
-[node name="ArmMesh" type="MeshInstance3D" parent="Visuals/Torso/RightArm"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.28)
-mesh = SubResource("BoxMesh_arm")
+[node name="Sleeve" type="MeshInstance3D" parent="Visuals/Torso/RightArm"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.04, 0.08)
+mesh = SubResource("CapsuleMesh_sleeve")
 
-[node name="LeftLeg" type="MeshInstance3D" parent="Visuals"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.16, 0.42, 0)
-mesh = SubResource("CapsuleMesh_leg")
+[node name="UpperArm" type="MeshInstance3D" parent="Visuals/Torso/RightArm"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.08, 0.12)
+mesh = SubResource("CapsuleMesh_upper_arm")
 
-[node name="RightLeg" type="MeshInstance3D" parent="Visuals"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.16, 0.42, 0)
-mesh = SubResource("CapsuleMesh_leg")
+[node name="Forearm" type="MeshInstance3D" parent="Visuals/Torso/RightArm"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.35)
+mesh = SubResource("BoxMesh_forearm")
+
+[node name="Hand" type="MeshInstance3D" parent="Visuals/Torso/RightArm"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.02, 0.58)
+mesh = SubResource("BoxMesh_hand")
+
+[node name="LeftLeg" type="Node3D" parent="Visuals"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.16, 0.52, 0)
+
+[node name="DenimShorts" type="MeshInstance3D" parent="Visuals/LeftLeg"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+mesh = SubResource("CapsuleMesh_denim_shorts")
+
+[node name="Shin" type="MeshInstance3D" parent="Visuals/LeftLeg"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.28, 0)
+mesh = SubResource("CapsuleMesh_shin")
+
+[node name="Foot" type="MeshInstance3D" parent="Visuals/LeftLeg"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.48, 0.05)
+mesh = SubResource("BoxMesh_foot")
+
+[node name="RightLeg" type="Node3D" parent="Visuals"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.16, 0.52, 0)
+
+[node name="DenimShorts" type="MeshInstance3D" parent="Visuals/RightLeg"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+mesh = SubResource("CapsuleMesh_denim_shorts")
+
+[node name="Shin" type="MeshInstance3D" parent="Visuals/RightLeg"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.28, 0)
+mesh = SubResource("CapsuleMesh_shin")
+
+[node name="Foot" type="MeshInstance3D" parent="Visuals/RightLeg"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.48, 0.05)
+mesh = SubResource("BoxMesh_foot")
