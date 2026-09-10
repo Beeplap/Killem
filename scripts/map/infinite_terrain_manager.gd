@@ -18,7 +18,7 @@ var prop_noise: FastNoiseLite
 
 # Chunk Management
 var _active_chunks: Dictionary = {} # Vector2i -> TerrainChunk
-var _chunk_pool: Array[TerrainChunk] = []
+var _chunk_pool: Array = []
 var _last_player_chunk: Vector2i = Vector2i(-999999, -999999)
 
 var player: Node = null
@@ -46,6 +46,8 @@ func _init() -> void:
 	_load_resources()
 
 func _ready() -> void:
+	if Global.has_signal("player_died"):
+		Global.player_died.connect(_cleanup_stale_chunks)
 	_setup_container()
 	_find_player()
 	if player:
@@ -58,7 +60,8 @@ func _process(_delta: float) -> void:
 		_find_player()
 		return
 	
-	if not is_instance_valid(chunk_container) or chunk_container.get_parent() == null:
+	var current_scene = get_tree().current_scene
+	if not is_instance_valid(chunk_container) or chunk_container.get_parent() != current_scene:
 		_setup_container()
 	
 	var current_chunk = get_chunk_coord(player.global_position)
@@ -222,10 +225,10 @@ func _spawn_chunk(c: Vector2i) -> void:
 	var chunk: TerrainChunk = null
 	while _chunk_pool.size() > 0:
 		var candidate = _chunk_pool.pop_back()
-		if is_instance_valid(candidate):
+		if is_instance_valid(candidate) and candidate is TerrainChunk:
 			chunk = candidate
 			break
-	if chunk == null:
+	if chunk == null or not is_instance_valid(chunk):
 		chunk = TerrainChunk.new()
 	
 	chunk.setup_chunk(c, self)
@@ -251,7 +254,8 @@ func _despawn_chunk(c: Vector2i) -> void:
 	chunk.visible = false
 	if is_instance_valid(chunk_container) and chunk.get_parent() == chunk_container:
 		chunk_container.remove_child(chunk)
-	_chunk_pool.append(chunk)
+	if is_instance_valid(chunk):
+		_chunk_pool.append(chunk)
 
 func force_update_chunks() -> void:
 	if player:
