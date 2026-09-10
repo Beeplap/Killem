@@ -1,10 +1,12 @@
 extends Node2D
 class_name BossTelegraphDrawer
 
-@onready var boss: GoliathBoss = get_parent() as GoliathBoss
+enum TelegraphType { NONE = 0, CONE_180 = 1, LINEAR_LANE = 2, CIRCLE = 3 }
+
+@onready var boss: Node2D = get_parent()
 
 func _draw() -> void:
-	if boss == null or boss.active_telegraph_type == GoliathBoss.TelegraphType.NONE:
+	if boss == null or not ("active_telegraph_type" in boss) or boss.active_telegraph_type == TelegraphType.NONE:
 		return
 	
 	var progress = clampf(boss.telegraph_timer / maxf(0.001, boss.telegraph_duration), 0.0, 1.0)
@@ -13,12 +15,12 @@ func _draw() -> void:
 	var border_color = Color(1.0, 0.2, 0.25, 0.85 + pulse * 0.15)
 	var progress_fill = Color(1.0, 0.15, 0.15, 0.45)
 	
-	match boss.active_telegraph_type:
-		GoliathBoss.TelegraphType.CONE_180:
+	match int(boss.active_telegraph_type):
+		TelegraphType.CONE_180:
 			draw_cone_180(boss.telegraph_angle, boss.telegraph_range, progress, fill_color, border_color, progress_fill)
-		GoliathBoss.TelegraphType.LINEAR_LANE:
+		TelegraphType.LINEAR_LANE:
 			draw_linear_lane(boss.telegraph_angle, boss.telegraph_range, boss.telegraph_width, progress, fill_color, border_color)
-		GoliathBoss.TelegraphType.CIRCLE:
+		TelegraphType.CIRCLE:
 			draw_circle_telegraph(boss.telegraph_range, progress, fill_color, border_color, progress_fill)
 
 func draw_cone_180(center_angle: float, radius: float, progress: float, fill_col: Color, border_col: Color, prog_col: Color) -> void:
