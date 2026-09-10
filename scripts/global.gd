@@ -18,6 +18,10 @@ signal wave_started(wave_num: int)
 @warning_ignore("unused_signal")
 signal player_died
 @warning_ignore("unused_signal")
+signal player_downed(player_node: Node)
+@warning_ignore("unused_signal")
+signal player_revived(player_node: Node)
+@warning_ignore("unused_signal")
 signal player_fired
 @warning_ignore("unused_signal")
 signal explosion_occurred
@@ -212,8 +216,20 @@ func take_player_damage(amount: float) -> void:
 	player_health = max(0.0, player_health - amount)
 	health_changed.emit(player_health, player_max_health)
 	if player_health <= 0.0:
-		is_game_over = true
-		player_died.emit()
+		var players = get_tree().get_nodes_in_group("player")
+		var has_alive_teammate = false
+		for p in players:
+			if is_instance_valid(p) and not p.get("is_downed") and p.get("health", 100.0) > 0.0:
+				has_alive_teammate = true
+				break
+		if not has_alive_teammate:
+			trigger_player_death()
+
+func trigger_player_death() -> void:
+	if is_game_over:
+		return
+	is_game_over = true
+	player_died.emit()
 
 func heal_player(amount: float) -> void:
 	if is_game_over:
