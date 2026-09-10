@@ -18,6 +18,8 @@ var descent_timer: float = 0.0
 var player_in_range: bool = false
 var hold_timer: float = 0.0
 var beacon_timer: float = 0.0
+var is_menu_open: bool = false
+var interaction_cooldown: float = 0.0
 
 @onready var visual_node: Node2D = $Visual
 @onready var pod_sprite: Sprite2D = $Visual/PodSprite
@@ -36,6 +38,10 @@ func _ready() -> void:
 	
 	body_entered.connect(_on_body_entered)
 	body_exited.connect(_on_body_exited)
+	
+	if EconomyManager:
+		EconomyManager.armory_opened.connect(_on_armory_opened)
+		EconomyManager.armory_closed.connect(_on_armory_closed)
 	
 	if prompt_container:
 		prompt_container.visible = false
@@ -83,8 +89,14 @@ func _process(delta: float) -> void:
 				var pulse = 0.94 + sin(Time.get_ticks_msec() * 0.008) * 0.06
 				prompt_container.scale = Vector2(pulse, pulse)
 			
+			if interaction_cooldown > 0.0:
+				interaction_cooldown -= delta
+			
+			if is_menu_open:
+				return
+			
 			# Hold [E] interaction check
-			if player_in_range and not Global.is_game_over:
+			if player_in_range and not Global.is_game_over and interaction_cooldown <= 0.0:
 				if Input.is_key_pressed(KEY_E):
 					hold_timer += delta
 					if progress_bar:
@@ -97,7 +109,7 @@ func _process(delta: float) -> void:
 						open_armory()
 				else:
 					if hold_timer > 0.0:
-						hold_timer = max(0.0, hold_timer - delta * 2.0)
+						hold_timer = max(0.0, hold_timer - delta * 2.5)
 						if progress_bar:
 							progress_bar.value = hold_timer
 
@@ -170,9 +182,34 @@ func trigger_mechanical_hiss() -> void:
 
 func open_armory() -> void:
 	current_state = PodState.OPENED
+	is_menu_open = true
+	hold_timer = 0.0
+	if progress_bar:
+		progress_bar.value = 0.0
+	if prompt_container:
+		prompt_container.visible = false
+	
 	trigger_mechanical_hiss()
 	Global.play_sound("perk", global_position)
 	
 	# Open tactical vendor UI via EconomyManager
 	if EconomyManager:
 		EconomyManager.open_armory_ui()
+
+func _on_armory_opened() -> void:
+	is_menu_open = true
+	hold_timer = 0.0
+	if progress_bar:
+		progress_bar.value = 0.0
+	if prompt_container:
+		prompt_container.visible = false
+
+func _on_armory_closed() -> void:
+	is_menu_open = false
+	interaction_cooldown = 0.6
+	hold_timer = 0.0
+	if progress_bar:
+		progress_bar.value = 0.0
+	if player_in_range and prompt_container and current_state != PodState.DESCENDING:
+		prompt_container.visible = true
+
