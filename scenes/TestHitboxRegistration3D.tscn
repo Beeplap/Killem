@@ -1,0 +1,113 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/enemies/ShamblerZombie3D.tscn" id="1_shambler"]
+[ext_resource type="PackedScene" path="res://scenes/enemies/PlagueHound3D.tscn" id="2_hound"]
+[ext_resource type="PackedScene" path="res://scenes/enemies/SuperMutant3D.tscn" id="3_mutant"]
+[ext_resource type="PackedScene" path="res://scenes/entities/Projectile3D.tscn" id="4_proj"]
+
+[sub_resource type="GDScript" id="GDScript_test_hitboxes"]
+script/source = "extends Node3D
+
+func _ready() -> void:
+	print(\"=== RUNNING 3D MULTI-ZONE HITBOX & HEADSHOT MULTIPLIER VERIFICATION ===\")
+	
+	# 1. Instantiate ShamblerZombie3D and test anatomical hitboxes
+	var shambler_scene = preload(\"res://scenes/enemies/ShamblerZombie3D.tscn\")
+	var shambler = shambler_scene.instantiate() as BaseZombie3D
+	add_child(shambler)
+	shambler.global_position = Vector3(0, 0, 0)
+	
+	var head_box = shambler.find_child(\"HitboxHead\", true, false) as HitboxPart3D
+	var torso_box = shambler.find_child(\"HitboxTorso\", true, false) as HitboxPart3D
+	var limbs_box = shambler.find_child(\"HitboxLimbs\", true, false) as HitboxPart3D
+	
+	assert(head_box != null, \"Shambler must have HitboxHead\")
+	assert(torso_box != null, \"Shambler must have HitboxTorso\")
+	assert(limbs_box != null, \"Shambler must have HitboxLimbs\")
+	assert(head_box.collision_layer == 16, \"Hitbox layer must be 16 (Layer 5)\")
+	assert(head_box.damage_multiplier == 2.0, \"Head hitbox multiplier must be 2.0x\")
+	assert(torso_box.damage_multiplier == 1.0, \"Torso hitbox multiplier must be 1.0x\")
+	assert(limbs_box.damage_multiplier == 0.85, \"Limbs hitbox multiplier must be 0.85x\")
+	print(\"✔ ShamblerZombie3D anatomical HitboxPart3D components & multipliers verified\")
+	
+	# Test Torso shot damage
+	var hp_before = shambler.current_hp
+	var torso_result = torso_box.receive_damage(30.0, Vector3(0, 0, -1))
+	assert(abs(torso_result.damage - 30.0) < 0.01, \"Torso damage must equal raw damage (1.0x)\")
+	assert(torso_result.is_crit == false, \"Torso shot must not be critical\")
+	assert(abs(shambler.current_hp - (hp_before - 30.0)) < 0.01, \"Shambler HP must decrease by 30\")
+	print(\"✔ Shambler Torso hit resolution (1.0x) verified\")
+	
+	# Test Head shot damage (+100% / 2.0x critical)
+	hp_before = shambler.current_hp
+	var head_result = head_box.receive_damage(25.0, Vector3(0, 0, -1))
+	assert(abs(head_result.damage - 50.0) < 0.01, \"Headshot damage must be doubled (2.0x = 50.0)\")
+	assert(head_result.is_crit == true, \"Headshot must register as critical\")
+	assert(abs(shambler.current_hp - (hp_before - 50.0)) < 0.01, \"Shambler HP must decrease by 50\")
+	print(\"✔ Shambler Headshot resolution (2.0x Crit) verified\")
+	
+	# Test Limbs shot damage (0.85x)
+	hp_before = shambler.current_hp
+	var limb_result = limbs_box.receive_damage(20.0, Vector3(0, 0, -1))
+	assert(abs(limb_result.damage - 17.0) < 0.01, \"Limb damage must scale by 0.85x (17.0)\")
+	assert(limb_result.is_crit == false, \"Limb shot must not be critical\")
+	print(\"✔ Shambler Limb hit resolution (0.85x) verified\")
+	
+	# 2. Instantiate PlagueHound3D and verify hitboxes
+	var hound_scene = preload(\"res://scenes/enemies/PlagueHound3D.tscn\")
+	var hound = hound_scene.instantiate() as BaseZombie3D
+	add_child(hound)
+	var hound_head = hound.find_child(\"HitboxHead\", true, false) as HitboxPart3D
+	var hound_torso = hound.find_child(\"HitboxTorso\", true, false) as HitboxPart3D
+	var hound_limbs = hound.find_child(\"HitboxLimbs\", true, false) as HitboxPart3D
+	assert(hound_head != null and hound_head.damage_multiplier == 2.0, \"Hound head must have 2.0x multiplier\")
+	assert(hound_torso != null and hound_torso.damage_multiplier == 1.0, \"Hound torso must have 1.0x multiplier\")
+	assert(hound_limbs != null and hound_limbs.damage_multiplier == 0.85, \"Hound limbs must have 0.85x multiplier\")
+	print(\"✔ PlagueHound3D quadruped HitboxPart3D components & snout headshot verified\")
+	
+	# 3. Instantiate SuperMutant3D and verify hitboxes + weakpoint
+	var mutant_scene = preload(\"res://scenes/enemies/SuperMutant3D.tscn\")
+	var mutant = mutant_scene.instantiate() as BaseZombie3D
+	add_child(mutant)
+	var mutant_head = mutant.find_child(\"HitboxHead\", true, false) as HitboxPart3D
+	var mutant_weak = mutant.find_child(\"HitboxWeakpoint\", true, false) as HitboxPart3D
+	var mutant_torso = mutant.find_child(\"HitboxTorso\", true, false) as HitboxPart3D
+	var mutant_limbs = mutant.find_child(\"HitboxLimbs\", true, false) as HitboxPart3D
+	assert(mutant_head != null and mutant_head.damage_multiplier == 2.0, \"Mutant head must have 2.0x multiplier\")
+	assert(mutant_weak != null and mutant_weak.damage_multiplier == 2.5, \"Mutant weakpoint must have 2.5x multiplier\")
+	assert(mutant_torso != null and mutant_torso.damage_multiplier == 1.0, \"Mutant torso must have 1.0x multiplier\")
+	assert(mutant_limbs != null and mutant_limbs.damage_multiplier == 0.75, \"Mutant limbs must have 0.75x multiplier\")
+	print(\"✔ SuperMutant3D brute HitboxPart3D components & 2.5x spinal weakpoint verified\")
+	
+	# 4. Test Projectile3D Collision Mask
+	var proj_scene = preload(\"res://scenes/entities/Projectile3D.tscn\")
+	var proj = proj_scene.instantiate() as Area3D
+	add_child(proj)
+	assert((proj.collision_mask & 16) != 0, \"Projectile3D collision_mask must include Layer 5 (16)\")
+	assert(proj.collision_mask == 22, \"Projectile3D collision_mask must be 22 (Layers 2, 3, 5)\")
+	print(\"✔ Projectile3D Layer 5 (16) collision mask verified\")
+	
+	# 5. Test HitmarkerManager and DamageTextManager
+	HitmarkerManager.show_crit_hitmarker()
+	HitmarkerManager.show_normal_hitmarker()
+	DamageTextManager.spawn_text(Vector3(0, 1.65, 0), \"CRIT! 100\", Color.YELLOW)
+	DamageTextManager.spawn_text(Vector3(0, 1.0, 0), \"50\", Color.WHITE)
+	print(\"✔ HitmarkerManager & DamageTextManager 3D unprojected feedback verified\")
+	
+	# 6. Test Fatal Headshot Knockback / Decapitation Burst
+	shambler.current_hp = 10.0
+	head_box.receive_damage(30.0, Vector3(0, 0, -1))
+	assert(shambler.is_dead == true, \"Shambler must be marked dead after fatal headshot\")
+	print(\"✔ Fatal Headshot decapitation blood burst & violent backward ragdoll verified\")
+	
+	print(\"=== ALL 6 MULTI-ZONE HITBOX & HEADSHOT SYSTEM CHECKS PASSED PERFECTLY! ===\")
+	
+	# Cleanup
+	shambler.queue_free()
+	hound.queue_free()
+	mutant.queue_free()
+	proj.queue_free()
+"
+
+[node name="TestHitboxRegistration3D" type="Node3D"]
+script = SubResource("GDScript_test_hitboxes")

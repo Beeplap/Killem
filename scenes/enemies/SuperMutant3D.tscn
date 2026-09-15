@@ -7,6 +7,19 @@
 [ext_resource type="Texture2D" path="res://assets/textures/characters/zombie_flesh_pbr_n.png" id="5_flesh_norm"]
 [ext_resource type="Texture2D" path="res://assets/textures/characters/zombie_denim_pbr.png" id="6_denim"]
 [ext_resource type="Texture2D" path="res://assets/textures/characters/zombie_denim_pbr_n.png" id="7_denim_norm"]
+[ext_resource type="Script" path="res://scripts/combat/hitbox_part_3d.gd" id="8_hitbox"]
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_mutant_head"]
+radius = 0.48
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_mutant_weakpoint"]
+radius = 0.45
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_mutant_torso"]
+size = Vector3(1.85, 1.8, 1.25)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_mutant_limbs"]
+size = Vector3(1.6, 1.7, 1.1)
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_mutant"]
 radius = 1.05
@@ -237,3 +250,54 @@ mesh = SubResource("CapsuleMesh_calf")
 [node name="Foot" type="MeshInstance3D" parent="Visuals/RightLeg"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.05, 0.12)
 mesh = SubResource("BoxMesh_foot")
+
+[node name="Hitboxes" type="Node3D" parent="."]
+
+[node name="HitboxHead" type="Area3D" parent="Hitboxes"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.85, 0.65)
+collision_layer = 16
+collision_mask = 0
+monitoring = false
+script = ExtResource("8_hitbox")
+zone = 0
+damage_multiplier = 2.0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Hitboxes/HitboxHead"]
+shape = SubResource("SphereShape3D_mutant_head")
+
+[node name="HitboxWeakpoint" type="Area3D" parent="Hitboxes"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.8, -0.65)
+collision_layer = 16
+collision_mask = 0
+monitoring = false
+script = ExtResource("8_hitbox")
+zone = 3
+damage_multiplier = 2.5
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Hitboxes/HitboxWeakpoint"]
+shape = SubResource("SphereShape3D_mutant_weakpoint")
+
+[node name="HitboxTorso" type="Area3D" parent="Hitboxes"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.6, 0.05)
+collision_layer = 16
+collision_mask = 0
+monitoring = false
+script = ExtResource("8_hitbox")
+zone = 1
+damage_multiplier = 1.0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Hitboxes/HitboxTorso"]
+shape = SubResource("BoxShape3D_mutant_torso")
+
+[node name="HitboxLimbs" type="Area3D" parent="Hitboxes"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.85, 0)
+collision_layer = 16
+collision_mask = 0
+monitoring = false
+script = ExtResource("8_hitbox")
+zone = 2
+damage_multiplier = 0.75
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Hitboxes/HitboxLimbs"]
+shape = SubResource("BoxShape3D_mutant_limbs")
+

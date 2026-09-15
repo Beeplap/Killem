@@ -120,6 +120,13 @@ func _unhandled_input(event: InputEvent) -> void:
 		elif event.keycode == KEY_R:
 			PlayerShooting.play_reload_sequence(get_tree(), global_position)
 	
+	# Mouse Wheel Weapon Cycling
+	if event is InputEventMouseButton and event.pressed:
+		if event.button_index == MOUSE_BUTTON_WHEEL_UP:
+			cycle_weapon(-1)
+		elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
+			cycle_weapon(1)
+	
 	# Combat Dodge Dash (Space)
 	if event.is_action_pressed("dodge_roll") or (event is InputEventKey and event.pressed and event.keycode == KEY_SPACE):
 		if not is_dashing and dash_cooldown_timer <= 0.0:
@@ -391,12 +398,30 @@ func apply_hand_recoil(kick_z: float, pitch_x: float) -> void:
 	current_recoil_offset_z = clampf(current_recoil_offset_z, -0.16, 0.0)
 	current_recoil_pitch_x = clampf(current_recoil_pitch_x, -0.28, 0.0)
 
+func _get_global_weapon_type(w: WeaponType3D) -> Global.WeaponType:
+	match w:
+		WeaponType3D.PISTOL: return Global.WeaponType.PISTOL
+		WeaponType3D.SHOTGUN: return Global.WeaponType.SHOTGUN
+		WeaponType3D.ASSAULT_RIFLE: return Global.WeaponType.ASSAULT_RIFLE
+		WeaponType3D.FLAMETHROWER: return Global.WeaponType.FLAMETHROWER
+		WeaponType3D.MINIGUN: return Global.WeaponType.MINIGUN
+	return Global.WeaponType.PISTOL
+
 func fire_current_weapon() -> void:
 	var active_w = get_active_weapon_node()
 	if active_w == null:
 		return
 	
 	var spawn_pos: Vector3 = get_active_muzzle_position()
+	
+	# Ammo verification and consumption
+	var g_type = _get_global_weapon_type(current_weapon)
+	if not Global.has_ammo(g_type):
+		PlayerShooting.play_empty_click(spawn_pos)
+		fire_cooldown = 0.25
+		return
+	
+	Global.consume_ammo(g_type)
 	
 	# Flash light for 0.05s
 	set_active_muzzle_flash(true)
@@ -507,6 +532,8 @@ func switch_weapon(weapon_type: WeaponType3D) -> void:
 		WeaponType3D.PISTOL: Global.set_weapon(Global.WeaponType.PISTOL)
 		WeaponType3D.SHOTGUN: Global.set_weapon(Global.WeaponType.SHOTGUN)
 		WeaponType3D.ASSAULT_RIFLE: Global.set_weapon(Global.WeaponType.ASSAULT_RIFLE)
+		WeaponType3D.FLAMETHROWER: Global.set_weapon(Global.WeaponType.FLAMETHROWER)
+		WeaponType3D.MINIGUN: Global.set_weapon(Global.WeaponType.MINIGUN)
 	
 	# Equip transition: slight weapon draw dip and return via Tween
 	var hand_node = right_hand_socket if right_hand_socket else right_hand_attachment
@@ -517,6 +544,11 @@ func switch_weapon(weapon_type: WeaponType3D) -> void:
 		var dip_pos = default_hand_pos + Vector3(0, -0.07, -0.04)
 		_equip_tween.tween_property(hand_node, "position", dip_pos, 0.08).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 		_equip_tween.tween_property(hand_node, "position", default_hand_pos, 0.12).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
+
+func cycle_weapon(dir: int) -> void:
+	var total_weapons: int = 5
+	var next_idx: int = posmod(int(current_weapon) + dir, total_weapons)
+	switch_weapon(next_idx as WeaponType3D)
 
 func get_active_weapon_node() -> Node3D:
 	match current_weapon:

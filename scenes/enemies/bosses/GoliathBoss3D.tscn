@@ -3,6 +3,19 @@
 [ext_resource type="Script" path="res://scripts/goliath_boss_3d.gd" id="1_boss"]
 [ext_resource type="ArrayMesh" path="res://assets/models/boss/goliath_boss.obj" id="2_boss_mesh"]
 [ext_resource type="ArrayMesh" path="res://assets/models/boss/boulder.obj" id="3_boulder_mesh"]
+[ext_resource type="Script" path="res://scripts/combat/hitbox_part_3d.gd" id="4_hitbox"]
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_goliath_head"]
+radius = 0.52
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_goliath_weakpoint"]
+radius = 0.55
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_goliath_torso"]
+size = Vector3(2.2, 1.8, 1.5)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_goliath_limbs"]
+size = Vector3(1.8, 1.45, 1.2)
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_goliath"]
 radius = 1.35
@@ -116,3 +129,54 @@ mesh = SubResource("CylinderMesh_leap")
 [node name="NavigationAgent3D" type="NavigationAgent3D" parent="."]
 target_desired_distance = 4.0
 path_max_distance = 4.0
+
+[node name="Hitboxes" type="Node3D" parent="."]
+
+[node name="HitboxHead" type="Area3D" parent="Hitboxes"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.75, 0.25)
+collision_layer = 16
+collision_mask = 0
+monitoring = false
+script = ExtResource("4_hitbox")
+zone = 0
+damage_multiplier = 2.0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Hitboxes/HitboxHead"]
+shape = SubResource("SphereShape3D_goliath_head")
+
+[node name="HitboxWeakpoint" type="Area3D" parent="Hitboxes"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.35, -1.05)
+collision_layer = 16
+collision_mask = 0
+monitoring = false
+script = ExtResource("4_hitbox")
+zone = 3
+damage_multiplier = 2.5
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Hitboxes/HitboxWeakpoint"]
+shape = SubResource("SphereShape3D_goliath_weakpoint")
+
+[node name="HitboxTorso" type="Area3D" parent="Hitboxes"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.35, 0)
+collision_layer = 16
+collision_mask = 0
+monitoring = false
+script = ExtResource("4_hitbox")
+zone = 1
+damage_multiplier = 1.0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Hitboxes/HitboxTorso"]
+shape = SubResource("BoxShape3D_goliath_torso")
+
+[node name="HitboxLimbs" type="Area3D" parent="Hitboxes"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.75, 0)
+collision_layer = 16
+collision_mask = 0
+monitoring = false
+script = ExtResource("4_hitbox")
+zone = 2
+damage_multiplier = 0.75
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Hitboxes/HitboxLimbs"]
+shape = SubResource("BoxShape3D_goliath_limbs")
+

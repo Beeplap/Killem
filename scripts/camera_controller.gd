@@ -32,6 +32,7 @@ var trauma: float = 0.0
 var active_boss_target: Node2D = null
 
 func _ready() -> void:
+	add_to_group("camera_controller")
 	if not player:
 		_find_player()
 	

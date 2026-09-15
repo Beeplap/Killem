@@ -9,10 +9,15 @@ var timer: float = 0.0
 var direction: Vector3 = Vector3.FORWARD
 var projectile_type: ProjectileType = ProjectileType.BULLET
 
+var _has_hit: bool = false
+var pierce_count: int = 0
+var _hit_entities: Array[Node] = []
+
 @onready var collision_shape: CollisionShape3D = $CollisionShape3D
 @onready var mesh_instance: MeshInstance3D = $MeshInstance3D
 
 func _ready() -> void:
+	collision_mask = 22
 	body_entered.connect(_on_body_entered)
 	area_entered.connect(_on_area_entered)
 	setup_visuals()
@@ -25,6 +30,17 @@ func setup(spawn_pos: Vector3, shoot_dir: Vector3, bullet_damage: float, bullet_
 	lifetime = bullet_lifetime
 	projectile_type = type
 	timer = 0.0
+	_hit_entities.clear()
+	
+	match type:
+		ProjectileType.BULLET:
+			pierce_count = 1
+		ProjectileType.SHOTGUN_PELLET:
+			pierce_count = 0
+		ProjectileType.FLAME:
+			pierce_count = 3
+		ProjectileType.MINIGUN_ROUND:
+			pierce_count = 2
 	
 	# Orient projectile towards travel direction
 	if direction.length_squared() > 0.001:
@@ -98,25 +114,92 @@ func spawn_hit_sparks(is_flesh: bool, hit_pos: Vector3, hit_normal: Vector3) -> 
 	particles.finished.connect(particles.queue_free)
 
 func _on_body_entered(body: Node3D) -> void:
+	if _has_hit:
+		return
 	if body.is_in_group("player"):
 		return
 	
+	# If this body has a HitboxPart3D currently overlapping our projectile, let _on_area_entered resolve it
+	var overlapping = get_overlapping_areas()
+	for area in overlapping:
+		if area is HitboxPart3D and (area.parent_entity == body or area.get_parent() == body or body.is_ancestor_of(area)):
+			_on_area_entered(area)
+			return
+	
 	if body.is_in_group("enemies") or body.has_method("take_damage"):
+		if body in _hit_entities:
+			return
+		_hit_entities.append(body)
+		
 		body.take_damage(damage, direction)
+		AudioManager.play_flesh_impact(global_position)
+		HitmarkerManager.show_normal_hitmarker()
+		DamageTextManager.spawn_text(global_position, "%d" % int(damage), Color.WHITE)
 		spawn_hit_sparks(true, global_position, -direction)
 		if projectile_type == ProjectileType.SHOTGUN_PELLET:
 			Global.trigger_hitstop(0.04, 0.05)
-		queue_free()
-	elif body is StaticBody3D or body is CSGShape3D or body.is_in_group("obstacles"):
+		
+		if pierce_count > 0:
+			pierce_count -= 1
+			damage *= 0.75
+		else:
+			_has_hit = true
+			queue_free()
+	elif body is StaticBody3D or body is CSGShape3D or body.is_in_group("obstacles") or body is GridMap:
+		_has_hit = true
 		spawn_hit_sparks(false, global_position, -direction)
 		queue_free()
 
 func _on_area_entered(area: Area3D) -> void:
-	if area.is_in_group("player") or area.get_parent().is_in_group("player"):
+	if _has_hit:
+		return
+	if area.is_in_group("player") or (area.get_parent() and area.get_parent().is_in_group("player")):
+		return
+	
+	if area is HitboxPart3D:
+		var parent = area.parent_entity if area.parent_entity else area.get_parent()
+		if parent in _hit_entities:
+			return # Avoid hitting multiple hitbox parts of the same entity with one bullet
+		_hit_entities.append(parent)
+		
+		var hit_info = area.receive_damage(damage, direction)
+		var hit_pos = global_position
+		
+		if hit_info.get("is_crit", false):
+			AudioManager.play_headshot_crunch(hit_pos)
+			HitmarkerManager.show_crit_hitmarker()
+			DamageTextManager.spawn_text(hit_pos, "%d" % int(hit_info.damage), Color.YELLOW)
+		else:
+			AudioManager.play_flesh_impact(hit_pos)
+			HitmarkerManager.show_normal_hitmarker()
+			DamageTextManager.spawn_text(hit_pos, "%d" % int(hit_info.damage), Color.WHITE)
+		
+		spawn_hit_sparks(true, hit_pos, -direction)
+		if projectile_type == ProjectileType.SHOTGUN_PELLET:
+			Global.trigger_hitstop(0.04, 0.05)
+		
+		if pierce_count > 0:
+			pierce_count -= 1
+			damage *= 0.75
+		else:
+			_has_hit = true
+			queue_free()
 		return
 	
 	var target = area if area.has_method("take_damage") else area.get_parent()
 	if target and target.has_method("take_damage"):
+		if target in _hit_entities:
+			return
+		_hit_entities.append(target)
 		target.take_damage(damage, direction)
+		AudioManager.play_flesh_impact(global_position)
+		HitmarkerManager.show_normal_hitmarker()
+		DamageTextManager.spawn_text(global_position, "%d" % int(damage), Color.WHITE)
 		spawn_hit_sparks(true, global_position, -direction)
-		queue_free()
+		
+		if pierce_count > 0:
+			pierce_count -= 1
+			damage *= 0.75
+		else:
+			_has_hit = true
+			queue_free()

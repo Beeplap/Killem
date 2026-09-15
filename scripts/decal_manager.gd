@@ -5,7 +5,7 @@ extends Node
 # Zero node instantiation overhead at runtime, single draw-call rendering.
 
 const MAX_BLOOD_INSTANCES: int = 1000
-const MAX_CASING_INSTANCES: int = 40
+const MAX_CASING_INSTANCES: int = 1000
 const CASING_LIFETIME: float = 4.0
 
 var blood_multimesh_instance: MultiMeshInstance2D = null

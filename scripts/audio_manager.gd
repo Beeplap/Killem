@@ -450,6 +450,20 @@ func play_bullet_impact(is_armor: bool, pos = null, is_crit: bool = false) -> vo
 		if p:
 			p.volume_db = 0.0 if is_crit else -2.5
 
+func play_headshot_crunch(pos = null) -> void:
+	# Visceral skull crack transient + heavy flesh impact
+	var p_crack = play_sound("kill_bone_crack", pos, BUS_ZOMBIES)
+	if p_crack:
+		p_crack.volume_db = 2.0
+	var p_flesh = play_sound("flesh_impact", pos, BUS_ZOMBIES)
+	if p_flesh:
+		p_flesh.volume_db = 0.5
+
+func play_flesh_impact(pos = null) -> void:
+	var p = play_sound("flesh_impact", pos, BUS_ZOMBIES)
+	if p:
+		p.volume_db = -1.5
+
 func play_zombie_death(pos = null) -> void:
 	if _active_death_count >= MAX_DEATH_POLYPHONY:
 		# Polyphony clamped: Only play immediate bone crack transient, skip delayed body drop

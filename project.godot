@@ -44,7 +44,7 @@ window/stretch/mode="canvas_items"
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/terrain_3d")
+enabled=PackedStringArray("res://addons/terrain_3d", "res://addons/phantom_camera")
 
 [input]
 

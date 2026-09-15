@@ -15,6 +15,12 @@ func _run_tests() -> void:
 	add_child(main_level)
 	
 	var player = main_level.get_node_or_null("Player")
+	if not player and "player" in main_level and main_level.player:
+		player = main_level.player
+	if not player and main_level.has_node("Players/1"):
+		player = main_level.get_node("Players/1")
+	if not player:
+		player = get_tree().get_first_node_in_group("player")
 	assert(player != null, "Player node must exist in MainLevel")
 	
 	var horde_director = main_level.get_node_or_null("HordeDirector")

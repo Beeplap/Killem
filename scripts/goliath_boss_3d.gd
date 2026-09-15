@@ -401,6 +401,32 @@ func handle_radiation_field(delta: float) -> void:
 				Global.play_sound("radiation_tick", global_position)
 
 # --- DAMAGE & PHASE TRANSITIONS ---
+func apply_damage(dmg: float, is_crit: bool, hit_direction: Vector3 = Vector3.ZERO, zone: int = 1) -> void:
+	if current_state == State.DEAD:
+		return
+	
+	var is_weakpoint: bool = (zone == 3) # HitboxPart3D.BodyZone.WEAKPOINT
+	var is_head: bool = (zone == 0) # HitboxPart3D.BodyZone.HEAD
+	
+	if is_crit or is_head or is_weakpoint:
+		spawn_crit_sparks()
+		flash_damage_tint(true)
+	else:
+		flash_damage_tint(false)
+	
+	current_health = max(0.0, current_health - dmg)
+	boss_health_changed.emit(current_health, max_health)
+	
+	# Phase transition checks
+	var health_ratio = current_health / max_health
+	if current_phase == Phase.PHASE_1 and health_ratio <= 0.60:
+		transition_to_phase(Phase.PHASE_2)
+	elif current_phase == Phase.PHASE_2 and health_ratio <= 0.20:
+		transition_to_phase(Phase.PHASE_3)
+	
+	if current_health <= 0.0:
+		die()
+
 func take_damage(dmg: float, hit_direction: Vector3 = Vector3.ZERO) -> void:
 	if current_state == State.DEAD:
 		return
@@ -415,27 +441,16 @@ func take_damage(dmg: float, hit_direction: Vector3 = Vector3.ZERO) -> void:
 			is_back_hit = true
 	
 	var final_dmg = dmg
+	var is_crit = false
+	var zone = 1
 	if current_phase == Phase.PHASE_3 and is_back_hit:
 		# +200% Critical Damage on Exposed Weak Point
 		final_dmg = dmg * 3.0
+		is_crit = true
+		zone = 3
 		Global.play_sound("hit", global_position)
-		spawn_crit_sparks()
 	
-	current_health = max(0.0, current_health - final_dmg)
-	boss_health_changed.emit(current_health, max_health)
-	
-	# Flash mesh damage
-	flash_damage_tint(is_back_hit)
-	
-	# Phase transition checks
-	var health_ratio = current_health / max_health
-	if current_phase == Phase.PHASE_1 and health_ratio <= 0.60:
-		transition_to_phase(Phase.PHASE_2)
-	elif current_phase == Phase.PHASE_2 and health_ratio <= 0.20:
-		transition_to_phase(Phase.PHASE_3)
-	
-	if current_health <= 0.0:
-		die()
+	apply_damage(final_dmg, is_crit, hit_direction, zone)
 
 func transition_to_phase(new_phase: Phase) -> void:
 	current_phase = new_phase

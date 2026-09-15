@@ -38,13 +38,15 @@ func _ready() -> void:
 	assert(player_pcam.follow_mode == PhantomCamera2D.FollowMode.SIMPLE or player_pcam.follow_mode == PhantomCamera2D.FollowMode.GLUED, "Player PCam follow_mode must be SIMPLE or GLUED")
 	assert(player_pcam.follow_damping == true, "Player PCam follow_damping must be enabled")
 	assert(player_pcam.follow_damping_value == Vector2(0.15, 0.15), "Player PCam damping factor must be 0.15")
-	assert(player_pcam.follow_target == level.get_node("Player"), "Player PCam follow_target must be Player node")
+	var target_player = level.player if ("player" in level and level.player) else (level.get_node_or_null("Player") if level.has_node("Player") else level.get_tree().get_first_node_in_group("player"))
+	assert(target_player != null, "Player node must exist in level")
+	assert(player_pcam.follow_target == target_player, "Player PCam follow_target must be Player node")
 	print("✔ 4. PlayerPhantomCamera2D damping, follow mode, and target verified")
 	
 	# 4. Verify Aiming Lookahead
 	assert(cam_controller.lookahead_enabled == true, "Aiming lookahead must be enabled")
 	# Simulate looking 300px to the right
-	var player = level.get_node("Player")
+	var player = target_player
 	player.global_position = Vector2(0, 0)
 	# Process delta frames to let lookahead lerp
 	for i in range(30):

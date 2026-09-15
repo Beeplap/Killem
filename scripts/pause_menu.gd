@@ -30,9 +30,10 @@ func _ready() -> void:
 	_connect_controls()
 	_load_current_settings()
 
-func _unhandled_input(event: InputEvent) -> void:
-	if event.is_action_pressed("ui_cancel") or (event is InputEventKey and event.pressed and event.keycode == KEY_ESCAPE):
+func _input(event: InputEvent) -> void:
+	if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_ESCAPE:
 		toggle_pause()
+		get_viewport().set_input_as_handled()
 
 func toggle_pause() -> void:
 	var new_state = not get_tree().paused

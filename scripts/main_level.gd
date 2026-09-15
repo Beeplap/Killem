@@ -69,7 +69,9 @@ func spawn_player(peer_id: int) -> CharacterBody2D:
 	
 	if peer_id == NetworkManager.get_local_peer_id():
 		player = new_player
-		var cam_ctrl = get_tree().get_first_node_in_group("camera_controller")
+		var cam_ctrl = get_node_or_null("CameraController")
+		if not cam_ctrl:
+			cam_ctrl = get_tree().get_first_node_in_group("camera_controller")
 		if cam_ctrl and cam_ctrl.has_method("set_player_target"):
 			cam_ctrl.set_player_target(new_player)
 	

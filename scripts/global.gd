@@ -155,6 +155,9 @@ func reset_state() -> void:
 	hitstop_active = false
 	keycards_collected.clear()
 
+func reset_game() -> void:
+	reset_state()
+
 func show_notification(title: String, subtitle: String = "", color: Color = Color(0.98, 0.85, 0.18)) -> void:
 	notification_displayed.emit(title, subtitle, color)
 

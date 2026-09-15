@@ -35,6 +35,8 @@ func _setup_audio() -> void:
 	audio_player.stream = gen
 
 func play_hit_audio(pitch_scale_mult: float = 1.0) -> void:
+	if not is_inside_tree():
+		return
 	# Check if AudioManager has dedicated hit sound
 	var audio_mgr = get_node_or_null("/root/AudioManager")
 	if audio_mgr and audio_mgr.has_method("play_ui_sound"):
@@ -92,6 +94,8 @@ func flash_hit(type: HitType) -> void:
 	queue_redraw()
 
 func _trigger_crit_microfreeze() -> void:
+	if not is_inside_tree():
+		return
 	Engine.time_scale = 0.05
 	var tree = get_tree()
 	if tree:
@@ -101,7 +105,8 @@ func _trigger_crit_microfreeze() -> void:
 
 func _process(delta: float) -> void:
 	# Pin to mouse cursor / crosshair position in screen space
-	global_position = get_viewport().get_mouse_position()
+	if get_viewport():
+		global_position = get_viewport().get_mouse_position()
 	
 	if active_timer > 0.0:
 		active_timer -= delta

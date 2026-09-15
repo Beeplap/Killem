@@ -237,26 +237,87 @@ func perform_melee_attack() -> void:
 			target_player.take_damage(attack_damage, dir)
 		Global.play_sound("zombie_aggro", global_position)
 
-func trigger_hit_flash() -> void:
-	flash_timer = 0.12
+func trigger_hit_flash(is_crit: bool = false) -> void:
+	flash_timer = 0.14 if is_crit else 0.10
 	if hit_flash_material:
-		hit_flash_material.set_shader_parameter("flash_amount", 0.95)
+		if is_crit:
+			hit_flash_material.set_shader_parameter("flash_color", Color(1.0, 0.25, 0.25, 1.0))
+			hit_flash_material.set_shader_parameter("flash_amount", 1.0)
+		else:
+			hit_flash_material.set_shader_parameter("flash_color", Color(1.0, 1.0, 1.0, 1.0))
+			hit_flash_material.set_shader_parameter("flash_amount", 0.95)
 
-func take_damage(amount: float, knockback_dir: Vector3 = Vector3.ZERO) -> void:
+func spawn_headshot_burst(hit_dir: Vector3) -> void:
+	var scene = get_tree().current_scene
+	if not scene:
+		scene = get_parent()
+	if not scene:
+		return
+	
+	var particles = CPUParticles3D.new()
+	particles.emitting = true
+	particles.one_shot = true
+	particles.explosiveness = 0.98
+	particles.amount = 26
+	particles.lifetime = 0.42
+	
+	var emit_dir = hit_dir.normalized() if hit_dir != Vector3.ZERO else Vector3.UP
+	particles.direction = emit_dir + Vector3.UP * 0.4
+	particles.spread = 55.0
+	particles.initial_velocity_min = 5.5
+	particles.initial_velocity_max = 13.0
+	particles.gravity = Vector3(0, -12.0, 0)
+	
+	var quad = QuadMesh.new()
+	quad.size = Vector2(0.12, 0.12)
+	particles.mesh = quad
+	
+	var mat = StandardMaterial3D.new()
+	mat.shading_mode = StandardMaterial3D.SHADING_MODE_UNSHADED
+	mat.albedo_color = Color(0.75, 0.05, 0.05)
+	particles.material_override = mat
+	
+	scene.add_child(particles)
+	var head_pos = global_position + Vector3(0, 1.65, 0)
+	if visuals and visuals.has_node("Torso/Head"):
+		head_pos = visuals.get_node("Torso/Head").global_position
+	particles.global_position = head_pos
+	particles.finished.connect(particles.queue_free)
+
+func apply_damage(amount: float, is_crit: bool, hit_dir: Vector3, zone: int = 1) -> void:
 	if is_dead:
 		return
 	
 	current_hp -= amount
-	trigger_hit_flash()
-	Global.play_sound("zombie_hurt", global_position)
+	trigger_hit_flash(is_crit)
 	
-	# Apply knockback scaled by resistance
-	if knockback_dir != Vector3.ZERO and knockback_resistance < 1.0:
-		var kb_power = 7.5 * (1.0 - knockback_resistance)
-		knockback_velocity = knockback_dir.normalized() * kb_power
+	if is_crit:
+		Global.play_sound("kill_bone_crack", global_position)
+	else:
+		Global.play_sound("zombie_hurt", global_position)
+	
+	# Headshot applies +50% knockback / stagger impulse
+	var is_headshot: bool = (zone == 0 or is_crit)
+	var kb_mult: float = 1.5 if is_headshot else 1.0
+	
+	if hit_dir != Vector3.ZERO and knockback_resistance < 1.0:
+		var kb_power = 7.5 * (1.0 - knockback_resistance) * kb_mult
+		knockback_velocity = hit_dir.normalized() * kb_power
 	
 	if current_hp <= 0.0:
-		die(knockback_dir)
+		if is_headshot:
+			spawn_headshot_burst(hit_dir)
+			if visuals:
+				var head_node = visuals.find_child("Head", true, false)
+				if head_node:
+					head_node.visible = false
+			var violent_death_impulse = hit_dir.normalized() * 8.0 + Vector3.UP * 2.0
+			die(violent_death_impulse)
+		else:
+			die(hit_dir)
+
+func take_damage(amount: float, knockback_dir: Vector3 = Vector3.ZERO) -> void:
+	apply_damage(amount, false, knockback_dir, 1)
 
 func die(death_dir: Vector3 = Vector3.ZERO) -> void:
 	if is_dead:

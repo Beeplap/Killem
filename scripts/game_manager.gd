@@ -63,4 +63,8 @@ func reset_game() -> void:
 	_scrap = 0
 	is_game_over = false
 	if has_node("/root/Global"):
-		get_node("/root/Global").reset_game()
+		var g = get_node("/root/Global")
+		if g.has_method("reset_state"):
+			g.reset_state()
+		elif g.has_method("reset_game"):
+			g.reset_game()
