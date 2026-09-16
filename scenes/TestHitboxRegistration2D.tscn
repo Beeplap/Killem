@@ -1,0 +1,146 @@
+[gd_scene load_steps=2 format=3]
+
+[sub_resource type="GDScript" id="GDScript_test_2d_hitboxes"]
+script/source = "extends Node2D
+
+func _ready() -> void:
+	print(\"=== RUNNING 2D MULTI-ZONE HITBOX & HEADSHOT MULTIPLIER VERIFICATION ===\")
+	
+	# 1. Instantiate 2D Regular Zombie
+	var zombie_scene = preload(\"res://scenes/Zombie.tscn\")
+	var zombie = zombie_scene.instantiate() as Zombie
+	add_child(zombie)
+	zombie.global_position = Vector2(0, 0)
+	
+	var head_box = zombie.find_child(\"HitboxHead\", true, false) as HitboxPart2D
+	var torso_box = zombie.find_child(\"HitboxTorso\", true, false) as HitboxPart2D
+	var limbs_box = zombie.find_child(\"HitboxLimbs\", true, false) as HitboxPart2D
+	
+	assert(head_box != null, \"Zombie must have HitboxHead\")
+	assert(torso_box != null, \"Zombie must have HitboxTorso\")
+	assert(limbs_box != null, \"Zombie must have HitboxLimbs\")
+	assert(head_box.collision_layer == 16, \"Hitbox layer must be 16 (Layer 5)\")
+	assert(head_box.damage_multiplier == 2.0, \"Head hitbox multiplier must be 2.0x\")
+	assert(torso_box.damage_multiplier == 1.0, \"Torso hitbox multiplier must be 1.0x\")
+	assert(limbs_box.damage_multiplier == 0.85, \"Limbs hitbox multiplier must be 0.85x\")
+	print(\"✔ Zombie 2D anatomical HitboxPart2D components & multipliers verified\")
+	
+	# Test Torso shot damage
+	var hp_before = zombie.current_health
+	var torso_result = torso_box.receive_damage(30.0, Vector2.DOWN)
+	assert(abs(torso_result.damage - 30.0) < 0.01, \"Torso damage must equal raw damage (1.0x)\")
+	assert(torso_result.is_crit == false, \"Torso shot must not be critical\")
+	assert(abs(zombie.current_health - (hp_before - 30.0)) < 0.01, \"Zombie HP must decrease by 30\")
+	print(\"✔ Zombie Torso hit resolution (1.0x) verified\")
+	
+	# Test Head shot damage (+100% / 2.0x critical)
+	hp_before = zombie.current_health
+	var head_result = head_box.receive_damage(15.0, Vector2.DOWN)
+	assert(abs(head_result.damage - 30.0) < 0.01, \"Headshot damage must be doubled (2.0x = 30.0)\")
+	assert(head_result.is_crit == true, \"Headshot must register as critical\")
+	assert(abs(zombie.current_health - (hp_before - 30.0)) < 0.01, \"Zombie HP must decrease by 30\")
+	print(\"✔ Zombie Headshot resolution (2.0x Crit) verified\")
+	
+	# Test Limbs shot damage (0.85x)
+	hp_before = zombie.current_health
+	var limb_result = limbs_box.receive_damage(10.0, Vector2.DOWN)
+	assert(abs(limb_result.damage - 8.5) < 0.01, \"Limb damage must scale by 0.85x (8.5)\")
+	assert(limb_result.is_crit == false, \"Limb shot must not be critical\")
+	print(\"✔ Zombie Limb hit resolution (0.85x) verified\")
+	
+	# 2. Instantiate ArmoredZombie and verify headshot bypasses frontal shield deflection
+	var armored_scene = preload(\"res://scenes/ArmoredZombie.tscn\")
+	var armored = armored_scene.instantiate() as Zombie
+	add_child(armored)
+	armored.global_position = Vector2(100, 0)
+	armored.current_facing_dir = Vector2.UP # Facing UP
+	
+	var arm_head = armored.find_child(\"HitboxHead\", true, false) as HitboxPart2D
+	var arm_torso = armored.find_child(\"HitboxTorso\", true, false) as HitboxPart2D
+	assert(arm_head != null and arm_torso != null, \"ArmoredZombie must have head and torso hitboxes\")
+	
+	# Frontal shot to torso (bullet flying DOWN against zombie facing UP) -> 80% deflected
+	hp_before = armored.current_health
+	arm_torso.receive_damage(50.0, Vector2.DOWN)
+	# 50 * 0.20 = 10 effective damage
+	assert(abs(armored.current_health - (hp_before - 10.0)) < 0.01, \"Frontal torso shot must be 80% deflected (10 dmg taken)\")
+	print(\"✔ ArmoredZombie frontal riot shield deflection verified\")
+	
+	# Frontal shot to HEAD -> Bypasses shield, deals 2.0x full critical damage!
+	hp_before = armored.current_health
+	arm_head.receive_damage(20.0, Vector2.DOWN)
+	# 20 * 2.0x = 40 damage, shield BYPASSED!
+	assert(abs(armored.current_health - (hp_before - 40.0)) < 0.01, \"Headshot must bypass frontal riot shield deflection (40 dmg taken)\")
+	print(\"✔ ArmoredZombie headshot riot shield bypass verified\")
+	
+	# 3. Instantiate InfectedDog and verify hitboxes
+	var dog_scene = preload(\"res://scenes/InfectedDog.tscn\")
+	var dog = dog_scene.instantiate() as Zombie
+	add_child(dog)
+	var dog_head = dog.find_child(\"HitboxHead\", true, false) as HitboxPart2D
+	assert(dog_head != null and dog_head.damage_multiplier == 2.0, \"Dog head must have 2.0x multiplier\")
+	hp_before = dog.current_health
+	dog_head.receive_damage(10.0, Vector2.DOWN)
+	assert(abs(dog.current_health - (hp_before - 20.0)) < 0.01, \"Dog headshot must deal 2.0x damage\")
+	print(\"✔ InfectedDog quadruped hitboxes & headshot verified\")
+	
+	# 4. Instantiate Heavy, Colossus, Spitter, Screamer
+	var heavy = preload(\"res://scenes/HeavyZombie.tscn\").instantiate()
+	add_child(heavy)
+	assert(heavy.find_child(\"HitboxHead\", true, false) != null, \"Heavy must have HitboxHead\")
+	
+	var colossus = preload(\"res://scenes/ColossusZombie.tscn\").instantiate()
+	add_child(colossus)
+	assert(colossus.find_child(\"HitboxHead\", true, false) != null, \"Colossus must have HitboxHead\")
+	
+	var spitter = preload(\"res://scenes/SpitterZombie.tscn\").instantiate()
+	add_child(spitter)
+	assert(spitter.find_child(\"HitboxHead\", true, false) != null, \"Spitter must have HitboxHead\")
+	
+	var screamer = preload(\"res://scenes/ScreamerZombie.tscn\").instantiate()
+	add_child(screamer)
+	assert(screamer.find_child(\"HitboxHead\", true, false) != null, \"Screamer must have HitboxHead\")
+	print(\"✔ Heavy, Colossus, Spitter, and Screamer multi-zone hitboxes verified\")
+	
+	# 5. Instantiate GoliathBoss and verify 2.0x Headshot and 2.5x Weakpoint
+	var boss_scene = preload(\"res://scenes/enemies/bosses/GoliathBoss.tscn\")
+	var boss = boss_scene.instantiate() as GoliathBoss
+	add_child(boss)
+	var boss_head = boss.find_child(\"HitboxHead\", true, false) as HitboxPart2D
+	var boss_weak = boss.find_child(\"HitboxWeakpoint\", true, false) as HitboxPart2D
+	assert(boss_head != null and boss_head.damage_multiplier == 2.0, \"Boss head must have 2.0x multiplier\")
+	assert(boss_weak != null and boss_weak.damage_multiplier == 2.5, \"Boss weakpoint must have 2.5x multiplier\")
+	
+	var boss_hp_before = boss.current_health
+	boss_head.receive_damage(50.0, Vector2.DOWN)
+	assert(abs(boss.current_health - (boss_hp_before - 100.0)) < 0.01, \"Boss headshot must deal 2.0x damage (100 dmg)\")
+	
+	boss_hp_before = boss.current_health
+	boss_weak.receive_damage(40.0, Vector2.DOWN)
+	assert(abs(boss.current_health - (boss_hp_before - 100.0)) < 0.01, \"Boss weakpoint must deal 2.5x damage (100 dmg)\")
+	print(\"✔ GoliathBoss 2.0x Headshot and 2.5x Weakpoint verified\")
+	
+	# 6. Test Bullet Collision Mask
+	var bullet_scene = preload(\"res://scenes/Bullet.tscn\")
+	var bullet = bullet_scene.instantiate() as Area2D
+	add_child(bullet)
+	assert((bullet.collision_mask & 16) != 0, \"Bullet collision_mask must include Layer 5 (16)\")
+	assert(bullet.collision_mask == 22, \"Bullet collision_mask must be 22 (Layers 2, 3, 5)\")
+	print(\"✔ Bullet Layer 5 (16) collision mask verified\")
+	
+	print(\"=== ALL 6 MULTI-ZONE 2D HITBOX & HEADSHOT CHECKS PASSED PERFECTLY! ===\")
+	
+	# Cleanup
+	zombie.queue_free()
+	armored.queue_free()
+	dog.queue_free()
+	heavy.queue_free()
+	colossus.queue_free()
+	spitter.queue_free()
+	screamer.queue_free()
+	boss.queue_free()
+	bullet.queue_free()
+"
+
+[node name="TestHitboxRegistration2D" type="Node2D"]
+script = SubResource("GDScript_test_2d_hitboxes")

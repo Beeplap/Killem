@@ -1,13 +1,28 @@
-[gd_scene load_steps=6 format=3]
+[gd_scene load_steps=11 format=3]
 
 [ext_resource type="Script" path="res://scripts/enemies/goliath_boss.gd" id="1_boss"]
 [ext_resource type="Texture2D" path="res://assets/textures/characters/zombie_colossus_8dir.png" id="2_texture"]
 [ext_resource type="Script" path="res://scripts/enemies/boss_telegraph_drawer.gd" id="3_telegraph"]
 [ext_resource type="Texture2D" path="res://assets/textures/lighting/point_light_cookie.png" id="4_cookie"]
+[ext_resource type="Script" path="res://scripts/combat/hitbox_part_2d.gd" id="5_hitbox"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_1"]
+radius = 32.0
+height = 86.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_head"]
+radius = 18.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_weakpoint"]
+radius = 16.0
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_torso"]
 radius = 28.0
-height = 68.0
+height = 44.0
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_limbs"]
+radius = 20.0
+height = 32.0
 
 [node name="GoliathBoss" type="CharacterBody2D"]
 scale = Vector2(3, 3)
@@ -24,7 +39,7 @@ texture = ExtResource("2_texture")
 hframes = 8
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
-position = Vector2(0, 12)
+position = Vector2(0, -6)
 shape = SubResource("CapsuleShape2D_1")
 
 [node name="WeakPointLight" type="PointLight2D" parent="."]
@@ -54,3 +69,51 @@ target_desired_distance = 60.0
 avoidance_enabled = true
 radius = 50.0
 max_speed = 110.0
+
+[node name="HitboxHead" type="Area2D" parent="."]
+position = Vector2(0, -40)
+collision_layer = 16
+collision_mask = 0
+monitoring = false
+script = ExtResource("5_hitbox")
+zone = 0
+damage_multiplier = 2.0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="HitboxHead"]
+shape = SubResource("CircleShape2D_head")
+
+[node name="HitboxWeakpoint" type="Area2D" parent="."]
+position = Vector2(0, -10)
+collision_layer = 16
+collision_mask = 0
+monitoring = false
+script = ExtResource("5_hitbox")
+zone = 3
+damage_multiplier = 2.5
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="HitboxWeakpoint"]
+shape = SubResource("CircleShape2D_weakpoint")
+
+[node name="HitboxTorso" type="Area2D" parent="."]
+position = Vector2(0, -4)
+collision_layer = 16
+collision_mask = 0
+monitoring = false
+script = ExtResource("5_hitbox")
+zone = 1
+damage_multiplier = 1.0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="HitboxTorso"]
+shape = SubResource("CapsuleShape2D_torso")
+
+[node name="HitboxLimbs" type="Area2D" parent="."]
+position = Vector2(0, 24)
+collision_layer = 16
+collision_mask = 0
+monitoring = false
+script = ExtResource("5_hitbox")
+zone = 2
+damage_multiplier = 0.85
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="HitboxLimbs"]
+shape = SubResource("CapsuleShape2D_limbs")

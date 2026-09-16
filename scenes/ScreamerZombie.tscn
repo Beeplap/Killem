@@ -1,11 +1,23 @@
-[gd_scene format=3 uid="uid://bxoirdb73fxce"]
+[gd_scene load_steps=8 format=3 uid="uid://bxoirdb73fxce"]
 
 [ext_resource type="Script" path="res://scripts/zombie.gd" id="1_zombie"]
 [ext_resource type="Texture2D" path="res://assets/textures/characters/zombie_screamer_8dir.png" id="2_screamertex"]
+[ext_resource type="Script" path="res://scripts/combat/hitbox_part_2d.gd" id="3_hitbox"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_screamer"]
-radius = 12.0
-height = 30.0
+radius = 15.0
+height = 54.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_head"]
+radius = 13.0
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_torso"]
+radius = 14.0
+height = 26.0
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_limbs"]
+radius = 11.0
+height = 22.0
 
 [node name="ScreamerZombie" type="CharacterBody2D"]
 collision_layer = 2
@@ -18,7 +30,7 @@ texture = ExtResource("2_screamertex")
 hframes = 8
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
-position = Vector2(0, 8)
+position = Vector2(0, -6)
 shape = SubResource("CapsuleShape2D_screamer")
 
 [node name="NavigationAgent2D" type="NavigationAgent2D" parent="."]
@@ -27,3 +39,39 @@ target_desired_distance = 25.0
 avoidance_enabled = true
 radius = 16.0
 max_speed = 140.0
+
+[node name="HitboxHead" type="Area2D" parent="."]
+position = Vector2(0, -26)
+collision_layer = 16
+collision_mask = 0
+monitoring = false
+script = ExtResource("3_hitbox")
+zone = 0
+damage_multiplier = 2.0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="HitboxHead"]
+shape = SubResource("CircleShape2D_head")
+
+[node name="HitboxTorso" type="Area2D" parent="."]
+position = Vector2(0, -6)
+collision_layer = 16
+collision_mask = 0
+monitoring = false
+script = ExtResource("3_hitbox")
+zone = 1
+damage_multiplier = 1.0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="HitboxTorso"]
+shape = SubResource("CapsuleShape2D_torso")
+
+[node name="HitboxLimbs" type="Area2D" parent="."]
+position = Vector2(0, 14)
+collision_layer = 16
+collision_mask = 0
+monitoring = false
+script = ExtResource("3_hitbox")
+zone = 2
+damage_multiplier = 0.85
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="HitboxLimbs"]
+shape = SubResource("CapsuleShape2D_limbs")

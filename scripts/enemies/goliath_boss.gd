@@ -571,14 +571,21 @@ func handle_radiation_aura(delta: float) -> void:
 # Damage & Weakpoint System
 # -------------------------------------------------------------------------
 func take_damage(amount: float, hit_direction: Vector2 = Vector2.ZERO) -> void:
+	apply_damage(amount, false, hit_direction, 1)
+
+func apply_damage(amount: float, is_crit: bool = false, hit_direction: Vector2 = Vector2.ZERO, zone: int = 1) -> void:
 	if current_state == State.DEAD or current_health <= 0.0:
 		return
 	
 	var effective_damage = amount
-	var is_crit: bool = false
 	
-	# Phase 3 Weak-Point Cyst: deals 2.5x critical damage when shot from behind
-	if current_phase == Phase.PHASE_3 and hit_direction != Vector2.ZERO:
+	# Anatomical multi-zone detection (zone 0: HEAD, zone 3: WEAKPOINT)
+	if zone == 0:
+		is_crit = true
+	elif zone == 3:
+		is_crit = true
+		spawn_weakpoint_crit_fx()
+	elif current_phase == Phase.PHASE_3 and hit_direction != Vector2.ZERO:
 		var dot = hit_direction.normalized().dot(current_facing_dir)
 		if dot > 0.3:
 			is_crit = true
@@ -588,14 +595,18 @@ func take_damage(amount: float, hit_direction: Vector2 = Vector2.ZERO) -> void:
 	current_health -= effective_damage
 	boss_health_changed.emit(current_health, max_health)
 	
+	if is_crit:
+		Global.play_sound("kill_bone_crack", global_position)
+	
 	if Global.has_signal("enemy_hit"):
 		Global.enemy_hit.emit(self, effective_damage, is_crit, current_health <= 0.0, hit_direction)
 	
-	# White flash feedback
+	# Visual flash feedback
 	if sprite:
-		sprite.modulate = Color(2.5, 2.5, 2.5, 1.0)
+		sprite.modulate = Color(3.5, 1.2, 0.4, 1.0) if is_crit else Color(2.5, 2.5, 2.5, 1.0)
 		var tween = create_tween()
 		tween.tween_property(sprite, "modulate", Color.WHITE, 0.08)
+
 	
 	# Check Phase Transitions
 	if current_phase == Phase.PHASE_1 and current_health <= (max_health * 0.65):

@@ -691,6 +691,9 @@ func request_damage(amount: float, hit_direction: Vector2) -> void:
 		take_damage(amount, hit_direction)
 
 func take_damage(amount: float, hit_direction: Vector2 = Vector2.ZERO) -> void:
+	apply_damage(amount, false, hit_direction, 1)
+
+func apply_damage(amount: float, is_crit: bool = false, hit_direction: Vector2 = Vector2.ZERO, zone: int = 1) -> void:
 	if current_health <= 0.0:
 		return
 	
@@ -702,9 +705,18 @@ func take_damage(amount: float, hit_direction: Vector2 = Vector2.ZERO) -> void:
 	var remaining_before = current_health
 	var is_shield_deflected: bool = false
 	
+	# Anatomical Body Zones (0: HEAD, 1: TORSO, 2: LIMBS, 3: WEAKPOINT)
+	var is_headshot = (zone == 0)
+	var is_weakpoint = (zone == 3)
+	if is_headshot or is_weakpoint:
+		is_crit = true
+	
 	# Armored Riot Zombie frontal riot shield deflecting 80% direct bullet damage
+	# Precision headshots (above shield) and weakpoints (rear/flank) bypass frontal shield deflection!
 	if zombie_type == ZombieType.ARMORED:
-		if hit_direction != Vector2.ZERO:
+		if is_headshot or is_weakpoint:
+			is_shield_deflected = false
+		elif hit_direction != Vector2.ZERO:
 			# hit_direction points along bullet trajectory.
 			# If bullet is hitting frontal shield, it travels opposite to zombie's facing direction.
 			if hit_direction.normalized().dot(current_facing_dir) < -0.2:
@@ -719,7 +731,9 @@ func take_damage(amount: float, hit_direction: Vector2 = Vector2.ZERO) -> void:
 	
 	# Armored Plating Elite Mutator: immune to light-caliber, takes 70% reduced damage from front
 	if mutation_affix == MutationAffix.ARMORED:
-		if hit_direction != Vector2.ZERO:
+		if is_headshot or is_weakpoint:
+			is_shield_deflected = false
+		elif hit_direction != Vector2.ZERO:
 			if hit_direction.normalized().dot(current_facing_dir) < -0.15:
 				effective_damage = amount * 0.30 # 70% deflected from front!
 				spawn_shield_ricochet(hit_direction)
@@ -731,20 +745,35 @@ func take_damage(amount: float, hit_direction: Vector2 = Vector2.ZERO) -> void:
 	
 	current_health -= effective_damage
 	
-	# Active white flash shader across sprite for 0.06s
-	hit_flash_timer = 0.06
+	# Active visual hit flash:
+	# Normal hits: crisp white flash (0.06s)
+	# Critical headshots: intense crimson/amber flash (0.09s)
+	hit_flash_timer = 0.09 if is_crit else 0.06
 	if sprite and sprite.material:
 		sprite.material.set_shader_parameter("flash_amount", 1.0)
 	elif sprite:
-		sprite.modulate = Color(2.5, 2.5, 2.5, 1.0)
+		if is_crit:
+			sprite.modulate = Color(3.5, 1.2, 0.4, 1.0)
+		else:
+			sprite.modulate = Color(2.5, 2.5, 2.5, 1.0)
 	
 	# Physical directional knockback scaled inversely to enemy max HP
+	# Headshots deliver 50% additional knockback impulse!
 	var weapon_stagger_force = 2400.0
 	var knockback_scale = clampf(weapon_stagger_force / max_health, 15.0, 190.0)
+	if is_crit or is_headshot:
+		knockback_scale *= 1.5
 	if hit_direction != Vector2.ZERO:
 		knockback_velocity += hit_direction.normalized() * knockback_scale
 	
-	var is_crit = (hit_direction != Vector2.ZERO and (randf() < 0.18 or amount >= 45.0))
+	# Limb shots apply quick stagger
+	if zone == 2 and not is_shield_deflected:
+		stagger(0.25)
+	
+	# Headshot blood burst FX & bone crack audio
+	if is_headshot or is_crit:
+		spawn_headshot_burst(hit_direction)
+	
 	var is_fatal = (current_health <= 0.0)
 	
 	# Ballistic flesh impact or armor deflection sound
@@ -752,7 +781,10 @@ func take_damage(amount: float, hit_direction: Vector2 = Vector2.ZERO) -> void:
 	if audio_mgr and audio_mgr.has_method("play_bullet_impact"):
 		audio_mgr.play_bullet_impact(is_shield_deflected, global_position, is_crit)
 	else:
-		Global.play_sound("hit")
+		if is_crit:
+			Global.play_sound("kill_bone_crack", global_position)
+		else:
+			Global.play_sound("hit")
 	
 	# Hollow-Point Rounds: apply 2-second bleeding damage-over-time status
 	if Global.mod_hollow_point and not is_fatal and hit_direction != Vector2.ZERO:
@@ -763,8 +795,31 @@ func take_damage(amount: float, hit_direction: Vector2 = Vector2.ZERO) -> void:
 	
 	if current_health <= 0.0:
 		var overkill_amount = effective_damage - remaining_before
-		var is_overkill = (overkill_amount >= 25.0 or amount >= 55.0)
+		var is_overkill = (overkill_amount >= 25.0 or amount >= 55.0 or is_headshot)
 		die(hit_direction, is_overkill)
+
+func spawn_headshot_burst(hit_dir: Vector2) -> void:
+	var level = get_tree().current_scene
+	if not level:
+		return
+	var burst = CPUParticles2D.new()
+	burst.emitting = true
+	burst.one_shot = true
+	burst.explosiveness = 0.95
+	burst.amount = 16
+	burst.lifetime = 0.35
+	burst.direction = hit_dir.normalized() if hit_dir != Vector2.ZERO else Vector2.UP
+	burst.spread = 45.0
+	burst.initial_velocity_min = 120.0
+	burst.initial_velocity_max = 240.0
+	burst.scale_amount_min = 2.5
+	burst.scale_amount_max = 5.5
+	burst.color = Color(0.85, 0.08, 0.08, 0.9)
+	var head_y = (sprite.offset.y if sprite else -18.0) - 8.0
+	burst.global_position = global_position + Vector2(0, head_y)
+	burst.finished.connect(burst.queue_free)
+	level.add_child(burst)
+
 
 func spawn_shield_ricochet(hit_dir: Vector2) -> void:
 	var level = get_tree().current_scene

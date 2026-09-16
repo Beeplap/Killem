@@ -28,7 +28,7 @@ func _setup_raycast() -> void:
 	raycast.name = "LaserRayCast"
 	raycast.enabled = true
 	raycast.target_position = Vector2(max_range, 0)
-	raycast.collision_mask = 6 # Environment (4) + Enemies (2)
+	raycast.collision_mask = 22 # Environment (4) + Enemies (2) + Hitboxes (16)
 	raycast.collide_with_areas = true
 	raycast.collide_with_bodies = true
 	add_child(raycast)

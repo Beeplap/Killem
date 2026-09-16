@@ -10,6 +10,7 @@ var is_active: bool = false
 @onready var collision_shape: CollisionShape2D = $CollisionShape2D
 
 func _ready() -> void:
+	collision_mask = 22
 	body_entered.connect(_on_body_entered)
 	area_entered.connect(_on_area_entered)
 	set_process(false)
@@ -97,15 +98,43 @@ func _on_body_entered(body: Node2D) -> void:
 	if body.is_in_group("player"):
 		return
 	
+	# Also check overlapping areas first
+	for area in get_overlapping_areas():
+		if area is HitboxPart2D and (area.parent_entity == body or area.get_parent() == body or body.is_ancestor_of(area)):
+			_on_area_entered(area)
+			return
+	
+	# If this body has HitboxPart2D components attached, resolve to the closest hitbox part
+	var hitboxes: Array[HitboxPart2D] = []
+	for child in body.get_children():
+		if child is HitboxPart2D:
+			hitboxes.append(child)
+	
+	if not hitboxes.is_empty():
+		var best_hitbox: HitboxPart2D = null
+		var min_dist: float = INF
+		for hb in hitboxes:
+			var d = hb.global_position.distance_to(global_position)
+			if d < min_dist:
+				min_dist = d
+				best_hitbox = hb
+		if best_hitbox != null:
+			_on_area_entered(best_hitbox)
+			return
+	
 	if body.is_in_group("enemies"):
-		body.take_damage(damage, direction)
+		if body.has_method("apply_damage"):
+			body.apply_damage(damage, false, direction, 1)
+		elif body.has_method("take_damage"):
+			body.take_damage(damage, direction)
+		HitmarkerManager.show_normal_hitmarker()
 		spawn_impact_fx(true)
-		# Shotgun pellets trigger micro-hitstop for heavy blast feedback
 		if lifetime <= 0.85:
 			Global.trigger_hitstop(0.04, 0.05)
 		deactivate()
 	elif body.has_method("take_damage"):
 		body.take_damage(damage, direction)
+		DamageTextManager.spawn_text(global_position, "%d" % int(damage), Color.WHITE)
 		spawn_impact_fx(false)
 		deactivate()
 	elif body.is_in_group("obstacles") or body is TileMap or body is StaticBody2D:
@@ -115,10 +144,33 @@ func _on_body_entered(body: Node2D) -> void:
 func _on_area_entered(area: Area2D) -> void:
 	if not is_active:
 		return
-	if area.is_in_group("player") or area.get_parent().is_in_group("player"):
+	if area.is_in_group("player") or (area.get_parent() and area.get_parent().is_in_group("player")):
 		return
-	if area.has_method("take_damage") or area.get_parent().has_method("take_damage"):
+	if area.is_in_group("interactable") or area.name == "Interactable":
+		return
+	
+	if area is HitboxPart2D:
+		var hit_info = area.receive_damage(damage, direction)
+		var is_crit: bool = hit_info.get("is_crit", false)
+		
+		if is_crit:
+			Global.play_sound("kill_bone_crack", global_position)
+			HitmarkerManager.show_crit_hitmarker()
+		else:
+			HitmarkerManager.show_normal_hitmarker()
+		
+		spawn_impact_fx(true)
+		if lifetime <= 0.85:
+			Global.trigger_hitstop(0.04, 0.05)
+		deactivate()
+		return
+	
+	if area.has_method("take_damage") or (area.get_parent() and area.get_parent().has_method("take_damage")):
 		var target = area if area.has_method("take_damage") else area.get_parent()
-		target.take_damage(damage, direction)
+		if target.has_method("take_damage"):
+			target.take_damage(damage, direction)
+		HitmarkerManager.show_normal_hitmarker()
+		DamageTextManager.spawn_text(global_position, "%d" % int(damage), Color.WHITE)
 		spawn_impact_fx(false)
 		deactivate()
+
