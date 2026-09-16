@@ -131,7 +131,7 @@ func _on_body_entered(body: Node3D) -> void:
 			return
 		_hit_entities.append(body)
 		
-		body.take_damage(damage, direction)
+		_call_take_damage(body, damage, direction)
 		AudioManager.play_flesh_impact(global_position)
 		HitmarkerManager.show_normal_hitmarker()
 		DamageTextManager.spawn_text(global_position, "%d" % int(damage), Color.WHITE)
@@ -154,6 +154,8 @@ func _on_area_entered(area: Area3D) -> void:
 	if _has_hit:
 		return
 	if area.is_in_group("player") or (area.get_parent() and area.get_parent().is_in_group("player")):
+		return
+	if area is Interactable3D or area.name == "Interactable3D" or area.is_in_group("interactable"):
 		return
 	
 	if area is HitboxPart3D:
@@ -191,7 +193,7 @@ func _on_area_entered(area: Area3D) -> void:
 		if target in _hit_entities:
 			return
 		_hit_entities.append(target)
-		target.take_damage(damage, direction)
+		_call_take_damage(target, damage, direction)
 		AudioManager.play_flesh_impact(global_position)
 		HitmarkerManager.show_normal_hitmarker()
 		DamageTextManager.spawn_text(global_position, "%d" % int(damage), Color.WHITE)
@@ -203,3 +205,19 @@ func _on_area_entered(area: Area3D) -> void:
 		else:
 			_has_hit = true
 			queue_free()
+
+func _call_take_damage(target: Object, dmg: float, dir: Vector3) -> void:
+	if not target or not is_instance_valid(target) or not target.has_method("take_damage"):
+		return
+	
+	var method_list = target.get_method_list()
+	var args_count: int = 1
+	for m in method_list:
+		if m["name"] == "take_damage":
+			args_count = m["args"].size()
+			break
+	
+	if args_count >= 2:
+		target.take_damage(dmg, dir)
+	else:
+		target.take_damage(dmg)

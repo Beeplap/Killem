@@ -117,7 +117,7 @@ func _process(delta: float) -> void:
 		if time_remaining <= 0.0:
 			complete_defense()
 
-func take_damage(amount: float) -> void:
+func take_damage(amount: float, _hit_dir: Vector3 = Vector3.ZERO) -> void:
 	if current_state != State.DEFENDING:
 		return
 		
