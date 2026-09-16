@@ -53,7 +53,7 @@ damage_multiplier = 2.0
 shape = SubResource("CircleShape2D_head")
 
 [node name="HitboxTorso" type="Area2D" parent="."]
-position = Vector2(0, -14)
+position = Vector2(0, -16)
 collision_layer = 16
 collision_mask = 0
 monitoring = false

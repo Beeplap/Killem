@@ -6,14 +6,14 @@
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_1"]
 radius = 24.0
-height = 72.0
+height = 76.0
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_head"]
-radius = 16.0
+radius = 18.0
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_torso"]
 radius = 22.0
-height = 36.0
+height = 38.0
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_limbs"]
 radius = 17.0
@@ -30,7 +30,7 @@ texture = ExtResource("2_heavytex")
 hframes = 8
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
-position = Vector2(0, -10)
+position = Vector2(0, -14)
 shape = SubResource("CapsuleShape2D_1")
 
 [node name="NavigationAgent2D" type="NavigationAgent2D" parent="."]
@@ -41,7 +41,7 @@ radius = 28.0
 max_speed = 90.0
 
 [node name="HitboxHead" type="Area2D" parent="."]
-position = Vector2(0, -38)
+position = Vector2(0, -42)
 collision_layer = 16
 collision_mask = 0
 monitoring = false
@@ -53,7 +53,7 @@ damage_multiplier = 2.0
 shape = SubResource("CircleShape2D_head")
 
 [node name="HitboxTorso" type="Area2D" parent="."]
-position = Vector2(0, -10)
+position = Vector2(0, -16)
 collision_layer = 16
 collision_mask = 0
 monitoring = false

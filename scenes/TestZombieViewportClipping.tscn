@@ -1,0 +1,89 @@
+[gd_scene load_steps=2 format=3]
+
+[sub_resource type="GDScript" id="GDScript_test_viewport_clipping"]
+script/source = "extends Node2D
+
+func _ready() -> void:
+	print(\"=== RUNNING 3D MODEL VIEWPORT CLIPPING & BOUNDS VERIFICATION ===\")
+	
+	# Test all 7 zombie types
+	var types_to_test = [
+		{\"name\": \"REGULAR\", \"scene\": \"res://scenes/Zombie.tscn\", \"min_expected_vp\": Vector2i(128, 128)},
+		{\"name\": \"ARMORED\", \"scene\": \"res://scenes/ArmoredZombie.tscn\", \"min_expected_vp\": Vector2i(128, 128)},
+		{\"name\": \"INFECTED_DOG\", \"scene\": \"res://scenes/InfectedDog.tscn\", \"min_expected_vp\": Vector2i(160, 160)},
+		{\"name\": \"HEAVY\", \"scene\": \"res://scenes/HeavyZombie.tscn\", \"min_expected_vp\": Vector2i(256, 256)},
+		{\"name\": \"COLOSSUS\", \"scene\": \"res://scenes/ColossusZombie.tscn\", \"min_expected_vp\": Vector2i(256, 256)},
+		{\"name\": \"SPITTER\", \"scene\": \"res://scenes/SpitterZombie.tscn\", \"min_expected_vp\": Vector2i(128, 128)},
+		{\"name\": \"SCREAMER\", \"scene\": \"res://scenes/ScreamerZombie.tscn\", \"min_expected_vp\": Vector2i(128, 128)}
+	]
+	
+	for entry in types_to_test:
+		var scene_res = load(entry.scene) as PackedScene
+		assert(scene_res != null, \"Scene must load: \" + entry.scene)
+		var zombie = scene_res.instantiate() as Zombie
+		add_child(zombie)
+		
+		# Allow ready and deferred setup
+		await get_tree().process_frame
+		
+		var vp = zombie.get_node_or_null(\"ModelViewport\") as SubViewport
+		assert(vp != null, entry.name + \" must have ModelViewport\")
+		assert(vp.size == entry.min_expected_vp, entry.name + \" viewport size must be \" + str(entry.min_expected_vp) + \", got \" + str(vp.size))
+		
+		var cam = vp.get_node_or_null(\"ModelCamera\") as Camera3D
+		if cam == null:
+			for c in vp.get_children():
+				if c is Camera3D:
+					cam = c
+					break
+		assert(cam != null, entry.name + \" viewport must have Camera3D\")
+		
+		var model = zombie.model_3d
+		assert(model != null, entry.name + \" must have 3D visual model instantiated\")
+		
+		# Test all 8 cardinal/diagonal directions
+		var vp_w = float(vp.size.x)
+		var vp_h = float(vp.size.y)
+		var min_x = 999.0
+		var max_x = -999.0
+		var min_y = 999.0
+		var max_y = -999.0
+		
+		for angle_deg in range(0, 360, 45):
+			zombie.update_facing(Vector2.from_angle(deg_to_rad(angle_deg)))
+			
+			var meshes = []
+			_get_all_meshes(model, meshes)
+			for m in meshes:
+				var aabb = m.get_aabb()
+				for cx in [0.0, 1.0]:
+					for cy in [0.0, 1.0]:
+						for cz in [0.0, 1.0]:
+							var corner = m.global_transform * (aabb.position + aabb.size * Vector3(cx, cy, cz))
+							var unproj = cam.unproject_position(corner)
+							min_x = min(min_x, unproj.x)
+							max_x = max(max_x, unproj.x)
+							min_y = min(min_y, unproj.y)
+							max_y = max(max_y, unproj.y)
+		
+		# Assert that geometry stays strictly within the viewport boundaries (no cut-offs!)
+		assert(min_y >= 0.0, entry.name + \" 3D model is clipped at top! min_y=\" + str(min_y))
+		assert(max_y <= vp_h, entry.name + \" 3D model is clipped at bottom! max_y=\" + str(max_y))
+		assert(min_x >= 0.0, entry.name + \" 3D model is clipped at left! min_x=\" + str(min_x))
+		assert(max_x <= vp_w, entry.name + \" 3D model is clipped at right! max_x=\" + str(max_x))
+		
+		print(\"✔ \" + entry.name + \" viewport (\" + str(vp.size.x) + \"x\" + str(vp.size.y) + \") bounds verified: X:[\" + str(snappedf(min_x, 0.1)) + \", \" + str(snappedf(max_x, 0.1)) + \"] Y:[\" + str(snappedf(min_y, 0.1)) + \", \" + str(snappedf(max_y, 0.1)) + \"]\")
+		zombie.queue_free()
+	
+	print(\"=== ALL 7 ENEMY ARCHETYPES HAVE ZERO 3D MODEL VIEWPORT CLIPPING! ===\")
+	get_tree().quit()
+
+func _get_all_meshes(node: Node, list: Array) -> void:
+	if node is MeshInstance3D:
+		list.append(node)
+	for c in node.get_children():
+		_get_all_meshes(c, list)
+"
+
+[node name="TestZombieViewportClipping" type="Node2D"]
+script = SubResource("GDScript_test_viewport_clipping")
