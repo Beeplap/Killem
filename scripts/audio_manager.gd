@@ -415,54 +415,25 @@ func play_weapon_shot(weapon_name: String, pos = null) -> void:
 func play_weapon_foley(cue_name: String, pos = null) -> void:
 	play_sound(cue_name, pos, BUS_WEAPONS)
 
-func play_footstep(surface_type: String, pos = null) -> void:
-	var sound_name = "footstep_sole"
-	match surface_type.to_lower():
-		"gravel", "ballast", "dirt", "grass":
-			sound_name = "footstep_gravel"
-		"metal", "tracks", "railway":
-			sound_name = "footstep_metal"
-		_:
-			sound_name = "footstep_sole"
-	
-	# Layer A: Sole Impact (punchy low-mid thud with sharp decay)
-	var p_sole = play_sound(sound_name, pos, BUS_FOLEY)
-	if p_sole:
-		p_sole.volume_db = -4.0
-	
-	# Layer B: Gear Rustle (-14 dB relative to impact -> -18.0 dB)
-	var p_gear = play_sound("gear_rustle", pos, BUS_FOLEY)
-	if p_gear:
-		p_gear.volume_db = -18.0
+func play_footstep(_surface_type: String, _pos = null) -> void:
+	# Completely silenced per user request (movement sound effect removed)
+	return
 
-func play_boot_skid(pos = null) -> void:
-	var p = play_sound("boot_skid", pos, BUS_FOLEY)
-	if p:
-		p.volume_db = -5.0
+func play_boot_skid(_pos = null) -> void:
+	# Completely silenced per user request (movement sound effect removed)
+	return
 
-func play_bullet_impact(is_armor: bool, pos = null, is_crit: bool = false) -> void:
-	if is_armor:
-		var p = play_sound("armor_deflect", pos, BUS_ZOMBIES)
-		if p:
-			p.volume_db = -2.0
-	else:
-		var p = play_sound("flesh_impact", pos, BUS_ZOMBIES)
-		if p:
-			p.volume_db = 0.0 if is_crit else -2.5
+func play_bullet_impact(_is_armor: bool, _pos = null, _is_crit: bool = false) -> void:
+	# Completely silenced per user request (bullet registration sound effect removed)
+	return
 
-func play_headshot_crunch(pos = null) -> void:
-	# Visceral skull crack transient + heavy flesh impact
-	var p_crack = play_sound("kill_bone_crack", pos, BUS_ZOMBIES)
-	if p_crack:
-		p_crack.volume_db = 2.0
-	var p_flesh = play_sound("flesh_impact", pos, BUS_ZOMBIES)
-	if p_flesh:
-		p_flesh.volume_db = 0.5
+func play_headshot_crunch(_pos = null) -> void:
+	# Completely silenced per user request (bullet registration sound effect removed)
+	return
 
-func play_flesh_impact(pos = null) -> void:
-	var p = play_sound("flesh_impact", pos, BUS_ZOMBIES)
-	if p:
-		p.volume_db = -1.5
+func play_flesh_impact(_pos = null) -> void:
+	# Completely silenced per user request (bullet registration sound effect removed)
+	return
 
 func play_zombie_death(pos = null) -> void:
 	if _active_death_count >= MAX_DEATH_POLYPHONY:

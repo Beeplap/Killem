@@ -595,8 +595,8 @@ func apply_damage(amount: float, is_crit: bool = false, hit_direction: Vector2 =
 	current_health -= effective_damage
 	boss_health_changed.emit(current_health, max_health)
 	
-	if is_crit:
-		Global.play_sound("kill_bone_crack", global_position)
+	# Bullet hit registration audio removed per design requirement
+	# (Visual flash, phase roar, and collapse sounds remain intact)
 	
 	if Global.has_signal("enemy_hit"):
 		Global.enemy_hit.emit(self, effective_damage, is_crit, current_health <= 0.0, hit_direction)
@@ -620,7 +620,6 @@ func apply_damage(amount: float, is_crit: bool = false, hit_direction: Vector2 =
 		die()
 
 func spawn_weakpoint_crit_fx() -> void:
-	Global.play_sound("kill_bone_crack", global_position)
 	var level = get_tree().current_scene
 	if level:
 		var burst = CPUParticles2D.new()

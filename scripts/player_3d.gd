@@ -228,10 +228,7 @@ func handle_movement(delta: float) -> void:
 	_clamp_to_terrain_surface()
 	
 	if is_on_floor() and Vector2(velocity.x, velocity.z).length_squared() > 0.5:
-		_footstep_dist += Vector2(velocity.x, velocity.z).length() * delta
-		if _footstep_dist >= 2.4:
-			_footstep_dist = 0.0
-			_play_surface_footstep_3d()
+		pass
 
 var _cached_terrain: Node = null
 
@@ -280,15 +277,8 @@ func _clamp_to_terrain_surface() -> void:
 					velocity.y = 0.0
 
 func _play_surface_footstep_3d() -> void:
-	var surface = "concrete"
-	if abs(global_position.z) > 12.0 or abs(global_position.x) > 14.0:
-		surface = "gravel"
-	elif global_position.x > 8.0 and global_position.z < -4.0:
-		surface = "metal"
-	
-	var audio_mgr = get_node_or_null("/root/AudioManager")
-	if audio_mgr and audio_mgr.has_method("play_footstep"):
-		audio_mgr.play_footstep(surface, global_position)
+	# Movement footstep sound completely removed per design requirement
+	pass
 
 func update_raycast_aiming(delta: float) -> void:
 	if Global.virtual_aim_active and Global.virtual_aim_dir != Vector2.ZERO:

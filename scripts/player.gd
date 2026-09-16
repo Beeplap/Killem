@@ -568,18 +568,10 @@ func _physics_process(delta: float) -> void:
 		velocity = roll_dir * (move_speed * ROLL_SPEED_MULT)
 		move_and_slide()
 		
-		step_accumulator += velocity.length() * delta
-		if step_accumulator >= STEP_THRESHOLD_DASH:
-			step_accumulator = 0.0
-			_play_surface_footstep()
-		
 		if roll_timer <= 0.0:
 			is_rolling = false
 			# Restore collision against Layer 2 zombies after phasing
 			set_collision_mask_value(2, true)
-			var audio_mgr = get_node_or_null("/root/AudioManager")
-			if audio_mgr and audio_mgr.has_method("play_boot_skid"):
-				audio_mgr.play_boot_skid(global_position)
 		
 		handle_camera_and_shake(delta)
 		return
@@ -620,23 +612,10 @@ func handle_movement(delta: float) -> void:
 	else:
 		velocity = velocity.move_toward(Vector2.ZERO, friction * delta)
 	move_and_slide()
-	
-	if velocity.length_squared() > 100.0:
-		step_accumulator += velocity.length() * delta
-		if step_accumulator >= STEP_THRESHOLD_WALK:
-			step_accumulator = 0.0
-			_play_surface_footstep()
 
 func _play_surface_footstep() -> void:
-	var surface = "gravel"
-	if global_position.y > 60.0 and global_position.y < 380.0:
-		surface = "asphalt"
-	elif global_position.x < -400.0:
-		surface = "metal"
-	
-	var audio_mgr = get_node_or_null("/root/AudioManager")
-	if audio_mgr and audio_mgr.has_method("play_footstep"):
-		audio_mgr.play_footstep(surface, global_position)
+	# Completely silenced per user request (movement sound effect removed)
+	pass
 
 func _get_active_deployable_stock() -> int:
 	match active_deployable_type:

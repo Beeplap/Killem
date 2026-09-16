@@ -782,15 +782,8 @@ func apply_damage(amount: float, is_crit: bool = false, hit_direction: Vector2 =
 	
 	var is_fatal = (current_health <= 0.0)
 	
-	# Ballistic flesh impact or armor deflection sound
-	var audio_mgr = get_node_or_null("/root/AudioManager")
-	if audio_mgr and audio_mgr.has_method("play_bullet_impact"):
-		audio_mgr.play_bullet_impact(is_shield_deflected, global_position, is_crit)
-	else:
-		if is_crit:
-			Global.play_sound("kill_bone_crack", global_position)
-		else:
-			Global.play_sound("hit")
+	# Bullet hit registration audio removed per design requirement
+	# (Realistic weapon fire and zombie death audio remain intact)
 	
 	# Hollow-Point Rounds: apply 2-second bleeding damage-over-time status
 	if Global.mod_hollow_point and not is_fatal and hit_direction != Vector2.ZERO:

@@ -34,28 +34,9 @@ func _setup_audio() -> void:
 	gen.buffer_length = 0.08
 	audio_player.stream = gen
 
-func play_hit_audio(pitch_scale_mult: float = 1.0) -> void:
-	if not is_inside_tree():
-		return
-	# Check if AudioManager has dedicated hit sound
-	var audio_mgr = get_node_or_null("/root/AudioManager")
-	if audio_mgr and audio_mgr.has_method("play_ui_sound"):
-		audio_mgr.play_ui_sound("hit")
-	elif Global.has_method("play_sound"):
-		Global.play_sound("hit")
-	
-	if audio_player and audio_player.stream is AudioStreamGenerator:
-		audio_player.pitch_scale = randf_range(0.95, 1.05) * pitch_scale_mult
-		audio_player.play()
-		var playback: AudioStreamGeneratorPlayback = audio_player.get_stream_playback()
-		if playback:
-			var frames = 800
-			for i in range(frames):
-				var t = float(i) / 22050.0
-				var decay = exp(-t * 85.0)
-				# Snappy click + punchy low crunch
-				var sample = (sin(t * 1200.0 * TAU) * 0.4 + (randf() * 2.0 - 1.0) * 0.6) * decay
-				playback.push_frame(Vector2(sample, sample))
+func play_hit_audio(_pitch_scale_mult: float = 1.0) -> void:
+	# Bullet hit registration audio confirmation removed per design requirement
+	return
 
 func _on_enemy_hit(_enemy: Node2D, _amount: float, is_crit: bool, is_fatal: bool, _hit_dir: Vector2) -> void:
 	if is_fatal:

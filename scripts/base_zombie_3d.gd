@@ -291,10 +291,8 @@ func apply_damage(amount: float, is_crit: bool, hit_dir: Vector3, zone: int = 1)
 	current_hp -= amount
 	trigger_hit_flash(is_crit)
 	
-	if is_crit:
-		Global.play_sound("kill_bone_crack", global_position)
-	else:
-		Global.play_sound("zombie_hurt", global_position)
+	# Bullet hit registration audio removed per design requirement
+	# (Realistic weapon fire and zombie death audio remain intact)
 	
 	# Headshot applies +50% knockback / stagger impulse
 	var is_headshot: bool = (zone == 0 or is_crit)

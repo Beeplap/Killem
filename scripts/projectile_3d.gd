@@ -132,7 +132,6 @@ func _on_body_entered(body: Node3D) -> void:
 		_hit_entities.append(body)
 		
 		_call_take_damage(body, damage, direction)
-		AudioManager.play_flesh_impact(global_position)
 		HitmarkerManager.show_normal_hitmarker()
 		DamageTextManager.spawn_text(global_position, "%d" % int(damage), Color.WHITE)
 		spawn_hit_sparks(true, global_position, -direction)
@@ -168,11 +167,9 @@ func _on_area_entered(area: Area3D) -> void:
 		var hit_pos = global_position
 		
 		if hit_info.get("is_crit", false):
-			AudioManager.play_headshot_crunch(hit_pos)
 			HitmarkerManager.show_crit_hitmarker()
 			DamageTextManager.spawn_text(hit_pos, "%d" % int(hit_info.damage), Color.YELLOW)
 		else:
-			AudioManager.play_flesh_impact(hit_pos)
 			HitmarkerManager.show_normal_hitmarker()
 			DamageTextManager.spawn_text(hit_pos, "%d" % int(hit_info.damage), Color.WHITE)
 		
@@ -194,7 +191,6 @@ func _on_area_entered(area: Area3D) -> void:
 			return
 		_hit_entities.append(target)
 		_call_take_damage(target, damage, direction)
-		AudioManager.play_flesh_impact(global_position)
 		HitmarkerManager.show_normal_hitmarker()
 		DamageTextManager.spawn_text(global_position, "%d" % int(damage), Color.WHITE)
 		spawn_hit_sparks(true, global_position, -direction)

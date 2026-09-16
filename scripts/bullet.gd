@@ -154,7 +154,6 @@ func _on_area_entered(area: Area2D) -> void:
 		var is_crit: bool = hit_info.get("is_crit", false)
 		
 		if is_crit:
-			Global.play_sound("kill_bone_crack", global_position)
 			HitmarkerManager.show_crit_hitmarker()
 		else:
 			HitmarkerManager.show_normal_hitmarker()
