@@ -5,7 +5,7 @@ func _ready() -> void:
 	
 	# 1. Verify Project Settings Plugin & Autoload
 	var editor_plugins = ProjectSettings.get_setting("editor_plugins/enabled", PackedStringArray())
-	assert(editor_plugins.has("res://addons/phantom_camera"), "Phantom Camera plugin must be enabled in project.godot [editor_plugins]")
+	assert(editor_plugins.has("res://addons/phantom_camera/plugin.cfg") or editor_plugins.has("res://addons/phantom_camera"), "Phantom Camera plugin must be enabled in project.godot [editor_plugins]")
 	print("✔ 1. Phantom Camera plugin enabled in [editor_plugins]")
 	
 	var pcam_mgr = get_node_or_null("/root/PhantomCameraManager")
